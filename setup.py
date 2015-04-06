@@ -45,15 +45,18 @@ setup(
     include_package_data=False,
 
     install_requires=[
-        # add your dependencies here
-        # remember to use 'package-name>=x.y.z,<x.y+1.0' notation (this way you get bugfixes)
+        'pyproj>=1.9.3,<1.10',
+        'fiona>=1.5.0,<2.0',
+        'svgwrite>=1.1.6,<1.2',
+        'fionautil>=0.1.0,<1.0',
     ],
 
     tests_require=['tox'],
 
+    test_suite='tests',
+
     entry_points={
         'console_scripts': [
-            # add cli scripts here in this form:
             'svgis=svgis.cli:main',
         ],
     },
