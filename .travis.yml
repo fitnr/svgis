@@ -1,0 +1,20 @@
+# This file is part of svgis.
+# https://github.com/fitnr/svgis
+
+# Licensed under the GNU General Public License v3 (GPLv3) license:
+# http://opensource.org/licenses/GPL-3.0
+# Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
+
+language: python
+
+python:
+    - "2.7"
+    - "3.4"
+
+install:
+    # install python requirements
+    - python setup.py install
+
+script:
+    # run tests
+    - python setup.py test
