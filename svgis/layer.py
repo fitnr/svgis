@@ -144,6 +144,4 @@ def compose(filename, mbr=None, out_crs=None, scalar=None, style=None, padding=0
     else:
         lowerleft, topright = (minx, miny), (maxx, maxy)
 
-    drawing = _framedrawing([group], lowerleft, topright, style, padding)
-
-    return drawing.tostring()
+    return _framedrawing([group], lowerleft, topright, style, padding)

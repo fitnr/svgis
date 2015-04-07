@@ -39,9 +39,9 @@ def _draw(layer, output, minx, maxx, miny, maxy, scale, epsg, **kwargs):
     else:
         crs = None
 
-    result = compose(layer, mbr, out_crs=crs, scalar=(1 / scale), **kwargs)
+    drawing = compose(layer, mbr, out_crs=crs, scalar=(1 / scale), **kwargs)
 
-    _echo(result, output)
+    _echo(drawing.tostring(), output)
 
 
 def main():
@@ -66,12 +66,12 @@ def main():
     draw.add_argument('-e', '--maxx', type=float, required=None)
     draw.add_argument('-n', '--maxy', type=float, required=None)
     draw.add_argument('-c', '--style', type=str, help="CSS string")
-    draw.add_argument('-f', '--scale', type=int, default='100',
+    draw.add_argument('-f', '--scale', type=int, default=1,
                       help='Scale for the map (units are divided by this number)')
     draw.add_argument('-p', '--padding', type=int, default=0, required=None,
                       help='Buffer the map bounds (in projection units)')
     draw.add_argument('-g', '--epsg', type=str, help='EPSG code to use in output map.')
-    draw.add_argument('--utm', action='store_true', dest='use_utm', help='Draw map in local UTM projection.')
+    draw.add_argument('--utm', action='store_true', dest='use-utm', help='Draw map in local UTM projection.')
     draw.set_defaults(function=_draw)
 
     args = parser.parse_args()
