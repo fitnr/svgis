@@ -63,7 +63,7 @@ def polygon(coordinates, precision=3, **kwargs):
     if fionautil.measure.counterclockwise(coordinates[0]):
         coordinates[0] = coordinates[0][::-1]
 
-    pth = path(list(coordinates[0]) + ['z'], fill_rule='evenodd', **kwargs)
+    pth = path(list(coordinates[0]) + ['z'], fill_rule='evenodd', class_='polygon', **kwargs)
 
     for ring in coordinates[1:]:
         # make all interior run the counter-clockwise

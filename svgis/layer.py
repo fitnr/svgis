@@ -11,7 +11,8 @@ from . import draw
 from . import convert
 from . import svg
 
-STYLE = '''polyline, path {
+STYLE = '''
+polyline, line, rect, path, polygon, .polygon {
     fill: none;
     stroke: #000;
     stroke-width: 1px;
