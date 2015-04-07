@@ -55,6 +55,21 @@ def set_group(scale=None, translate=None, **kwargs):
 
     return g
 
+def frame(drawing, minpt, maxpt, padding=0):
+    '''Translate a drawing to the correct spot and optionally add padding'''
+    x0, _ = minpt
+    _, y1 = maxpt
+
+    padding = padding or 0
+
+    # set window
+    for elem in drawing.elements:
+        if elem.elementname == 'g':
+            elem.translate(-x0 + padding, y1 + padding)
+            elem.scale(1, -1)
+
+    return drawing
+
 
 def save(filename, diameter, groups, profile=None):
     dwg = create(diameter, groups, profile)
