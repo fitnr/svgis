@@ -122,7 +122,6 @@ def feature(feat, **kwargs):
     return geometry(feat['geometry'], **kwargs)
 
 
-
 def group(features):
     '''Return a group with features drawn into it'''
     g = svgwrite.container.Group(fill_rule="evenodd")

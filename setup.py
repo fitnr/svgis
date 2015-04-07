@@ -49,6 +49,7 @@ setup(
         'fiona>=1.5.0,<2.0',
         'svgwrite>=1.1.6,<1.2',
         'fionautil>=0.1.0,<1.0',
+        'utm>=0.4.0,<1'
     ],
 
     tests_require=['tox'],

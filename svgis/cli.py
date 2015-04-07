@@ -1,8 +1,9 @@
 #!/usr/bin/python
 from __future__ import print_function, division
 import argparse
+from fiona.crs import from_epsg
 from . import svg
-from . import layer as Layer
+from .layer import compose
 
 
 def _echo(content, output):
@@ -24,12 +25,21 @@ def _style(layer, output, style):
     _echo(result, output)
 
 
-def _draw(layer, output, minx=None, maxx=None, miny=None, maxy=None, scale=None):
+def _draw(layer, output, minx, maxx, miny, maxy, scale, epsg, **kwargs):
     '''Draw a geodata layer to a simple SVG'''
     scale = scale or 1
     mbr = (minx, miny, maxx, maxy)
 
-    result = Layer.compose(layer, mbr, scalar=(1 / scale))
+    if not any(mbr):
+        mbr = None
+
+    if epsg:
+        crs = from_epsg(epsg)
+        print(crs)
+    else:
+        crs = None
+
+    result = compose(layer, mbr, out_crs=crs, scalar=(1 / scale), **kwargs)
 
     _echo(result, output)
 
@@ -55,7 +65,13 @@ def main():
     draw.add_argument('-s', '--miny', type=float, required=None)
     draw.add_argument('-e', '--maxx', type=float, required=None)
     draw.add_argument('-n', '--maxy', type=float, required=None)
-    draw.add_argument('-f', '--scale', type=int, default='100', help='Scale for the map (units are divided by this number)')
+    draw.add_argument('-c', '--style', type=str, help="CSS string")
+    draw.add_argument('-f', '--scale', type=int, default='100',
+                      help='Scale for the map (units are divided by this number)')
+    draw.add_argument('-p', '--padding', type=int, default=0, required=None,
+                      help='Buffer the map bounds (in projection units)')
+    draw.add_argument('-g', '--epsg', type=str, help='EPSG code to use in output map.')
+    draw.add_argument('--utm', action='store_true', dest='use_utm', help='Draw map in local UTM projection.')
     draw.set_defaults(function=_draw)
 
     args = parser.parse_args()
