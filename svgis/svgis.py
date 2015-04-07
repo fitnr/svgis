@@ -8,8 +8,8 @@ import fionautil.geometry
 from pyproj import Proj
 from . import projection
 from . import draw
-from . import convert
 from . import svg
+from . import scale
 
 STYLE = '''
 polyline, line, rect, path, polygon, .polygon {
@@ -18,17 +18,6 @@ polyline, line, rect, path, polygon, .polygon {
     stroke-width: 1px;
     stroke-linejoin: round
 }'''
-
-
-def _minmaxpts(bounds, mbr):
-    '''Replace any missing min/max points with those from the layer's bounds'''
-    if any(v is None for v in mbr):
-        minx, maxx, miny, maxy = [(a or b) for a, b in zip(mbr, bounds)]
-
-    minpt = (minx, miny)
-    maxpt = (maxx, maxy)
-
-    return minpt, maxpt
 
 
 def _choosecrs(in_crs, bounds=None, use_utm=None):
@@ -71,28 +60,10 @@ def _minmax(transform, bounds, scalar=None):
     scalar = scalar or 1
 
     # then scale the min and max
-    x0, y0 = convert.scale(minpt, scalar)
-    x1, y1 = convert.scale(maxpt, scalar)
+    x0, y0 = scale.scale(minpt, scalar)
+    x1, y1 = scale.scale(maxpt, scalar)
 
     return (x0, y0), (x1, y1)
-
-
-def _framedrawing(groups, minpt, maxpt, style=None, padding=0):
-    '''Translate the group to the correct spot and save the drawing'''
-    x0, y0 = minpt
-    x1, y1 = maxpt
-
-    style = style or STYLE
-
-    padding = padding or 0
-
-    # set window
-    for group in groups:
-        group.translate(-x0 + padding, y1 + padding)
-
-        group.scale(1, -1)
-
-    return svg.create((x1 - x0 + padding + padding, y1 - y0 + padding + padding), groups, profile='full', style=style)
 
 
 def compose(filename, mbr=None, out_crs=None, scalar=None, style=None, padding=0, **kwargs):
@@ -112,7 +83,7 @@ def compose(filename, mbr=None, out_crs=None, scalar=None, style=None, padding=0
                 # Determine projection transformation:
                 # either use something passed in, a non latlong layer projection,
                 # the local UTM, or customize local TM
-                out_crs = _choosecrs(layer.crs, mbr or layer.bounds, use_utm=kwargs.pop('use_utm'))
+                out_crs = _choosecrs(layer.crs, mbr or layer.bounds, use_utm=kwargs.pop('use_utm', None))
 
             if out_crs:
                 reproject = lambda geom: fiona.transform.transform_geom(layer.crs, out_crs, geom)
@@ -127,7 +98,7 @@ def compose(filename, mbr=None, out_crs=None, scalar=None, style=None, padding=0
             minx, miny, maxx, maxy = 1e28, 1e28, -1e28, -1e28
 
             for _, f in layer.items(**bbox):
-                geom = convert.scale_geometry(reproject(f['geometry']), scalar)
+                geom = scale.geometry(reproject(f['geometry']), scalar)
                 if not mbr:
                     # Can't have a generator
                     geom['coordinates'] = list(list(x) for x in geom['coordinates'])
@@ -140,8 +111,10 @@ def compose(filename, mbr=None, out_crs=None, scalar=None, style=None, padding=0
 
     # Either project the bounds, or don't
     if mbr:
-        lowerleft, topright = _minmax(transform, mbr, scalar)
+        (x0, y0), (x1, y1) = _minmax(transform, mbr, scalar)
     else:
-        lowerleft, topright = (minx, miny), (maxx, maxy)
+        (x0, y0), (x1, y1) = (minx, miny), (maxx, maxy)
 
-    return _framedrawing([group], lowerleft, topright, style, padding)
+    drawing = svg.create((x1 - x0 + padding + padding, y1 - y0 + padding + padding), [group], style=style or STYLE)
+
+    return svg.frame(drawing, (x0, y0), (x1, y1), padding)

@@ -13,16 +13,14 @@ __version__ = '0.1.0'  # NOQA
 __all__ = [
     'convert',
     'draw',
-    'feature',
-    'layer',
     'projection',
     'svg',
+    'svgis',
 ]
 
 
 from . import convert
 from . import draw
-from . import feature
-from . import layer
 from . import projection
 from . import svg
+from . import svgis

@@ -3,7 +3,7 @@ from __future__ import print_function, division
 import argparse
 from fiona.crs import from_epsg
 from . import svg
-from .layer import compose
+from .svgis import compose
 
 
 def _echo(content, output):
