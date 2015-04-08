@@ -30,6 +30,9 @@ def _draw(layer, output, mbr, scale, epsg, **kwargs):
     '''Draw a geodata layer to a simple SVG'''
     scale = scale or 1
 
+    if None in mbr:
+        mbr = None
+
     if epsg:
         crs = from_epsg(epsg)
     else:
@@ -57,7 +60,8 @@ def main():
     scale.set_defaults(function=_scale)
 
     draw = sp.add_parser('draw', parents=[parent])
-    draw.add_arguments('--bounds', nargs=4, type=float, help='The bounds in minx, miny, maxx, maxy format')
+    draw.add_argument('--bounds', nargs=4, type=float,
+                      help='The bounds in minx, miny, maxx, maxy format', default=(None, None, None, None))
     draw.add_argument('-w', '--minx', type=float)
     draw.add_argument('-s', '--miny', type=float)
     draw.add_argument('-e', '--maxx', type=float)
@@ -73,13 +77,13 @@ def main():
 
     args = parser.parse_args()
 
-    if hasattr(args, 'bounds'):
-        bounds = convert.replacebounds(args.bounds, (args.minx, args.miny, args.maxx, args.maxy))
-
     non_keywords = ('function', 'layer', 'output', 'bounds', 'minx', 'miny', 'maxx', 'maxy')
     kwargs = {k: v for k, v in vars(args).items() if k not in non_keywords}
 
-    args.function(args.layer, args.output, bounds, **kwargs)
+    if hasattr(args, 'bounds'):
+        kwargs['mbr'] = convert.replacebounds(args.bounds, (args.minx, args.miny, args.maxx, args.maxy))
+
+    args.function(args.layer, args.output, **kwargs)
 
 
 if __name__ == '__main__':
