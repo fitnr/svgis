@@ -25,7 +25,7 @@ def _style(layer, output, style, replace=None, **_):
     _echo(result, output)
 
 
-def _draw(layer, output, mbr, scale, epsg, **kwargs):
+def _draw(layers, output, bounds, scale, **kwargs):
     '''Draw a geodata layer to a simple SVG'''
     scale = (1/scale) if scale else 1
 
@@ -56,11 +56,6 @@ def main():
     scale.add_argument('-f', '--scale', type=int)
     scale.set_defaults(function=_scale)
 
-    draw.add_argument('-w', '--minx', type=float)
-    draw.add_argument('-s', '--miny', type=float)
-    draw.add_argument('-e', '--maxx', type=float)
-    draw.add_argument('-n', '--maxy', type=float)
-    draw.add_argument('-c', '--style', type=str, help="CSS string")
     draw = sp.add_parser('draw')
     draw.add_argument('input', nargs='+', default='/dev/stdin', help="Input geodata layers")
     draw.add_argument('-o', '--output', default='/dev/stdout', help="defaults to stdout")
@@ -82,11 +77,8 @@ def main():
 
     args = parser.parse_args()
 
-    non_keywords = ('function', 'layer', 'output', 'bounds', 'minx', 'miny', 'maxx', 'maxy')
+    non_keywords = ('function', 'layer', 'output', 'bounds')
     kwargs = {k: v for k, v in vars(args).items() if k not in non_keywords}
-
-    if hasattr(args, 'bounds'):
-        kwargs['mbr'] = convert.replacebounds(args.bounds, (args.minx, args.miny, args.maxx, args.maxy))
 
     args.function(args.input, args.output, **kwargs)
 
