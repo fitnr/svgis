@@ -8,7 +8,6 @@ except ImportError:
     pass
 import svgwrite
 import fionautil.measure
-import fionautil.coordinates as fcoords
 
 
 def linestring(coordinates, precision=3, **kwargs):
@@ -52,8 +51,7 @@ def polygon(coordinates, precision=3, **kwargs):
     try:
         coordinates = [np.round(c, precision) for c in coordinates]
     except NameError:
-        rounder = lambda w: round(w, precision)
-        coordinates = [fcoords.transform(rounder, cs, each=True) for cs in coordinates]
+        coordinates = [(round(x, precision), round(y, precision)) for ring in coordinates for x, y in ring]
 
     if len(coordinates) == 1:
         return svgwrite.shapes.Polygon(coordinates[0])
