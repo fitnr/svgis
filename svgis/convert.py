@@ -11,3 +11,10 @@ def replacebounds(bounds1, bounds2):
         bounds1 = tuple((a or b) for a, b in zip(bounds1, bounds2))
 
     return bounds1
+
+def bounds_to_poly(minx, miny, maxx, maxy):
+    """Convert min, max points into a geometry object"""
+    return {
+        'type': 'Polygon',
+        'coordinates': [[(minx, miny), (minx, maxy), (maxx, maxy), (maxx, miny), (minx, miny)]]
+    }

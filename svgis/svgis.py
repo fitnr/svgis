@@ -22,101 +22,143 @@ polyline, line, rect, path, polygon, .polygon {
 }'''
 
 
+def _collate_bounds(geometry, bounds):
+    minx, miny, maxx, maxy = bounds
+
+    geometry['coordinates'] = list(list(x) for x in geometry['coordinates'])
+    x0, y0, x1, y1 = fionautil.geometry.bbox(geometry)
+
+    return min(minx, x0), min(miny, y0), max(maxx, x1), max(maxy, y1)
+
+
 def _choosecrs(in_crs, bounds=None, use_utm=None):
     '''Choose a projection. If the layer is projected, use that.
     Otherwise, create use a passed projection or create a custom transverse mercator.
     Returns a function that operates on features
     '''
-    in_proj = Proj(**in_crs)
+    if use_utm:
+        midx = (bounds[0] + bounds[2]) / 2
+        midy = (bounds[1] + bounds[3]) / 2
 
-    if in_proj.is_latlong():
-        if use_utm:
-            midx = (bounds[0] + bounds[2]) / 2
-            midy = (bounds[1] + bounds[3]) / 2
+        try:
+            out_crs = fiona.crs.from_string(projection.utm_proj4(midx, midy))
+        except ValueError:
+            return _choosecrs(in_crs, bounds, use_utm=None)
 
-            try:
-                out_proj4 = projection.utm_proj4(midx, midy)
-            except ValueError:
-                return _choosecrs(in_crs, bounds, use_utm=None)
+    elif Proj(**in_crs).is_latlong():
 
-        else:
-            minpt, maxpt = (bounds[0], bounds[1]), (bounds[2], bounds[3])
-            # Create a custom TM projection
-            x0 = (float(minpt[0]) + float(maxpt[0])) / 2
-            out_proj4 = projection.tm_proj4(x0, minpt[1], maxpt[1])
+        minpt, maxpt = (bounds[0], bounds[1]), (bounds[2], bounds[3])
+        # Create a custom TM projection
+        x0 = (float(minpt[0]) + float(maxpt[0])) / 2
 
+        out_proj4 = projection.tm_proj4(x0, minpt[1], maxpt[1])
         out_crs = fiona.crs.from_string(out_proj4)
 
     else:
         # it's projected already, so noop.
-        out_crs = None
+        out_crs = in_crs
 
     return out_crs
 
 
-def _minmax(transform, bounds, scalar=None):
-    '''Use a minpt and maxpt to translate a group to be visible'''
-    # Project the minpt and maxpt if necessary
-    minpt, maxpt = zip(*transform((bounds[0], bounds[2]), (bounds[1], bounds[3])))
+class SVGIS(object):
 
-    scalar = scalar or 1
+    """Draw geodata files to SVG"""
 
-    # then scale the min and max
-    x0, y0 = scale.scale(minpt, scalar)
-    x1, y1 = scale.scale(maxpt, scalar)
+    bounds = dict()
+    in_crs = None
 
-    return (x0, y0), (x1, y1)
+    def __init__(self, files, mbr, out_crs=None, **kwargs):
+        self.files = files
 
+        self.mbr = mbr or None
 
-def compose(filename, mbr=None, out_crs=None, scalar=None, style=None, padding=0, **kwargs):
-    '''Draw file to svg
-    filename: a fiona-readable file
-    mbr: a tuple containing (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
-    '''
-    scalar = scalar or 1
+        self.out_crs = out_crs
 
-    bbox = {'bbox': mbr} if mbr else {}
+        self.use_utm = kwargs.pop('use_utm', False)
 
-    with fiona.drivers():
+        self.scalar = kwargs.pop('scalar', 1)
+
+        self.style = kwargs.pop('style', STYLE)
+
+        self.padding = kwargs.pop('padding', 0)
+
+    def _project_mbr(self, scalar):
+        '''Project and apply a scale to the MBR'''
+        mx, my, MX, MY = self.mbr
+
+        x0, x1, y0, y1 = fiona.transform.transform(self.in_crs, self.out_crs, (mx, MX), (my, MY))
+
+        # then scale the min and max
+        x0, y0 = scale.scale((x0, y0), scalar)
+        x1, y1 = scale.scale((x1, y1), scalar)
+
+        return (x0, y0, x1, y1)
+
+    def _dims(self, x0, y0, x1, y1):
+        w = x1 - x0 + (self.padding * 2)
+        h = y1 - y0 + (self.padding * 2)
+
+        return w, h
+
+    def compose_file(self, filename, scalar, **kwargs):
+        '''Draw file to svg
+        filename -- a fiona-readable file
+        mbr -- a tuple containing (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
+        '''
         with fiona.open(filename, "r") as layer:
-            group = svgwrite.container.Group(fill_rule="evenodd", id=layer.name)
+            group = svgwrite.container.SVG(fill_rule="evenodd", id=layer.name)
 
-            if not out_crs:
+            if self.in_crs is None:
+                self.in_crs = layer.crs
+
+            if not self.out_crs:
                 # Determine projection transformation:
                 # either use something passed in, a non latlong layer projection,
                 # the local UTM, or customize local TM
-                out_crs = _choosecrs(layer.crs, mbr or layer.bounds, use_utm=kwargs.pop('use_utm', None))
+                self.out_crs = _choosecrs(layer.crs, self.mbr or layer.bounds, use_utm=self.use_utm)
 
-            if out_crs:
-                reproject = lambda geom: fiona.transform.transform_geom(layer.crs, out_crs, geom)
-                transform = lambda xs, ys: fiona.transform.transform(layer.crs, out_crs, xs, ys)
-
+            if self.out_crs != layer.crs:
+                reproject = lambda geom: fiona.transform.transform_geom(layer.crs, self.out_crs, geom)
             else:
                 reproject = lambda f: f
-                transform = lambda x, y: (x, y)
 
-            # FYI, we can't use the layer bounds
-            # because of obvious things about map projections
-            minx, miny, maxx, maxy = 1e28, 1e28, -1e28, -1e28
+            if not self.mbr:
+                self.bounds[filename] = 1e28, 1e28, -1e28, -1e28
 
-            for _, f in layer.items(**bbox):
+            for _, f in layer.items(bbox=self.mbr):
                 geom = scale.geometry(reproject(f['geometry']), scalar)
-                if not mbr:
-                    # Can't have a generator
-                    geom['coordinates'] = list(list(x) for x in geom['coordinates'])
-                    x0, y0, x1, y1 = fionautil.geometry.bbox(geom)
-                    minx, miny = min(minx, x0), min(miny, y0)
-                    maxx, maxy = max(maxx, x1), max(maxy, y1)
+
+                if not self.mbr:
+                    self.bounds[filename] = _collate_bounds(geom, self.bounds[filename])
 
                 for p in draw.geometry(geom, **kwargs):
                     group.add(p)
 
-    # Either project the bounds, or don't
-    if mbr:
-        (x0, y0), (x1, y1) = _minmax(transform, mbr, scalar)
-    else:
-        (x0, y0), (x1, y1) = (minx, miny), (maxx, maxy)
+        return group
 
-    drawing = svg.create((x1 - x0 + padding + padding, y1 - y0 + padding + padding), [group], style=style or STYLE)
+    def compose(self, style=None, scalar=None, **kwargs):
+        '''Draw files to svg.
+        scalar -- factor by which to scale the data.
+        style -- CSS
+        '''
+        scalar = scalar or self.scalar
+        style = style or self.style
 
-    return svg.frame(drawing, (x0, y0), (x1, y1), padding)
+        container = svgwrite.container.SVG()
+
+        with fiona.drivers():
+            for filename in self.files:
+                group = self.compose_file(filename, scalar, **kwargs)
+                container.add(group)
+
+        # Either project the bounds, or don't
+        if self.mbr:
+            bounds = self._project_mbr(scalar)
+        else:
+            bounds = [(min(x), min(y), max(X), max(Y)) for x, y, X, Y in [zip(*self.bounds.values())]]
+
+        dims = self._dims(*bounds)
+        drawing = svg.create(dims, [container], style=style)
+
+        return svg.frame(drawing, bounds[:2], bounds[2:], self.padding)

@@ -1,9 +1,8 @@
 #!/usr/bin/python
 from __future__ import print_function, division
 import argparse
-from fiona.crs import from_epsg
 from . import svg
-from .svgis import compose
+from .svgis import SVGIS
 from . import convert
 
 
@@ -14,13 +13,13 @@ def _echo(content, output):
         open(output, 'w').write(content)
 
 
-def _scale(layer, output, scale):
+def _scale(layer, output, scale, **_):
     '''Rescale an SVG by a factor'''
     result = svg.rescale(layer, scale)
     _echo(result, output)
 
 
-def _style(layer, output, style, replace=None):
+def _style(layer, output, style, replace=None, **_):
     '''Add a CSS string to an SVG's style attribute'''
     result = svg.add_style(layer, style, replace=replace)
     _echo(result, output)
@@ -28,24 +27,21 @@ def _style(layer, output, style, replace=None):
 
 def _draw(layer, output, mbr, scale, epsg, **kwargs):
     '''Draw a geodata layer to a simple SVG'''
-    scale = scale or 1
+    scale = (1/scale) if scale else 1
 
-    if None in mbr:
-        mbr = None
+    if 'epsg' in kwargs:
+        crs = 'EPSG:' + kwargs.get('epsg')
+    elif 'proj4' in kwargs:
+        crs = kwargs.get('proj4')
 
-    if epsg:
-        crs = from_epsg(epsg)
-    else:
-        crs = None
-
-    drawing = compose(layer, mbr, out_crs=crs, scalar=(1 / scale), **kwargs)
+    drawing = SVGIS(layers, bounds, out_crs=crs, scalar=scale).compose(**kwargs)
 
     _echo(drawing.tostring(), output)
 
 
 def main():
     parent = argparse.ArgumentParser(add_help=None)
-    parent.add_argument('svg', default='/dev/stdin', help="Target svg file.")
+    parent.add_argument('input', default='/dev/stdin', help="Input svg file")
     parent.add_argument('output', nargs='?', default='/dev/stdout', help="defaults to stdout")
 
     parser = argparse.ArgumentParser('svgis')
@@ -60,20 +56,28 @@ def main():
     scale.add_argument('-f', '--scale', type=int)
     scale.set_defaults(function=_scale)
 
-    draw = sp.add_parser('draw', parents=[parent])
-    draw.add_argument('--bounds', nargs=4, type=float,
-                      help='The bounds in minx, miny, maxx, maxy format', default=(None, None, None, None))
     draw.add_argument('-w', '--minx', type=float)
     draw.add_argument('-s', '--miny', type=float)
     draw.add_argument('-e', '--maxx', type=float)
     draw.add_argument('-n', '--maxy', type=float)
     draw.add_argument('-c', '--style', type=str, help="CSS string")
+    draw = sp.add_parser('draw')
+    draw.add_argument('input', nargs='+', default='/dev/stdin', help="Input geodata layers")
+    draw.add_argument('-o', '--output', default='/dev/stdout', help="defaults to stdout")
+    draw.add_argument('--bounds', nargs=4, type=float, metavar=('minx','miny','maxx','maxy'),
+                      help='In the same coordinate system as the input layers', default=(None, None, None, None))
+
+    draw.add_argument('-c', '--style', type=str, metavar='CSS', help="CSS string")
     draw.add_argument('-f', '--scale', type=int, default=1,
                       help='Scale for the map (units are divided by this number)')
     draw.add_argument('-p', '--padding', type=int, default=0, required=None,
                       help='Buffer the map bounds (in projection units)')
-    draw.add_argument('-g', '--epsg', type=str, help='EPSG code to use in output map.')
-    draw.add_argument('--utm', action='store_true', dest='use_utm', help='Draw map in local UTM projection.')
+
+    group = draw.add_mutually_exclusive_group()
+    group.add_argument('-g', '--epsg', type=str, help='EPSG code to use in projecting output')
+    group.add_argument('-j', '--proj4', type=str, help='Proj4 string defining projection use in output')
+    group.add_argument('--utm', action='store_true', dest='use_utm', help='Draw map in local UTM projection')
+
     draw.set_defaults(function=_draw)
 
     args = parser.parse_args()
@@ -84,7 +88,7 @@ def main():
     if hasattr(args, 'bounds'):
         kwargs['mbr'] = convert.replacebounds(args.bounds, (args.minx, args.miny, args.maxx, args.maxy))
 
-    args.function(args.layer, args.output, **kwargs)
+    args.function(args.input, args.output, **kwargs)
 
 
 if __name__ == '__main__':
