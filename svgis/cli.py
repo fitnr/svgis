@@ -20,9 +20,9 @@ def _scale(layer, output, scale):
     _echo(result, output)
 
 
-def _style(layer, output, style):
+def _style(layer, output, style, replace=None):
     '''Add a CSS string to an SVG's style attribute'''
-    result = svg.add_style(layer, style)
+    result = svg.add_style(layer, style, replace=replace)
     _echo(result, output)
 
 
@@ -42,14 +42,14 @@ def _draw(layer, output, mbr, scale, epsg, **kwargs):
 
 def main():
     parent = argparse.ArgumentParser(add_help=None)
-    parent.add_argument('layer', default='/dev/stdin')
     parent.add_argument('output', nargs='?', default='/dev/stdout')
 
     parser = argparse.ArgumentParser('svgis')
     sp = parser.add_subparsers()
 
-    style = sp.add_parser('addstyle', parents=[parent])
+    style = sp.add_parser('style', parents=[parent])
     style.add_argument('-s', '--style', type=str, help="Style string to append to SVG")
+    style.add_argument('-r', '--replace', action='store_true', help="Replace the SVG's style")
     style.set_defaults(function=_style)
 
     scale = sp.add_parser('scale', parents=[parent])

@@ -1,4 +1,5 @@
 import sys
+import warnings
 import svgwrite.container
 from collections import Sequence
 from xml.dom import minidom
@@ -20,13 +21,24 @@ def rescale(svgfile, factor):
     return svg.toxml()
 
 
-def add_style(svgfile, newstyle):
+def add_style(svgfile, newstyle, replace=False):
+    '''Add to the CSS style in an SVG file.
+    svgfile -- Path to an SVG file
+    newstyle -- CSS string
+    replace -- (boolean) If true, replace the existing CSS with newstyle (default: False)
+    '''
     svg = minidom.parse(svgfile)
 
     defs = svg.getElementsByTagName('defs').item(0)
 
     if defs.getElementsByTagName('style'):
-        defs.getElementsByTagName('style').item(0).firstChild.replaceWholeText(newstyle)
+        style = defs.getElementsByTagName('style').item(0)
+
+        if replace:
+            style.firstChild.replaceWholeText(newstyle)
+        else:
+            style.firstChild.nodeValue += ' ' + newstyle
+
     else:
         style = svg.createElement('style')
         css = svg.createTextNode(newstyle)
@@ -82,6 +94,10 @@ def create(size, groups, profile=None, style=None):
 
     if not isinstance(size, Sequence):
         size = (int(size), int(size))
+
+    if size[0] > 16384 or size[1] > 16384:
+        warnings.warn("SVG is very large. May not work for all clients. "
+                      "If it doesn't work, try a larger scale factor.", RuntimeWarning)
 
     dwg = svgwrite.Drawing(profile=profile, size=size)
 
