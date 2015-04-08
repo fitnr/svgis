@@ -45,7 +45,8 @@ def _draw(layer, output, mbr, scale, epsg, **kwargs):
 
 def main():
     parent = argparse.ArgumentParser(add_help=None)
-    parent.add_argument('output', nargs='?', default='/dev/stdout')
+    parent.add_argument('svg', default='/dev/stdin', help="Target svg file.")
+    parent.add_argument('output', nargs='?', default='/dev/stdout', help="defaults to stdout")
 
     parser = argparse.ArgumentParser('svgis')
     sp = parser.add_subparsers()

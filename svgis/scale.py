@@ -1,7 +1,9 @@
+"""Scale geometries and features."""
 try:
     import numpy as np
 except ImportError:
     pass
+
 
 def geometry(geom, factor=1):
     coordinates = geom['coordinates']
@@ -40,6 +42,7 @@ def scale(coordinates, scalar=1):
             return (coordinates[0] * scalar, coordinates[1] * scalar)
 
         return ((x * scalar, y * scalar) for x, y in coordinates)
+
 
 def feature(feat, factor=1):
     return {

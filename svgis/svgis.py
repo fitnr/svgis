@@ -1,3 +1,5 @@
+"""Draw geodata layers into svg"""
+# -*- coding: utf-8 -*-
 import fiona
 import fiona.crs
 import fiona.transform
@@ -13,10 +15,10 @@ from . import scale
 
 STYLE = '''
 polyline, line, rect, path, polygon, .polygon {
-    fill: none;
-    stroke: #000;
-    stroke-width: 1px;
-    stroke-linejoin: round
+ fill: none;
+ stroke: #000;
+ stroke-width: 1px;
+ stroke-linejoin: round;
 }'''
 
 
@@ -33,7 +35,7 @@ def _choosecrs(in_crs, bounds=None, use_utm=None):
             midy = (bounds[1] + bounds[3]) / 2
 
             try:
-                out_proj4 = projection.utmproj4(midx, midy)
+                out_proj4 = projection.utm_proj4(midx, midy)
             except ValueError:
                 return _choosecrs(in_crs, bounds, use_utm=None)
 

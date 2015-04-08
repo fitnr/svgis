@@ -1,8 +1,11 @@
+'''Edit SVGs'''
+# -*- coding: utf-8 -*-
 import sys
 import warnings
 import svgwrite.container
 from collections import Sequence
 from xml.dom import minidom
+
 
 def rescale(svgfile, factor):
     svg = minidom.parse(svgfile)
@@ -66,6 +69,7 @@ def set_group(scale=None, translate=None, **kwargs):
         g.translate(*translate)
 
     return g
+
 
 def frame(drawing, minpt, maxpt, padding=0):
     '''Translate a drawing to the correct spot and optionally add padding'''

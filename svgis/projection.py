@@ -1,3 +1,5 @@
+'''Helpers for dealing with projections'''
+# -*- coding: utf-8 -*-
 import pyproj
 import utm
 
@@ -18,7 +20,7 @@ def tm(x0, y0, y1):
     return pyproj.Proj(proj4)
 
 
-def utmproj4(x, y):
+def utm_proj4(x, y):
     '''Generate the proj4 string for a given (lon, lat) coordinate'''
 
     try:
