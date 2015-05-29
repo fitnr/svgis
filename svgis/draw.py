@@ -99,6 +99,7 @@ def multipoint(coordinates, **kwargs):
 
 def geometry(geom, **kwargs):
     '''Draw a feature'''
+
     if geom['type'] == 'Point':
         return [point(geom, **kwargs)]
 
