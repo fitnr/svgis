@@ -3,7 +3,6 @@ from __future__ import print_function, division
 import argparse
 from . import svg
 from .svgis import SVGIS
-from . import convert
 
 
 def _echo(content, output):
@@ -25,16 +24,23 @@ def _style(layer, output, style, replace=None, **_):
     _echo(result, output)
 
 
-def _draw(layers, output, bounds, scale, **kwargs):
+def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
     '''Draw a geodata layer to a simple SVG'''
-    scale = (1/scale) if scale else 1
+    scalar = (1 / scale) if scale else 1
+    out_crs = None
 
-    if 'epsg' in kwargs:
-        crs = 'EPSG:' + kwargs.get('epsg')
-    elif 'proj4' in kwargs:
-        crs = kwargs.get('proj4')
+    if kwargs.get('epsg'):
+        out_crs = 'EPSG:' + kwargs.pop('epsg')
+    elif kwargs.get('proj4'):
+        out_crs = kwargs.pop('proj4')
+    else:
+        use_utm = kwargs.pop('use_utm', None)
 
-    drawing = SVGIS(layers, bounds, out_crs=crs, scalar=scale).compose(**kwargs)
+    # get rid of pesky kwargs
+    for x in ('use_utm', 'epsg', 'proj4'):
+        kwargs.pop(x, None)
+
+    drawing = SVGIS(layers, bounds=bounds, scalar=scalar, use_utm=use_utm, out_crs=out_crs, padding=padding).compose(**kwargs)
 
     _echo(drawing.tostring(), output)
 
@@ -77,7 +83,7 @@ def main():
 
     args = parser.parse_args()
 
-    non_keywords = ('function', 'layer', 'output', 'bounds')
+    non_keywords = ('function', 'layer', 'output', 'input')
     kwargs = {k: v for k, v in vars(args).items() if k not in non_keywords}
 
     args.function(args.input, args.output, **kwargs)

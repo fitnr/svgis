@@ -51,7 +51,7 @@ def polygon(coordinates, precision=3, **kwargs):
     try:
         coordinates = [np.round(c, precision) for c in coordinates]
     except NameError:
-        coordinates = [(round(x, precision), round(y, precision)) for ring in coordinates for x, y in ring]
+        coordinates = [[(round(x, precision), round(y, precision)) for x, y in ring] for ring in coordinates]
 
     if len(coordinates) == 1:
         return svgwrite.shapes.Polygon(coordinates[0])
