@@ -29,6 +29,8 @@ def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
     scalar = (1 / scale) if scale else 1
     out_crs = None
 
+    use_utm = False
+
     if kwargs.get('epsg'):
         out_crs = 'EPSG:' + kwargs.pop('epsg')
     elif kwargs.get('proj4'):

@@ -4,7 +4,6 @@ import fiona
 import fiona.crs
 import fiona.transform
 import svgwrite
-import fionautil.layer
 import fionautil.feature
 import fionautil.geometry
 from pyproj import Proj
