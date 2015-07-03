@@ -54,7 +54,7 @@ def polygon(coordinates, precision=3, **kwargs):
         coordinates = [[(round(x, precision), round(y, precision)) for x, y in ring] for ring in coordinates]
 
     if len(coordinates) == 1:
-        return svgwrite.shapes.Polygon(coordinates[0])
+        return svgwrite.shapes.Polygon(coordinates[0], **kwargs)
 
     # This is trickier because drawing holes in SVG.
     # We go clockwise on the first ring, then counterclockwise

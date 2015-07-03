@@ -34,6 +34,16 @@ def add_style(svgfile, newstyle, replace=False):
 
     defs = svg.getElementsByTagName('defs').item(0)
 
+    if not defs:
+        defs = svg.createElement('defs')
+
+        if not hasattr(svg, 'tagName'):
+            elem = svg.getElementsByTagName('svg').item(0)
+            elem.insertBefore(defs, elem.firstChild)
+
+        else:
+            svg.insertBefore(defs, svg.firstChild)
+
     if defs.getElementsByTagName('style'):
         style = defs.getElementsByTagName('style').item(0)
 
@@ -57,7 +67,6 @@ def set_group(scale=None, translate=None, **kwargs):
     groupargs = {
         'fill': 'none',
         'stroke': 'black',
-        'stroke_width': '0.1'
     }
     groupargs.update(kwargs)
     g = svgwrite.container.Group(**groupargs)
