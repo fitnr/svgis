@@ -24,6 +24,15 @@ def rescale(svgfile, factor):
     return svg.toxml()
 
 
+def dims(bounds, padding=0):
+    '''Return width and height based on an MBR and an optional padding'''
+    x0, y0, x1, y1 = bounds
+
+    w = x1 - x0 + (padding * 2)
+    h = y1 - y0 + (padding * 2)
+
+    return w, h
+
 def add_style(svgfile, newstyle, replace=False):
     '''Add to the CSS style in an SVG file.
     svgfile -- Path to an SVG file

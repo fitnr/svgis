@@ -4,8 +4,6 @@ import fiona
 import fiona.crs
 import fiona.transform
 import svgwrite
-import fionautil.feature
-import fionautil.geometry
 from pyproj import Proj
 from . import projection
 from . import draw
@@ -48,7 +46,6 @@ def _choosecrs(in_crs, bounds=None, use_utm=None):
 
     return out_crs
 
-
 class SVGIS(object):
 
     """Draw geodata files to SVG"""
@@ -73,27 +70,9 @@ class SVGIS(object):
 
         self.padding = kwargs.pop('padding', 0)
 
-    def _project_mbr(self, scalar):
-        '''Project and apply a scale to the MBR'''
-        mx, my, MX, MY = self.mbr
-
-        (x0, x1), (y0, y1) = fiona.transform.transform(self.in_crs, self.out_crs, (mx, MX), (my, MY))
-
-        # then scale the min and max
-        x0, y0 = scale.scale((x0, y0), scalar)
-        x1, y1 = scale.scale((x1, y1), scalar)
-
-        return (x0, y0, x1, y1)
-
     @property
     def _incomplete_mbr(self):
         return any([x is None for x in self.mbr])
-
-    def _dims(self, x0, y0, x1, y1):
-        w = x1 - x0 + (self.padding * 2)
-        h = y1 - y0 + (self.padding * 2)
-
-        return w, h
 
     def compose_file(self, filename, scalar, **kwargs):
         '''Draw file to svg
@@ -147,9 +126,9 @@ class SVGIS(object):
         if self._incomplete_mbr:
             self.mbr = [(min(x), min(y), max(X), max(Y)) for x, y, X, Y in [zip(*self.bounds.values())]][0]
 
-        bounds = self._project_mbr(scalar)
+        bounds = projection.project_bounds(self.in_crs, self.out_crs, self.mbr, scalar)
 
-        dims = self._dims(*bounds)
+        dims = svg.dims(bounds, self.padding)
 
         drawing = svg.create(dims, [container], style=style)
         drawing.viewbox(bounds[0], -bounds[3], *dims)

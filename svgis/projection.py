@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 import pyproj
 import utm
-
+import fiona.transform
+from . import scale
 
 def wgs84():
     return pyproj.Geod(ellps='WGS84')
@@ -39,3 +40,16 @@ def zonetoproj4(zonenumber, zoneletter):
         hemisphere = 'south'
 
     return '+proj=utm +zone={} +{} +datum=WGS84 +units=m +no_defs'.format(zonenumber, hemisphere)
+
+def project_bounds(in_crs, out_crs, mbr, scalar=None):
+    '''Project and apply a scale to a bounding rectangle'''
+    mx, my, MX, MY = mbr
+
+    (x0, x1), (y0, y1) = fiona.transform.transform(in_crs, out_crs, (mx, MX), (my, MY))
+
+    # then scale the min and max
+    if scalar:
+        x0, y0 = scale.scale((x0, y0), scalar)
+        x1, y1 = scale.scale((x1, y1), scalar)
+
+    return (x0, y0, x1, y1)
