@@ -70,7 +70,7 @@ def add_style(svgfile, newstyle, replace=False):
     return svg.toxml()
 
 
-def set_group(scale=None, translate=None, **kwargs):
+def set_group(members=None, scale=None, translate=None, **kwargs):
     '''Create a group with the given scale and translation'''
 
     groupargs = {
@@ -79,6 +79,11 @@ def set_group(scale=None, translate=None, **kwargs):
     }
     groupargs.update(kwargs)
     g = svgwrite.container.Group(**groupargs)
+
+    members = members or []
+
+    for m in members:
+        g.add(m)
 
     if scale:
         g.scale(*scale)
