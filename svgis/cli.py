@@ -42,6 +42,13 @@ def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
     for x in ('use_utm', 'epsg', 'proj4'):
         kwargs.pop(x, None)
 
+    # Try to read style file
+    if kwargs.get('style'):
+        try:
+            kwargs['style'] = open(kwargs['style'], 'r').read()
+        except IOError:
+            pass
+
     drawing = SVGIS(layers, bounds=bounds, scalar=scalar, use_utm=use_utm, out_crs=out_crs, padding=padding).compose(**kwargs)
 
     _echo(drawing.tostring(), output)
@@ -70,7 +77,7 @@ def main():
     draw.add_argument('--bounds', nargs=4, type=float, metavar=('minx', 'miny', 'maxx', 'maxy'),
                       help='In the same coordinate system as the input layers', default=(None, None, None, None))
 
-    draw.add_argument('-c', '--style', type=str, metavar='CSS', help="CSS string")
+    draw.add_argument('-c', '--style', type=str, metavar='CSS', help="CSS file or string")
     draw.add_argument('-f', '--scale', type=int, default=1,
                       help='Scale for the map (units are divided by this number)')
     draw.add_argument('-p', '--padding', type=int, default=0, required=None,
