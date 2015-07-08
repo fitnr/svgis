@@ -1,3 +1,4 @@
+from __future__ import division
 import math
 
 
@@ -14,10 +15,24 @@ def replacebounds(bounds1, bounds2):
 
     return bounds1
 
+def _frange(a, b, count=None):
+    """Yield <count> points between two floats"""
+    count = count or 10
+    jump = (b - a) / 10
 
-def bounds_to_poly(minx, miny, maxx, maxy):
-    """Convert min, max points into a geometry object"""
-    return {
-        'type': 'Polygon',
-        'coordinates': [[(minx, miny), (minx, maxy), (maxx, maxy), (maxx, miny), (minx, miny)]]
-    }
+    while a < b:
+        yield a
+        a += jump
+
+
+def mbr_to_bounds(minx, miny, maxx, maxy):
+    """Convert min, max points to a boundary ring"""
+
+    xs, ys = list(_frange(minx, maxx)), list(_frange(miny, maxy))
+
+    left_top = [(minx, y) for y in ys] + [(x, maxy) for x in xs][1:]
+
+    ys.reverse()
+    xs.reverse()
+
+    return left_top + [(maxx, y) for y in ys] + [(x, miny) for x in xs]

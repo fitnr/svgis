@@ -34,7 +34,7 @@ def scale_rings(rings, factor=1):
 
 
 def scale(coordinates, scalar=1):
-    '''Scale a list of coordinates by a scalar. Only use of projected coordinates'''
+    '''Scale a list of coordinates by a scalar. Only use with projected coordinates'''
     try:
         return np.array(coordinates, dtype=float) * scalar
     except NameError:

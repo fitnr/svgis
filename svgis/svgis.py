@@ -5,6 +5,7 @@ import fiona.crs
 import fiona.transform
 import svgwrite
 from pyproj import Proj
+import fionautil.coords
 from . import projection
 from . import draw
 from . import svg
@@ -122,16 +123,24 @@ class SVGIS(object):
             for filename in self.files:
                 container.add(self.compose_file(filename, scalar, **kwargs))
 
+        w, h, x0, y1 = self._bounds(scalar)
+
+        drawing = svg.create((w, h), [container], style=style)
+        drawing.viewbox(x0, -y1, w, h)
+
+        return drawing
+
+    def _bounds(self, scalar):
         # project the bounds, or don't
         if self._incomplete_mbr:
             self.mbr = [(min(x), min(y), max(X), max(Y)) for x, y, X, Y in [zip(*self.bounds.values())]][0]
 
-        bounds = projection.project_bounds(self.in_crs, self.out_crs, self.mbr, scalar)
+        mbr_ring = convert.mbr_to_bounds(*self.mbr)
+        boundary = zip(*projection.project_scale(self.in_crs, self.out_crs, mbr_ring, scalar))
 
-        dims = svg.dims(bounds, self.padding)
+        x0, y0, x1, y1 = fionautil.coords.bounds(boundary)
 
-        drawing = svg.create(dims, [container], style=style)
-        drawing.viewbox(bounds[0], -bounds[3], *dims)
+        w = x1 - x0 + (self.padding * 2)
+        h = y1 - y0 + (self.padding * 2)
 
-        return drawing
-
+        return w, h, x0, y1

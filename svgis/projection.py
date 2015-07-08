@@ -41,15 +41,12 @@ def zonetoproj4(zonenumber, zoneletter):
 
     return '+proj=utm +zone={} +{} +datum=WGS84 +units=m +no_defs'.format(zonenumber, hemisphere)
 
-def project_bounds(in_crs, out_crs, mbr, scalar=None):
-    '''Project and apply a scale to a bounding rectangle'''
-    mx, my, MX, MY = mbr
+def project_scale(in_crs, out_crs, ring, scalar=None):
+    '''Project and apply a scale to a ring'''
+    projected = fiona.transform.transform(in_crs, out_crs, *zip(*ring))
 
-    (x0, x1), (y0, y1) = fiona.transform.transform(in_crs, out_crs, (mx, MX), (my, MY))
-
-    # then scale the min and max
+    # then scale
     if scalar:
-        x0, y0 = scale.scale((x0, y0), scalar)
-        x1, y1 = scale.scale((x1, y1), scalar)
-
-    return (x0, y0, x1, y1)
+        return scale.scale(projected, scalar)
+    else:
+        return projected

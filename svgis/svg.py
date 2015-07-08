@@ -5,7 +5,7 @@ import warnings
 import svgwrite.container
 from collections import Sequence
 from xml.dom import minidom
-
+import fionautil.coords
 
 def rescale(svgfile, factor):
     svg = minidom.parse(svgfile)
@@ -24,9 +24,9 @@ def rescale(svgfile, factor):
     return svg.toxml()
 
 
-def dims(bounds, padding=0):
-    '''Return width and height based on an MBR and an optional padding'''
-    x0, y0, x1, y1 = bounds
+def dims(boundary, padding=0):
+    '''Return width and height based on an boundary ring and an optional padding'''
+    x0, y0, x1, y1 = fionautil.coords.bounds(boundary)
 
     w = x1 - x0 + (padding * 2)
     h = y1 - y0 + (padding * 2)
