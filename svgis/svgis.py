@@ -131,14 +131,13 @@ class SVGIS(object):
         return drawing
 
     def _bounds(self, scalar):
-        # project the bounds, or don't
         if self._incomplete_mbr:
             self.mbr = [(min(x), min(y), max(X), max(Y)) for x, y, X, Y in [zip(*self.bounds.values())]][0]
 
         mbr_ring = convert.mbr_to_bounds(*self.mbr)
-        boundary = zip(*projection.project_scale(self.in_crs, self.out_crs, mbr_ring, scalar))
+        boundary = projection.project_scale(self.in_crs, self.out_crs, mbr_ring, scalar)
 
-        x0, y0, x1, y1 = fionautil.coords.bounds(boundary)
+        x0, y0, x1, y1 = fionautil.coords.bounds(list(boundary))
 
         w = x1 - x0 + (self.padding * 2)
         h = y1 - y0 + (self.padding * 2)

@@ -43,7 +43,9 @@ def zonetoproj4(zonenumber, zoneletter):
 
 def project_scale(in_crs, out_crs, ring, scalar=None):
     '''Project and apply a scale to a ring'''
-    projected = fiona.transform.transform(in_crs, out_crs, *zip(*ring))
+    xs, ys = fiona.transform.transform(in_crs, out_crs, *zip(*ring))
+
+    projected = zip(xs, ys)
 
     # then scale
     if scalar:
