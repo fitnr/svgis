@@ -88,7 +88,11 @@ def points(geom, **kwargs):
 
 
 def point(coordinates, precision=3, **kwargs):
-    x, y = coordinates.pop()
+    try:
+        x, y = coordinates.pop()
+    except AttributeError:
+        x, y = coordinates
+
     x, y = round(x, precision), round(y, precision)
     return svgwrite.shapes.Circle(center=(x, y), **kwargs)
 

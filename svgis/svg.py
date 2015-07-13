@@ -122,14 +122,23 @@ def create(size, groups, profile=None, style=None):
 
 
 def write(filename, drawing):
+
     try:
         if filename == '-':
             f = sys.stdout
+
         else:
             f = open(filename, 'w')
 
+
         f.write(drawing.tostring())
 
+    except IOError:
+        raise
+
     finally:
-        if f != sys.stdout:
-            f.close()
+        try:
+            if f != sys.stdout:
+                f.close()
+        except UnboundLocalError:
+            pass
