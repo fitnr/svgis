@@ -10,7 +10,5 @@
 
 from . import test_convert
 from . import test_draw
-from . import test_feature
-from . import test_layer
 from . import test_projection
 from . import test_svg
