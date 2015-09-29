@@ -29,17 +29,17 @@ def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
     scalar = (1 / scale) if scale else 1
     out_crs = None
 
-    use_utm = False
+    use_proj = None
 
     if kwargs.get('epsg'):
         out_crs = 'EPSG:' + kwargs.pop('epsg')
     elif kwargs.get('proj4'):
         out_crs = kwargs.pop('proj4')
     else:
-        use_utm = kwargs.pop('use_utm', None)
+        use_proj = kwargs.pop('use_proj', None)
 
     # get rid of pesky kwargs
-    for x in ('use_utm', 'epsg', 'proj4'):
+    for x in ('use_proj', 'epsg', 'proj4'):
         kwargs.pop(x, None)
 
     # Try to read style file
@@ -94,7 +94,7 @@ def main():
     group = draw.add_mutually_exclusive_group()
     group.add_argument('-g', '--epsg', type=str, help='EPSG code to use in projecting output')
     group.add_argument('-j', '--proj4', type=str, help='Proj4 string defining projection use in output')
-    group.add_argument('--utm', action='store_true', dest='use_utm', help='Draw map in local UTM projection')
+    group.add_argument('--project', choices=('utm', 'local'), type=str, dest='use_proj', help='Draw map in local UTM projection')
 
     draw.set_defaults(function=_draw)
 

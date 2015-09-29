@@ -19,26 +19,25 @@ STYLE = ('polyline, line, rect, path, polygon, .polygon {'
          ' stroke-linejoin: round;'
          '}')
 
-def _choosecrs(in_crs, bounds=None, use_utm=None):
+def _choosecrs(in_crs, bounds=None, use_proj=None):
     '''Choose a projection. If the layer is projected, use that.
     Otherwise, create use a passed projection or create a custom transverse mercator.
     Returns a function that operates on features
     '''
-    if use_utm:
+    if use_proj == 'utm':
         midx = (bounds[0] + bounds[2]) / 2
         midy = (bounds[1] + bounds[3]) / 2
 
         try:
             out_crs = fiona.crs.from_string(projection.utm_proj4(midx, midy))
         except ValueError:
-            return _choosecrs(in_crs, bounds, use_utm=None)
+            return _choosecrs(in_crs, bounds, use_proj=None)
 
-    elif Proj(**in_crs).is_latlong():
-        minpt, maxpt = (bounds[0], bounds[1]), (bounds[2], bounds[3])
+    elif use_proj == 'local_tm' or Proj(**in_crs).is_latlong():
         # Create a custom TM projection
-        x0 = (float(minpt[0]) + float(maxpt[0])) / 2
+        x0 = (float(bounds[0]) + float(bounds[2])) // 2
 
-        out_proj4 = projection.tm_proj4(x0, minpt[1], maxpt[1])
+        out_proj4 = projection.tm_proj4(x0, bounds[1], bounds[3])
         out_crs = fiona.crs.from_string(out_proj4)
 
     else:
@@ -63,7 +62,7 @@ class SVGIS(object):
 
         self.out_crs = out_crs
 
-        self.use_utm = kwargs.pop('use_utm', False)
+        self.use_proj = kwargs.pop('use_proj')
 
         self.scalar = kwargs.pop('scalar', 1)
 
