@@ -15,6 +15,11 @@ python:
 
 sudo: true
 
+matrix:
+    fast_finish: true
+    allow_failures:
+        - 3.5
+
 before_install:
     - sudo apt-get -qq update
     - sudo apt-get -qq install -y libgdal1-dev
