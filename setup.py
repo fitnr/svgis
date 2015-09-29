@@ -13,7 +13,7 @@ from setuptools import setup, find_packages
 setup(
     name='svgis',
 
-    version='0.1.0',
+    version='0.1.1',
 
     description='Draw geodata in SVG',
 
@@ -48,7 +48,7 @@ setup(
         'pyproj>=1.9.3,<1.10',
         'fiona>=1.5.0,<2.0',
         'svgwrite>=1.1.6,<1.2',
-        'fionautil>=0.2.0,<1.0',
+        'fionautil >=0.3.1, <1.0',
         'utm>=0.4.0,<1'
     ],
 
