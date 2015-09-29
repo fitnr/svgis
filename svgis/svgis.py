@@ -80,7 +80,6 @@ class SVGIS(object):
         filename -- a fiona-readable file
         mbr -- a tuple containing (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
         '''
-
         with fiona.open(filename, "r") as layer:
             group = svgwrite.container.Group(id=layer.name)
 
@@ -89,11 +88,22 @@ class SVGIS(object):
 
             self.bounds[layer.name] = convert.replacebounds(self.mbr, layer.bounds)
 
+            if 'classes' in kwargs:
+                classes = [c for c in kwargs['classes'] if c in layer.schema['properties']]
+                kwargs.pop('classes')
+            else:
+                classes = None
+
+            id_field = kwargs.pop('id_field', None)
+
+            if id_field not in layer.schema['properties'].keys():
+                id_field = None
+
             if not self.out_crs:
                 # Determine projection transformation:
                 # either use something passed in, a non latlong layer projection,
                 # the local UTM, or customize local TM
-                self.out_crs = _choosecrs(layer.crs, self.bounds[layer.name], use_utm=self.use_utm)
+                self.out_crs = _choosecrs(layer.crs, self.bounds[layer.name], use_proj=self.use_proj)
 
             if self.out_crs != layer.crs:
                 reproject = lambda geom: fiona.transform.transform_geom(layer.crs, self.out_crs, geom)
@@ -101,10 +111,26 @@ class SVGIS(object):
                 reproject = lambda f: f
 
             for _, f in layer.items(bbox=self.bounds[layer.name]):
+                attribs = {}
                 geom = scale.geometry(reproject(f['geometry']), scalar)
 
-                for p in draw.geometry(geom, **kwargs):
-                    group.add(p)
+                if classes:
+                    attribs['class'] = ' '.join([str(f['properties'][c]).replace(' ', '_') for c in classes])
+
+                if id_field:
+                    attribs['id'] = str(f['properties'][id_field]).replace(' ', '_')
+
+                ps = draw.geometry(geom, **kwargs)
+
+                if len(ps) > 1:
+                    target = svgwrite.container.Group()
+                    for p in ps:
+                        target.add(p)
+                else:
+                    target = ps[0]
+
+                target.attribs.update(attribs)
+                group.add(target)
 
         return group
 

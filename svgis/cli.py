@@ -49,7 +49,12 @@ def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
         except IOError:
             pass
 
-    drawing = SVGIS(layers, bounds=bounds, scalar=scalar, use_utm=use_utm, out_crs=out_crs, padding=padding).compose(**kwargs)
+    if kwargs.get('class_fields'):
+        kwargs['classes'] = kwargs.pop('class_fields').split(',')
+
+    kwargs.pop('class_fields', None)
+
+    drawing = SVGIS(layers, bounds=bounds, scalar=scalar, use_proj=use_proj, out_crs=out_crs, padding=padding).compose(**kwargs)
 
     _echo(drawing.tostring(), output)
 
@@ -82,6 +87,9 @@ def main():
                       help='Scale for the map (units are divided by this number)')
     draw.add_argument('-p', '--padding', type=int, default=0, required=None,
                       help='Buffer the map bounds (in projection units)')
+
+    draw.add_argument('--id-field', type=str, dest='id_field', help='Geodata field to use as ID')
+    draw.add_argument('--class', type=str, dest='class_fields', help='Geodata fields to use as class (comma-separated)')
 
     group = draw.add_mutually_exclusive_group()
     group.add_argument('-g', '--epsg', type=str, help='EPSG code to use in projecting output')
