@@ -14,12 +14,12 @@ def rescale(svgfile, factor):
 
     gs = svg.getElementsByTagName('g')[0]
 
-    transform = gs[0].attributes.get('transform')
+    transform = gs.attributes.get('transform')
 
     if transform:
         transform.value = transform.value + ' ' + scalar
     else:
-        gs[0].setAttribute('transform', scalar)
+        gs.setAttribute('transform', scalar)
 
     return svg.toxml()
 
