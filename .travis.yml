@@ -16,12 +16,15 @@ python:
 sudo: true
 
 before_install:
- - sudo apt-get -qq update
- - sudo apt-get -qq install -y libgdal1-dev
+    - sudo apt-get -qq update
+    - sudo apt-get -qq install -y libgdal1-dev
 
 install:
     - make
+    - pip install fionautil>=0.3.1
     - python setup.py install
 
 script:
-    - python setup.py test
+    - make test
+    - pip uninstall -y numpy
+    - make test
