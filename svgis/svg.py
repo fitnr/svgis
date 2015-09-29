@@ -1,7 +1,6 @@
 '''Edit SVGs'''
 # -*- coding: utf-8 -*-
 import sys
-import warnings
 import svgwrite.container
 from collections import Sequence
 from xml.dom import minidom
@@ -105,10 +104,6 @@ def create(size, groups, profile=None, style=None):
 
     if not isinstance(size, Sequence):
         size = (int(size), int(size))
-
-    if size[0] > 16384 or size[1] > 16384:
-        warnings.warn("SVG is very large. May not work for all clients. "
-                      "If it doesn't work, try a larger scale factor.", RuntimeWarning)
 
     dwg = svgwrite.Drawing(profile=profile, size=size)
 
