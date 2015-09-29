@@ -3,7 +3,7 @@ from __future__ import print_function, division
 import argparse
 from . import svg
 from .svgis import SVGIS
-
+import sys
 
 def _echo(content, output):
     if hasattr(output, 'write'):
@@ -102,6 +102,12 @@ def main():
 
     non_keywords = ('function', 'layer', 'output', 'input')
     kwargs = {k: v for k, v in vars(args).items() if k not in non_keywords}
+
+    if args.input in ('-', '/dev/stdin'):
+        args.input = sys.stdin
+
+    if args.output in ('-', '/dev/stdout'):
+        args.output = sys.stdout
 
     args.function(args.input, args.output, **kwargs)
 
