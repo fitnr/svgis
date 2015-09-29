@@ -8,13 +8,20 @@
 language: python
 
 python:
-    - "2.7"
-    - "3.4"
+    - 2.7
+    - 3.3
+    - 3.4
+    - 3.5
+
+sudo: true
+
+before_install:
+ - sudo apt-get -qq update
+ - sudo apt-get -qq install -y libgdal1-dev
 
 install:
-    # install python requirements
+    - make
     - python setup.py install
 
 script:
-    # run tests
     - python setup.py test
