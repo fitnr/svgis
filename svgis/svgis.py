@@ -141,6 +141,8 @@ class SVGIS(object):
         scalar = scalar or self.scalar
         style = style or self.style
 
+        viewbox = kwargs.pop('viewbox', None)
+
         container = svgwrite.container.Group(transform='scale(1, -1)', fill_rule='evenodd')
         container.translate(self.padding, -self.padding)
 
@@ -150,8 +152,13 @@ class SVGIS(object):
 
         w, h, x0, y1 = self._bounds(scalar)
 
-        drawing = svg.create((w, h), [container], style=style)
-        drawing.viewbox(x0, -y1, w, h)
+        if viewbox:
+            drawing = svg.create((w, h), [container], style=style)
+            drawing.viewbox(x0, -y1, w, h)
+
+        else:
+            container.translate(-x0, -y1)
+            drawing = svg.create((w, h), [container], style=style)
 
         return drawing
 
