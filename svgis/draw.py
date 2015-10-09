@@ -65,7 +65,6 @@ def polygon(coordinates, precision=3, **kwargs):
         except ValueError:
             raise
 
-
     # This is trickier because drawing holes in SVG.
     # We go clockwise on the first ring, then counterclockwise
     if fionautil.measure.counterclockwise(coordinates[0]):
@@ -90,20 +89,21 @@ def multipolygon(coordinates, **kwargs):
 def points(geom, **kwargs):
     kwargs['r'] = kwargs.get('r', 1)
 
-    if geom['type'] == 'LineString':
+    if geom['type'] == 'Point':
         return [point(geom['coordinates'], **kwargs)]
 
-    elif geom['type'] == 'MultiLineString':
+    elif geom['type'] == 'MultiPoint':
         return points(geom['coordinates'], **kwargs)
 
 
 def point(coordinates, precision=3, **kwargs):
     try:
         x, y = coordinates.pop()
-    except AttributeError:
+    except (AttributeError, TypeError):
         x, y = coordinates
 
     x, y = round(x, precision), round(y, precision)
+
     return svgwrite.shapes.Circle(center=(x, y), **kwargs)
 
 
@@ -115,7 +115,7 @@ def geometry(geom, **kwargs):
     '''Draw a geometry'''
 
     if geom['type'] == 'Point':
-        return [point(geom, **kwargs)]
+        return points(geom, **kwargs)
 
     elif geom['type'] in 'MultiPoint':
         return multipoint(geom, **kwargs)
