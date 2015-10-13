@@ -2,11 +2,8 @@
 # -*- coding: utf-8 -*-
 import pyproj
 import utm
-import fiona.transform
+from fiona import transform
 from . import scale
-
-def wgs84():
-    return pyproj.Geod(ellps='WGS84')
 
 
 def tm_proj4(x0, y0, y1):
@@ -43,7 +40,7 @@ def zonetoproj4(zonenumber, zoneletter):
 
 def project_scale(in_crs, out_crs, ring, scalar=None):
     '''Project and apply a scale to a ring'''
-    xs, ys = fiona.transform.transform(in_crs, out_crs, *zip(*ring))
+    xs, ys = transform.transform(in_crs, out_crs, *zip(*ring))
 
     projected = zip(xs, ys)
 
