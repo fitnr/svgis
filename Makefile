@@ -8,7 +8,7 @@
 README.rst: README.md
 	pandoc $< -o $@ || touch $@
 
-.PHONY: test cov
+.PHONY: test cov deploy
 
 cov:
 	coverage run --include='svgis/*' setup.py test
@@ -37,3 +37,10 @@ tests/shp/cb_2014_us_nation_20m.zip: tests/shp
 	touch $@
 
 tests/shp: ; mkdir -p $@
+
+deploy:
+	rm -r dist build
+	python3 setup.py bdist_wheel
+	rm -r build
+	python setup.py sdist bdist_wheel
+	twine upload dist/*

@@ -13,16 +13,22 @@ python:
     - 3.4
     - 3.5
 
+os:
+ - linux
+ - osx
 sudo: true
 
 matrix:
     fast_finish: true
     allow_failures:
-        - 3.5
+        -
+            python: 3.5
+        -
+            os: osx
 
 before_install:
-    - sudo apt-get -qq update
-    - sudo apt-get -qq install -y libgdal1-dev
+    - if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew install gdal; fi
+    - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -qq update && sudo apt-get -qq install -y libgdal1-dev; fi
 
 install:
     - make
