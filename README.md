@@ -7,6 +7,14 @@ Create simple SVG drawings from geodata files (SHP, geoJSON, etc).
 $ svgis draw in.shp -o out.svg
 $ svgis draw in.shp in.geojson -o out.svg
 ````
+
+## Install
+
+Requires [fiona](http://pypi.python.org/pypi/fiona), which in turn requires GDAL.
+
+Before installing, run the following on OS X: `brew install gdal`.
+On Linux: `sudo apt-get -qq install -y libgdal1-dev`.
+
 ## Command line options
 
 #### --bounds
