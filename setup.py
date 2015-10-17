@@ -10,6 +10,11 @@
 
 from setuptools import setup, find_packages
 
+try:
+    readme = open('README.rst').read()
+except IOError:
+    readme = ''
+
 setup(
     name='svgis',
 
@@ -17,7 +22,7 @@ setup(
 
     description='Draw geodata in SVG',
 
-    long_description='''Draw geodata in SVG''',
+    long_description=readme,
 
     keywords='svg gis geojson shapefile',
 
