@@ -39,8 +39,8 @@ tests/shp/cb_2014_us_nation_20m.zip: tests/shp
 tests/shp: ; mkdir -p $@
 
 deploy:
-	rm -r dist build
+	rm -rf dist build
 	python3 setup.py bdist_wheel
-	rm -r build
+	rm -rf build
 	python setup.py sdist bdist_wheel
 	twine upload dist/*
