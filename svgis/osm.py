@@ -1,7 +1,12 @@
-"""Draw OSM geometries as SVG"""
 # -*- coding: utf-8 -*-
+
+"""Draw OSM geometries as SVG"""
+
 from __future__ import division, print_function
-from xml.etree import ElementTree
+try:
+    from lxml.etree import ElementTree
+except ImportError:
+    from xml.etree import ElementTree
 import svgwrite
 from fiona.transform import transform
 from . import projection
@@ -24,14 +29,23 @@ def bounds(osmfile):
     return float(min(lons)), float(min(lats)), float(max(lons)), float(max(lats))
 
 
-def draw_way(root, way, **kwargs):
-    geometry = {'coordinates': []}
+def draw_way(root, way, project, **kwargs):
+    """Draw an OSM way as an svgwrite geometry."""
+    scalar = kwargs.get('scalar', 1)
 
     nodes = way.findall('nd')
+    cx, cy = [], []
 
     for ref in nodes:
         node = root.find('node[@id="' + ref.get('ref') + '"]')
-        geometry['coordinates'].append((float(node.get('x')), float(node.get('y'))))
+        cx.append(float(node.get('lon')))
+        cy.append(float(node.get('lat')))
+
+    px, py = project(cx, cy)
+
+    geometry = {
+        'coordinates': scale(zip(px, py), scalar)
+    }
 
     tipe = way.find('tag[@key="type"]')
 
@@ -52,34 +66,26 @@ def draw(osmfile, scalar=None, out_crs=None, **kwargs):
     """Draw ways in a OSM file"""
     osm = get_root(osmfile)
 
-    project(osm, scalar, out_crs)
+    out_crs = make_projection(osm, out_crs)
+    project = lambda xs, ys: transform('EPSG:4269', out_crs, xs, ys)
 
     group = svgwrite.container.Group()
 
     for way in osm.findall('way'):
-        for elem in draw_way(osm, way, **kwargs):
+        for elem in draw_way(osm, way, project, scalar=scalar, **kwargs):
             group.add(elem)
 
     return group
 
 
-def project(osm, scalar=None, out_crs=None):
-    nodeinfo = [(n.get('id'), float(n.get('lon')), float(n.get('lat'))) for n in osm.findall('node')]
-    ids, lons, lats = zip(*nodeinfo)
-
-    scalar = scalar or 1
-
+def make_projection(osm, out_crs=None):
     if out_crs is None:
+        coords = [(float(n.get('lon')), float(n.get('lat'))) for n in osm.findall('node')]
+        lons, lats = zip(*coords)
+
         midx = (max(lons) + min(lons)) / 2
         midy = (max(lats) + min(lats)) / 2
 
         out_crs = projection.utm_proj4(midx, midy)
 
-    xs, ys = transform('EPSG:4269', out_crs, lons, lats)
-
-    scaled = scale(zip(xs, ys), scalar)
-
-    for i, (x, y) in zip(ids, scaled):
-        node = osm.find('node[@id="' + i + '"]')
-        node.attrib['x'] = x
-        node.attrib['y'] = y
+    return out_crs

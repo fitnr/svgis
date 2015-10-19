@@ -59,6 +59,10 @@ setup(
         'utm>=0.4.0,<1'
     ],
 
+    extras_require={
+        'lxml': ['lxml']
+    },
+
     tests_require=['tox'],
 
     test_suite='tests',
