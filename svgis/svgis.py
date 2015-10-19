@@ -3,6 +3,7 @@
 from os import path
 import fiona
 import fiona.crs
+import fiona.transform
 import svgwrite
 from pyproj import Proj
 import fionautil.coords
@@ -19,8 +20,6 @@ STYLE = ('polyline, line, rect, path, polygon, .polygon {'
          ' stroke-width: 1px;'
          ' stroke-linejoin: round;'
          '}')
-
-transform = fiona.transform.transform
 
 def _choosecrs(in_crs, bounds=None, use_proj=None):
     '''Choose a projection. If the layer is projected, use that.
@@ -196,9 +195,15 @@ class SVGIS(object):
         return drawing
 
     def _complete_mbr(self):
+
         if self._incomplete_mbr:
-            coords = [transform(self.in_crs[name], self.out_crs, (x, X), (y, Y)) for name, (x, y, X, Y) in self.bounds.items()]
-            (xs, Xs), (ys, Ys) = zip(*coords)
+            coords = [fiona.transform.transform(self.in_crs[n], self.out_crs, (c[0], c[3]), (c[1], c[2])) for n, c in self.bounds.items()]
+
+            try:
+                (xs, Xs), (ys, Ys) = zip(*coords)
+            except ValueError:
+                # Likely: only one coordinate was returned
+                xs, ys = Xs, Ys = coords[0]
 
             self.mbr = min(xs), min(ys), max(Xs), max(Ys)
 
