@@ -40,6 +40,7 @@ def draw_way(root, way, **kwargs):
 
     elif geometry['coordinates'][0] == geometry['coordinates'][-1]:
         geometry['type'] = 'Polygon'
+        geometry['coordinates'] = [geometry['coordinates']]
 
     else:
         geometry['type'] = 'LineString'
