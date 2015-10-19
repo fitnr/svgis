@@ -88,7 +88,7 @@ def main():
     draw.add_argument('-p', '--padding', type=int, default=0, required=None,
                       help='Buffer the map bounds (in projection units)')
 
-    draw.add_argument('--no-viewbox', action='store_false', dest='viewbox', help='Draw SVG without a ViewBox. May improve compatibility.')
+    draw.add_argument('-x', '--no-viewbox', action='store_false', dest='viewbox', help='Draw SVG without a ViewBox. May improve compatibility.')
 
     draw.add_argument('--id-field', type=str, dest='id_field', help='Geodata field to use as ID')
     draw.add_argument('--class', type=str, dest='class_fields', help='Geodata fields to use as class (comma-separated)')
