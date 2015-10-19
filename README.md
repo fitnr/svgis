@@ -88,3 +88,7 @@ By default, SVGIS uses a viewbox. If you have a problem opening the created svg 
 svgis draw --no-viewbox in.shp -o out.svg
 svgis draw -x in.shp -o out.svg
 ````
+
+## A note on OSM files
+
+Conversion from OSM can be quite slow. You may find it more efficient to convert to `GeoJSON` or `Shapefile` using `ogr2ogr` or a similar tool.
