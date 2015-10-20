@@ -67,7 +67,7 @@ def draw(osmfile, scalar=None, out_crs=None, **kwargs):
     osm = get_root(osmfile)
 
     out_crs = make_projection(osm, out_crs)
-    project = lambda xs, ys: transform('EPSG:4269', out_crs, xs, ys)
+    project = lambda xs, ys: transform('EPSG:4326', out_crs, xs, ys)
 
     group = svgwrite.container.Group()
 

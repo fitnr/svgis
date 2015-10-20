@@ -118,10 +118,10 @@ class SVGIS(object):
 
         osm_root = osm.get_root(filename)
 
-        self.in_crs[filename] = {'init': 'epsg:4269'}
+        self.in_crs[filename] = {'init': 'epsg:4326'}
 
         if not self.out_crs:
-            self.out_crs = _choosecrs({'init': 'epsg:4269'}, osm.bounds(osm_root), use_proj=self.use_proj)
+            self.out_crs = _choosecrs(self.in_crs[filename], osm.bounds(osm_root), use_proj=self.use_proj)
 
         self.bounds[filename] = convert.replacebounds(self.mbr, osm.bounds(osm_root))
 
