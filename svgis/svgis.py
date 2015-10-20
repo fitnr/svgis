@@ -49,16 +49,22 @@ def _choosecrs(in_crs, bounds=None, use_proj=None):
     return out_crs
 
 
-def _draw_feature(f, reproject, scalar, classes=None, id_field=None, **kwargs):
-    """Draw a single feature, possibly adding ID and class attributes"""
+def _draw_feature(geom, properties=None, **kwargs):
+    '''Draw a single feature given a geometry object and properties object'''
     attribs = {}
-    geom = scale.geometry(reproject(f['geometry']), scalar)
+    properties = properties or {}
 
-    if classes:
-        attribs['class'] = ' '.join([str(f['properties'][c]).replace(' ', '_') for c in classes])
+    if kwargs.get('classes'):
+        try:
+            attribs['class'] = ' '.join(str(properties.get(c, '')).replace(' ', '_') for c in kwargs.pop('classes'))
+        except TypeError:
+            pass
 
-    if id_field:
-        attribs['id'] = str(f['properties'][id_field]).replace(' ', '_')
+    if kwargs.get('id_field'):
+        try:
+            attribs['id'] = str(properties.get(kwargs.pop('id_field'))).replace(' ', '_')
+        except AttributeError:
+            pass
 
     ps = draw.geometry(geom, **kwargs)
 
@@ -70,7 +76,6 @@ def _draw_feature(f, reproject, scalar, classes=None, id_field=None, **kwargs):
         target = ps[0]
 
     target.attribs.update(attribs)
-
     return target
 
 
@@ -137,30 +142,27 @@ class SVGIS(object):
             self.in_crs[layer.name] = layer.crs
             self.bounds[layer.name] = convert.replacebounds(self.mbr, layer.bounds)
 
-            if 'classes' in kwargs:
-                classes = [c for c in kwargs['classes'] if c in layer.schema['properties']]
-                kwargs.pop('classes')
-            else:
-                classes = None
-
-            id_field = kwargs.pop('id_field', None)
-
-            if id_field not in layer.schema['properties'].keys():
-                id_field = None
-
             if not self.out_crs:
                 # Determine projection transformation:
                 # either use something passed in, a non latlong layer projection,
                 # the local UTM, or customize local TM
                 self.out_crs = _choosecrs(layer.crs, self.bounds[layer.name], use_proj=self.use_proj)
 
+            if 'classes' in kwargs:
+                kwargs['classes'] = [c for c in kwargs['classes'] if c in layer.schema['properties']]
+
+            if 'id_field' in kwargs:
+                if kwargs['id_field'] not in layer.schema['properties'].keys():
+                    del kwargs['id_field']
+
             if self.out_crs != layer.crs:
                 reproject = lambda geom: fiona.transform.transform_geom(layer.crs, self.out_crs, geom)
             else:
                 reproject = lambda f: f
 
-            for _, f in layer.items(bbox=self.bounds[layer.name]):
-                target = _draw_feature(f, reproject, scalar, classes, id_field, **kwargs)
+            for _, f in layer.items(**self.bbox):
+                geom = scale.geometry(reproject(f['geometry']), scalar)
+                target = _draw_feature(geom, f['properties'], **kwargs)
                 group.add(target)
 
         return group
