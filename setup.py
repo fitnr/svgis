@@ -63,8 +63,6 @@ setup(
         'lxml': ['lxml']
     },
 
-    tests_require=['tox'],
-
     test_suite='tests',
 
     entry_points={
