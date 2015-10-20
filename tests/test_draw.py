@@ -45,8 +45,8 @@ class DrawTestCase(unittest.TestCase):
         assert mls2.pop(1).points == geom['coordinates'][1]
         assert draw.geometry(geom).pop(1).points == geom['coordinates'][1]
 
-        with self.assertRaises(ValueError):
-            draw.linestring(geom)
+        with self.assertRaises(TypeError):
+            draw.linestring(geom['coordinates'])
 
     def testDrawPolygon(self):
         geom = {
