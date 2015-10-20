@@ -14,7 +14,7 @@ cov:
 	coverage run --include='svgis/*' setup.py test
 	coverage report
 	coverage html
-	open html/index.html
+	open htmlcov/index.html
 
 test: tests/shp/cb_2014_us_nation_20m.shp
 	python setup.py test

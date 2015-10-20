@@ -6,6 +6,7 @@ from collections import Sequence
 from xml.dom import minidom
 import fionautil.coords
 
+
 def rescale(svgfile, factor):
     svg = minidom.parse(svgfile)
 
@@ -31,6 +32,7 @@ def dims(boundary, padding=0):
     h = y1 - y0 + (padding * 2)
 
     return w, h
+
 
 def add_style(svgfile, newstyle, replace=False):
     '''Add to the CSS style in an SVG file.
@@ -124,7 +126,6 @@ def write(filename, drawing):
 
         else:
             f = open(filename, 'w')
-
 
         f.write(drawing.tostring())
 

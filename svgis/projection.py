@@ -22,7 +22,6 @@ def tm(x0, y0, y1):
 
 def utm_proj4(x, y):
     '''Generate the proj4 string for a given (lon, lat) coordinate'''
-
     try:
         _, _, zonenumber, zoneletter = utm.from_latlon(y, x)
         return zonetoproj4(zonenumber, zoneletter)
