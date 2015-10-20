@@ -1,3 +1,12 @@
+0.1.4
+-----
+
+* Project bounds as each file is parsed, rather than fussily at the end
+* Simplify feature drawing and argument-passing
+* Fix a NAD32-for-WGS84 typo in osm.
+* Add 'svgis project' command line tool, for generating proj.4 strings
+* Add tests
+
 0.1.3
 -----
 
