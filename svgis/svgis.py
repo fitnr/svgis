@@ -35,7 +35,7 @@ def _choosecrs(in_crs, bounds=None, use_proj=None):
         except ValueError:
             return _choosecrs(in_crs, bounds, use_proj=None)
 
-    elif use_proj == 'local_tm' or Proj(**in_crs).is_latlong():
+    elif use_proj == 'local' or Proj(**in_crs).is_latlong():
         # Create a custom TM projection
         x0 = (float(bounds[0]) + float(bounds[2])) // 2
 
