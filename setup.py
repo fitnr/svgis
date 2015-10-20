@@ -70,4 +70,6 @@ setup(
             'svgis=svgis.cli:main',
         ],
     },
+
+    use_2to3=True,
 )
