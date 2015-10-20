@@ -2,8 +2,10 @@
 from __future__ import print_function, division
 import argparse
 from . import svg
+from .import projection
 from .svgis import SVGIS
 import sys
+
 
 def _echo(content, output):
     if hasattr(output, 'write'):
@@ -54,9 +56,16 @@ def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
 
     kwargs.pop('class_fields', None)
 
-    drawing = SVGIS(layers, bounds=bounds, scalar=scalar, use_proj=use_proj, out_crs=out_crs, padding=padding).compose(**kwargs)
+    drawing = SVGIS(layers, bounds=bounds, scalar=scalar, use_proj=use_proj,
+                    out_crs=out_crs, padding=padding).compose(**kwargs)
 
     _echo(drawing.tostring(), output)
+
+
+def _proj(_, output, minx, miny, maxx, maxy, use_proj=None):
+    '''Return a transverse mercator projection for the given bounds'''
+    prj = projection.generatecrs(minx, miny, maxx, maxy, use_proj)
+    _echo(prj + '\n', output)
 
 
 def main():
@@ -67,16 +76,16 @@ def main():
     parser = argparse.ArgumentParser('svgis')
     sp = parser.add_subparsers()
 
-    style = sp.add_parser('style', parents=[parent])
+    style = sp.add_parser('style', parents=[parent], help="Add a CSS style to an SVG")
     style.add_argument('-s', '--style', type=str, help="Style string to append to SVG")
     style.add_argument('-r', '--replace', action='store_true', help="Replace the SVG's style")
     style.set_defaults(function=_style)
 
-    scale = sp.add_parser('scale', parents=[parent])
+    scale = sp.add_parser('scale', parents=[parent], help='Scale all coordinates in an SVG by a factor')
     scale.add_argument('-f', '--scale', type=int)
     scale.set_defaults(function=_scale)
 
-    draw = sp.add_parser('draw')
+    draw = sp.add_parser('draw', help='Draw SVGs from input geodata ')
     draw.add_argument('input', nargs='+', default='/dev/stdin', help="Input geodata layers")
     draw.add_argument('-o', '--output', default='/dev/stdout', help="defaults to stdout")
     draw.add_argument('--bounds', nargs=4, type=float, metavar=('minx', 'miny', 'maxx', 'maxy'),
@@ -88,17 +97,30 @@ def main():
     draw.add_argument('-p', '--padding', type=int, default=0, required=None,
                       help='Buffer the map bounds (in projection units)')
 
-    draw.add_argument('-x', '--no-viewbox', action='store_false', dest='viewbox', help='Draw SVG without a ViewBox. May improve compatibility.')
+    draw.add_argument('-x', '--no-viewbox', action='store_false', dest='viewbox',
+                      help='Draw SVG without a ViewBox. May improve compatibility.')
 
     draw.add_argument('--id-field', type=str, dest='id_field', help='Geodata field to use as ID')
-    draw.add_argument('--class', type=str, dest='class_fields', help='Geodata fields to use as class (comma-separated)')
+    draw.add_argument('--class', type=str, dest='class_fields',
+                      help='Geodata fields to use as class (comma-separated)')
 
     group = draw.add_mutually_exclusive_group()
     group.add_argument('-g', '--epsg', type=str, help='EPSG code to use in projecting output')
     group.add_argument('-j', '--proj4', type=str, help='Proj4 string defining projection use in output')
-    group.add_argument('--project', choices=('utm', 'local'), type=str, dest='use_proj', help='Draw map in local UTM projection')
+    group.add_argument('-m', '--projection-method', choices=('utm', 'local'), type=str, dest='use_proj',
+                       help=('Projection to use: ',
+                             'either the local UTM zone, or a custom Transverse Mercator projection'
+                             'centered on the bounding box'))
 
     draw.set_defaults(function=_draw)
+
+    proj = sp.add_parser('project', help='Get a local Transverse Mercator projection for a bounding box')
+    proj.add_argument('minx', type=float, help='west')
+    proj.add_argument('miny', type=float, help='south')
+    proj.add_argument('maxx', type=float, help='east')
+    proj.add_argument('maxy', type=float, help='north')
+    proj.add_argument('-m', '--projection-method', dest='use_proj', choices=('utm', 'local'), type=str,)
+    proj.set_defaults(function=_proj, input=None, output='/dev/stdout')
 
     args = parser.parse_args()
 

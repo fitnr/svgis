@@ -3,6 +3,8 @@
 import pyproj
 import utm
 from fiona import transform
+import fiona.crs
+from pyproj import Proj
 from . import scale
 
 
@@ -37,6 +39,40 @@ def zonetoproj4(zonenumber, zoneletter):
         hemisphere = 'south'
 
     return '+proj=utm +zone={} +{} +datum=WGS84 +units=m +no_defs'.format(zonenumber, hemisphere)
+
+
+def generatecrs(minx, miny, maxx, maxy, use_proj=None):
+    '''Choose a projection, either the local UTM zone or
+    create a custom transverse mercator.
+    Returns a proj4 string
+    '''
+    if use_proj == 'utm':
+        midx = (minx + maxx) / 2
+        midy = (miny + maxy) / 2
+
+        return utm_proj4(midx, midy)
+
+    else:
+        # Create a custom TM projection
+        x0 = (float(minx) + float(maxx)) // 2
+
+        return tm_proj4(x0, miny, maxy)
+
+
+def choosecrs(in_crs, bounds, use_proj=None):
+    '''Choose a projection. If the layer is projected, use that.
+    Otherwise, create use a passed projection or create a custom transverse mercator.
+    :in_crs dict A fiona-type proj4 dictionary
+    :bounds tuple (minx, miny, maxx, maxy)
+    :use_proj string wither 'utm' or 'local'
+    :returns dict fiona-type proj4 dictionary
+    '''
+    if use_proj is None and not Proj(**in_crs).is_latlong():
+        # it's projected already, so noop.
+        return in_crs
+
+    else:
+        return fiona.crs.from_string(generatecrs(*bounds, use_proj=use_proj))
 
 
 def project_scale(in_crs, out_crs, ring, scalar=None):

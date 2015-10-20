@@ -1,11 +1,10 @@
 """Draw geodata layers into svg"""
 # -*- coding: utf-8 -*-
 from os import path
+from collections import Iterable
 import fiona
-import fiona.crs
 import fiona.transform
 import svgwrite
-from pyproj import Proj
 import fionautil.coords
 from . import projection
 from . import draw
@@ -20,34 +19,6 @@ STYLE = ('polyline, line, rect, path, polygon, .polygon {'
          ' stroke-width: 1px;'
          ' stroke-linejoin: round;'
          '}')
-
-
-def _choosecrs(in_crs, bounds=None, use_proj=None):
-    '''Choose a projection. If the layer is projected, use that.
-    Otherwise, create use a passed projection or create a custom transverse mercator.
-    Returns a function that operates on features
-    '''
-    if use_proj == 'utm':
-        midx = (bounds[0] + bounds[2]) / 2
-        midy = (bounds[1] + bounds[3]) / 2
-
-        try:
-            out_crs = fiona.crs.from_string(projection.utm_proj4(midx, midy))
-        except ValueError:
-            return _choosecrs(in_crs, bounds, use_proj=None)
-
-    elif use_proj == 'local' or Proj(**in_crs).is_latlong():
-        # Create a custom TM projection
-        x0 = (float(bounds[0]) + float(bounds[2])) // 2
-
-        out_proj4 = projection.tm_proj4(x0, bounds[1], bounds[3])
-        out_crs = fiona.crs.from_string(out_proj4)
-
-    else:
-        # it's projected already, so noop.
-        out_crs = in_crs
-
-    return out_crs
 
 
 def _draw_feature(geom, properties=None, **kwargs):
@@ -88,7 +59,12 @@ class SVGIS(object):
     bbox = dict()
 
     def __init__(self, files, bounds=None, out_crs=None, **kwargs):
-        self.files = files
+        if isinstance(files, basestring):
+            self.files = [files]
+        elif isinstance(files, Iterable):
+            self.files = files
+        else:
+            raise ValueError("'files' must be a file name or list of file names")
 
         if bounds:
             self.bbox['bbox'] = bounds
@@ -97,7 +73,7 @@ class SVGIS(object):
 
         self.out_crs = out_crs
 
-        self.use_proj = kwargs.pop('use_proj')
+        self.use_proj = kwargs.pop('use_proj', None)
 
         self.scalar = kwargs.pop('scalar', 1)
 
@@ -123,7 +99,7 @@ class SVGIS(object):
         bounds = osm.bounds(osm_root)
 
         if not self.out_crs:
-            self.out_crs = _choosecrs(osm.CRS, bounds, use_proj=self.use_proj)
+            self.out_crs = projection.choosecrs(osm.CRS, bounds, use_proj=self.use_proj)
 
         self.mbr = convert.updatebounds(self.mbr, projection.project_mbr(osm.CRS, self.out_crs, *bounds))
 
@@ -146,7 +122,7 @@ class SVGIS(object):
                 # Determine projection transformation:
                 # either use something passed in, a non latlong layer projection,
                 # the local UTM, or customize local TM
-                self.out_crs = _choosecrs(layer.crs, layer.bounds, use_proj=self.use_proj)
+                self.out_crs = projection.choosecrs(layer.crs, layer.bounds, use_proj=self.use_proj)
 
             self.mbr = convert.updatebounds(self.mbr, projection.project_mbr(layer.crs, self.out_crs, *layer.bounds))
 
