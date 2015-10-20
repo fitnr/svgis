@@ -21,6 +21,7 @@ STYLE = ('polyline, line, rect, path, polygon, .polygon {'
          ' stroke-linejoin: round;'
          '}')
 
+
 def _choosecrs(in_crs, bounds=None, use_proj=None):
     '''Choose a projection. If the layer is projected, use that.
     Otherwise, create use a passed projection or create a custom transverse mercator.
@@ -83,15 +84,16 @@ class SVGIS(object):
 
     """Draw geodata files to SVG"""
 
-    bounds = dict()
     in_crs = dict()
+    bbox = dict()
 
     def __init__(self, files, bounds=None, out_crs=None, **kwargs):
         self.files = files
 
-        bounds = bounds or (None,) * 4
+        if bounds:
+            self.bbox['bbox'] = bounds
 
-        self.mbr = convert.replacebounds(bounds, (None, None, None, None))
+        self.mbr = (None, None, None, None)
 
         self.out_crs = out_crs
 
@@ -102,10 +104,6 @@ class SVGIS(object):
         self.style = kwargs.pop('style', STYLE)
 
         self.padding = kwargs.pop('padding', 0)
-
-    @property
-    def _incomplete_mbr(self):
-        return any([x is None for x in self.mbr])
 
     def compose_file(self, filename, scalar, **kwargs):
         '''Draw file to svg
@@ -122,13 +120,12 @@ class SVGIS(object):
         kwargs.pop('classes', None)
 
         osm_root = osm.get_root(filename)
-
-        self.in_crs[filename] = {'init': 'epsg:4326'}
+        bounds = osm.bounds(osm_root)
 
         if not self.out_crs:
-            self.out_crs = _choosecrs(self.in_crs[filename], osm.bounds(osm_root), use_proj=self.use_proj)
+            self.out_crs = _choosecrs(osm.CRS, bounds, use_proj=self.use_proj)
 
-        self.bounds[filename] = convert.replacebounds(self.mbr, osm.bounds(osm_root))
+        self.mbr = convert.updatebounds(self.mbr, projection.project_mbr(osm.CRS, self.out_crs, *bounds))
 
         group = osm.draw(osm_root, scalar, out_crs=self.out_crs, **kwargs)
         group.attribs['id'] = filename
@@ -136,17 +133,22 @@ class SVGIS(object):
         return group
 
     def _compose_fiona(self, filename, scalar, **kwargs):
+        '''Draw file to svg
+        filename -- a fiona-readable file
+        mbr -- a tuple containing (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
+        '''
         with fiona.open(filename, "r") as layer:
             group = svgwrite.container.Group(id=layer.name)
 
             self.in_crs[layer.name] = layer.crs
-            self.bounds[layer.name] = convert.replacebounds(self.mbr, layer.bounds)
 
             if not self.out_crs:
                 # Determine projection transformation:
                 # either use something passed in, a non latlong layer projection,
                 # the local UTM, or customize local TM
-                self.out_crs = _choosecrs(layer.crs, self.bounds[layer.name], use_proj=self.use_proj)
+                self.out_crs = _choosecrs(layer.crs, layer.bounds, use_proj=self.use_proj)
+
+            self.mbr = convert.updatebounds(self.mbr, projection.project_mbr(layer.crs, self.out_crs, *layer.bounds))
 
             if 'classes' in kwargs:
                 kwargs['classes'] = [c for c in kwargs['classes'] if c in layer.schema['properties']]
@@ -184,7 +186,7 @@ class SVGIS(object):
             for filename in self.files:
                 container.add(self.compose_file(filename, scalar, **kwargs))
 
-        w, h, x0, y1 = self._bounds(scalar)
+        w, h, x0, y1 = self.dims(scalar)
 
         if viewbox:
             drawing = svg.create((w, h), [container], style=style)
@@ -196,29 +198,10 @@ class SVGIS(object):
 
         return drawing
 
-    def _complete_mbr(self):
-
-        if self._incomplete_mbr:
-            coords = [fiona.transform.transform(self.in_crs[n], self.out_crs, (c[0], c[3]), (c[1], c[2])) for n, c in self.bounds.items()]
-
-            try:
-                (xs, Xs), (ys, Ys) = zip(*coords)
-            except ValueError:
-                # Likely: only one coordinate was returned
-                xs, ys = Xs, Ys = coords[0]
-
-            self.mbr = min(xs), min(ys), max(Xs), max(Ys)
-
-    def _bounds(self, scalar):
-        """
-        Return the bounds for the project.
-        Creates an MBR from all the input files, projects and scales it
-        :returns tuple of length four: width, height, and (x, y) origin
-        """
-        self._complete_mbr()
-
+    def dims(self, scalar):
+        '''Calculate the width, height, origin X and max Y of the document'''
         mbr_ring = convert.mbr_to_bounds(*self.mbr)
-        boundary = projection.project_scale(self.in_crs, self.out_crs, mbr_ring, scalar)
+        boundary = scale.scale(mbr_ring, scalar)
 
         x0, y0, x1, y1 = fionautil.coords.bounds(list(boundary))
 

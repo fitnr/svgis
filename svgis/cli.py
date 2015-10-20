@@ -80,7 +80,7 @@ def main():
     draw.add_argument('input', nargs='+', default='/dev/stdin', help="Input geodata layers")
     draw.add_argument('-o', '--output', default='/dev/stdout', help="defaults to stdout")
     draw.add_argument('--bounds', nargs=4, type=float, metavar=('minx', 'miny', 'maxx', 'maxy'),
-                      help='In the same coordinate system as the input layers', default=(None, None, None, None))
+                      help='In the same coordinate system as the input layers', default=None)
 
     draw.add_argument('-c', '--style', type=str, metavar='CSS', help="CSS file or string")
     draw.add_argument('-f', '--scale', type=int, default=1,

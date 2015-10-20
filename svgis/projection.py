@@ -38,6 +38,7 @@ def zonetoproj4(zonenumber, zoneletter):
 
     return '+proj=utm +zone={} +{} +datum=WGS84 +units=m +no_defs'.format(zonenumber, hemisphere)
 
+
 def project_scale(in_crs, out_crs, ring, scalar=None):
     '''Project and apply a scale to a ring'''
     xs, ys = transform.transform(in_crs, out_crs, *zip(*ring))
@@ -49,3 +50,8 @@ def project_scale(in_crs, out_crs, ring, scalar=None):
         return scale.scale(projected, scalar)
     else:
         return projected
+
+
+def project_mbr(in_crs, out_crs, minx, miny, maxx, maxy):
+    minpt, maxpt = zip(*transform.transform(in_crs, out_crs, (minx, maxx), (miny, maxy)))
+    return minpt + maxpt

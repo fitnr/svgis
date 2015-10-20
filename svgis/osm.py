@@ -13,6 +13,8 @@ from . import projection
 from .scale import scale
 from . import draw as svgisdraw
 
+CRS = {'init': 'epsg:4326'}
+
 
 def get_root(osmfile):
     if type(osmfile) == str:
