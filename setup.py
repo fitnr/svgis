@@ -60,7 +60,8 @@ setup(
     ],
 
     extras_require={
-        'lxml': ['lxml']
+        'lxml': ['lxml'],
+        'numpy': ['numpy'],
     },
 
     test_suite='tests',
