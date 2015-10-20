@@ -3,12 +3,14 @@ from svgis import draw
 
 
 class DrawTestCase(unittest.TestCase):
+
     def setUp(self):
         self.lis1 = [[-110.277906, 35.590313], [-110.271087, 35.590375], [-110.26093, 35.590865], [-110.259592, 35.590881], [-110.250972, 35.590888], [-110.250543, 35.590882], [-110.248341, 35.591048], [-110.247998, 35.591065], [-110.230537, 35.59107], [-110.228281, 35.591044], [-110.2257, 35.591041], [-110.277906, 35.590313]]
 
     def testDrawPoint(self):
-        assert draw.point((0, 0)).tostring() == '<circle cx="0.0" cy="0.0" r="1" />'
-        assert draw.point((0, 0), r=2).tostring() == '<circle cx="0.0" cy="0.0" r="2" />'
+        drawn = draw.point((0, 0), r=2)
+        self.assertEqual((drawn.attribs['cx'], drawn.attribs['cy']), (0, 0))
+        self.assertEqual(drawn.attribs['r'], 2)
 
         geom = {
             'coordinates': (0, 0),
@@ -16,7 +18,7 @@ class DrawTestCase(unittest.TestCase):
         }
         points = draw.points(geom)
         assert len(points) == 1
-        assert points[0].tostring() == '<circle cx="0.0" cy="0.0" r="1" />'
+        self.assertEqual((points[0].attribs['cx'], points[0].attribs['cy']), (0, 0))
 
         assert draw.geometry(geom).pop(0).attribs['cy'] == 0
         assert draw.geometry(geom).pop(0).attribs['cx'] == 0

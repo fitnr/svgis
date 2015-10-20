@@ -9,7 +9,7 @@ class SvgisTestCase(unittest.TestCase):
         self.file = resource_filename('svgis', 'test_data/cb_2014_us_nation_20m.shp')
 
     def testSvgisCreate(self):
-        svgis_obj = svgis.SVGIS(unicode(self.file))
+        svgis_obj = svgis.SVGIS(self.file)
 
         self.assertEqual(svgis_obj.files, [self.file])
         assert svgis_obj.mbr == (None,) * 4
