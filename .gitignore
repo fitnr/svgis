@@ -47,4 +47,10 @@ docs/_build/
 
 readme.rst
 
-tests/shp
+svgis/test_data/*.cpg
+svgis/test_data/*.dbf
+svgis/test_data/*.shp
+svgis/test_data/*.shx
+svgis/test_data/*.prj
+svgis/test_data/*.xml
+

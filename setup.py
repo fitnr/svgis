@@ -49,7 +49,7 @@ setup(
 
     packages=find_packages(),
 
-    include_package_data=False,
+    include_package_data=True,
 
     install_requires=[
         'pyproj>=1.9.3,<1.10',

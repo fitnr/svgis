@@ -16,7 +16,7 @@ cov:
 	coverage html
 	open htmlcov/index.html
 
-test: tests/shp/cb_2014_us_nation_20m.shp
+test: svgis/test_data/cb_2014_us_nation_20m.shp
 	python setup.py test
 
 	svgis draw -g 102003 -f 1000 $< -o tests/test.svg
@@ -31,14 +31,14 @@ test: tests/shp/cb_2014_us_nation_20m.shp
 
 	@rm tests/test*.svg
 
-tests/shp/cb_2014_us_nation_20m.shp: tests/shp/cb_2014_us_nation_20m.zip
+svgis/test_data/cb_2014_us_nation_20m.shp: svgis/test_data/cb_2014_us_nation_20m.zip
 	unzip -o $< -d $(@D)
+	@touch $@
 
-tests/shp/cb_2014_us_nation_20m.zip: tests/shp
+svgis/test_data/cb_2014_us_nation_20m.zip: svgis/test_data
 	curl -o $@ http://www2.census.gov/geo/tiger/GENZ2014/shp/cb_2014_us_nation_20m.zip
-	touch $@
 
-tests/shp: ; mkdir -p $@
+svgis/test_data: ; mkdir -p $@
 
 deploy:
 	rm -rf dist build
