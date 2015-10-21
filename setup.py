@@ -49,7 +49,9 @@ setup(
 
     packages=find_packages(),
 
-    include_package_data=True,
+    package_data={
+        'svgis': ['test_data/test.*', 'test_data/cb_2014_us_nation_20m.*']
+    },
 
     install_requires=[
         'pyproj>=1.9.3,<1.10',
