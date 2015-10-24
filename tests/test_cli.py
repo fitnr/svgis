@@ -1,0 +1,130 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# This file is part of svgis.
+# https://github.com/fitnr/svgis
+
+# Licensed under the GNU General Public License v3 (GPLv3) license:
+# http://opensource.org/licenses/GPL-3.0
+# Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
+from __future__ import unicode_literals
+import unittest
+import sys
+import os
+import subprocess
+from pkg_resources import resource_filename
+from io import StringIO
+from svgis import cli
+
+
+class CliTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.testsvg = resource_filename('svgis', 'test_data/test.svg')
+        self.shp = resource_filename('svgis', 'test_data/cb_2014_us_nation_20m.shp')
+
+    def testSvgStyle(self):
+        args = ['svgis', 'style', '-s', 'polygon{fill:green}', self.testsvg]
+        p = subprocess.Popen(args, stdout=subprocess.PIPE)
+        out, err = p.communicate()
+
+        self.assertIsNone(err, 'err is not None')
+        self.assertIsNotNone(out, 'out is None')
+
+        try:
+            assert 'polygon{fill:green}' in out
+        except TypeError:
+            self.assertIn('polygon{fill:green}', out.decode())
+
+
+    def testSvgScale(self):
+        args = ['svgis', 'scale', '-f', '123', self.testsvg]
+        p = subprocess.Popen(args, stdout=subprocess.PIPE)
+        out, err = p.communicate()
+
+        self.assertIsNone(err, 'err is not None')
+        self.assertIsNotNone(out, 'out is None')
+
+        try:
+            self.assertIn('scale(123)', out)
+        except TypeError:
+            self.assertIn('scale(123)', out.decode())
+
+    def testSvgProjectUtm(self):
+        args = ['svgis', 'project', '-m', 'utm', '-110.277906', '35.450777', '-110.000477', '35.649030']
+        p = subprocess.Popen(args, stdout=subprocess.PIPE)
+        out, err = p.communicate()
+
+        self.assertIsNone(err, 'err is not None')
+        self.assertIsNotNone(out, 'out is None')
+
+        expected = '+proj=utm +zone=12 +north +datum=WGS84 +units=m +no_defs\n'
+
+        try:
+            assert out == expected
+        except TypeError:
+            assert out.decode() == expected
+
+    def testSvgProject(self):
+        args = ['svgis', 'project', '-110.277906', '35.450777', '-110.000477', '35.649030']
+        p = subprocess.Popen(args, stdout=subprocess.PIPE)
+        out, err = p.communicate()
+
+        self.assertIsNone(err, 'err is not None')
+        self.assertIsNotNone(out, 'out is None')
+
+        expected = ('+proj=lcc +lon_0=-111.0 +lat_1=35.64903 +lat_2=35.450777 '
+                    '+lat_0=35.64903+x_0=0 +y_0=0 +ellps=GRS80 '
+                    '+towgs84=0,0,0,0,0,0,0+units=m +no_defs\n')
+        try:
+            assert out == expected
+        except:
+            assert out.decode() == expected
+
+    def testCliEcho(self):
+        io = StringIO()
+        content = 'my content'
+        cli._echo(content, io)
+        io.seek(0)
+
+        assert io.read() == content
+
+    def testCliStyle(self):
+        io = StringIO()
+        new_style = 'polygon{fill:green}'
+        cli._style(self.testsvg, io, new_style)
+        io.seek(0)
+
+        assert new_style in io.read()
+
+    def testCliScale(self):
+        io = StringIO()
+
+        cli._scale(self.testsvg, io, 1.37)
+        io.seek(0)
+
+        assert 'scale(1.37)' in io.read()
+
+    def testCliDraw(self):
+        io = StringIO()
+
+        cli._draw(self.shp, io, scale=1000, epsg='102003')
+        io.seek(0)
+        result = io.read()
+        fixture = open(self.testsvg).read()
+
+        self.assertEqual(str(result[:1000]), str(fixture[:1000]))
+
+    def testCli(self):
+        try:
+            io = StringIO()
+            sys.argv = ['svgis', 'draw', '-g', '102003', '-f', '1000', self.shp, '-o', 'tmp.svg']
+
+            cli.main()
+            io.seek(0)
+            result = open('tmp.svg').read()
+            fixture = open(self.testsvg).read()
+            self.assertEqual(str(result), str(fixture))
+
+        finally:
+            os.remove('tmp.svg')
