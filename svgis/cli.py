@@ -1,5 +1,6 @@
 #!/usr/bin/python
 from __future__ import print_function, division
+from signal import signal, SIGPIPE, SIG_DFL
 import argparse
 from . import svg
 from .import projection
@@ -8,7 +9,9 @@ import sys
 
 
 def _echo(content, output):
+    '''Print something to either a file-like object or a file name.'''
     if hasattr(output, 'write'):
+        signal(SIGPIPE, SIG_DFL)
         output.write(content)
     else:
         open(output, 'w').write(content)
