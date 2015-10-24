@@ -12,10 +12,13 @@ import unittest
 import sys
 import os
 import subprocess
+from xml.dom import minidom
 from pkg_resources import resource_filename
 from io import StringIO
 from svgis import cli
 
+
+PROJECTION = '+proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'
 
 class CliTestCase(unittest.TestCase):
 
@@ -32,7 +35,7 @@ class CliTestCase(unittest.TestCase):
         self.assertIsNotNone(out, 'out is None')
 
         try:
-            assert 'polygon{fill:green}' in out
+            self.assertIn('polygon{fill:green}', out)
         except TypeError:
             self.assertIn('polygon{fill:green}', out.decode())
 
@@ -47,7 +50,7 @@ class CliTestCase(unittest.TestCase):
 
         try:
             self.assertIn('scale(123)', out)
-        except TypeError:
+        except (TypeError, AssertionError):
             self.assertIn('scale(123)', out.decode())
 
     def testSvgProjectUtm(self):
@@ -61,9 +64,9 @@ class CliTestCase(unittest.TestCase):
         expected = '+proj=utm +zone=12 +north +datum=WGS84 +units=m +no_defs\n'
 
         try:
-            assert out == expected
-        except TypeError:
-            assert out.decode() == expected
+            self.assertEqual(out, expected)
+        except (TypeError, AssertionError):
+            self.assertEqual(out.decode(), expected)
 
     def testSvgProject(self):
         args = ['svgis', 'project', '-110.277906', '35.450777', '-110.000477', '35.649030']
@@ -77,7 +80,7 @@ class CliTestCase(unittest.TestCase):
                     '+lat_0=35.64903+x_0=0 +y_0=0 +ellps=GRS80 '
                     '+towgs84=0,0,0,0,0,0,0+units=m +no_defs\n')
         try:
-            assert out == expected
+            self.assertEqual(out, expected)
         except:
             assert out.decode() == expected
 
@@ -87,7 +90,7 @@ class CliTestCase(unittest.TestCase):
         cli._echo(content, io)
         io.seek(0)
 
-        assert io.read() == content
+        self.assertEqual(io.read(), content)
 
     def testCliStyle(self):
         io = StringIO()
@@ -95,36 +98,49 @@ class CliTestCase(unittest.TestCase):
         cli._style(self.testsvg, io, new_style)
         io.seek(0)
 
-        assert new_style in io.read()
+        self.assertIn(new_style, io.read())
 
     def testCliScale(self):
         io = StringIO()
 
         cli._scale(self.testsvg, io, 1.37)
         io.seek(0)
-
-        assert 'scale(1.37)' in io.read()
+        result = io.read()
+        self.assertIn('scale(1.37)', result)
 
     def testCliDraw(self):
         io = StringIO()
 
-        cli._draw(self.shp, io, scale=1000, epsg='102003')
+        cli._draw(self.shp, io, scale=1000, project=PROJECTION)
         io.seek(0)
-        result = io.read()
-        fixture = open(self.testsvg).read()
 
-        self.assertEqual(str(result[:1000]), str(fixture[:1000]))
+        result = minidom.parseString(io.read()).getElementsByTagName('svg').item(0)
+        fixture = minidom.parse(self.testsvg).getElementsByTagName('svg').item(0)
+
+        result_vb = [float(x) for x in result.attributes.get('viewBox').value.split(',')]
+        fixture_vb = [float(x) for x in fixture.attributes.get('viewBox').value.split(',')]
+
+        for r, f in zip(result_vb, fixture_vb):
+            self.assertAlmostEqual(r, f, 5)
 
     def testCli(self):
         try:
             io = StringIO()
-            sys.argv = ['svgis', 'draw', '-g', '102003', '-f', '1000', self.shp, '-o', 'tmp.svg']
+            sys.argv = ['svgis', 'draw', '-j', PROJECTION, '-f', '1000', self.shp, '-o', 'tmp.svg']
 
             cli.main()
             io.seek(0)
-            result = open('tmp.svg').read()
-            fixture = open(self.testsvg).read()
-            self.assertEqual(str(result), str(fixture))
+            result = minidom.parse('tmp.svg').getElementsByTagName('svg').item(0)
+            fixture = minidom.parse(self.testsvg).getElementsByTagName('svg').item(0)
+
+            result_vb = [float(x) for x in result.attributes.get('viewBox').value.split(',')]
+            fixture_vb = [float(x) for x in fixture.attributes.get('viewBox').value.split(',')]
+
+            for r, f in zip(result_vb, fixture_vb):
+                self.assertAlmostEqual(r, f, 5)
 
         finally:
             os.remove('tmp.svg')
+
+if __name__ == '__main__':
+    unittest.main()
