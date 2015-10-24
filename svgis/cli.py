@@ -21,7 +21,17 @@ def _scale(layer, output, scale, **_):
 
 
 def _style(layer, output, style, replace=None, **_):
-    '''Add a CSS string to an SVG's style attribute'''
+    '''Add a CSS string to an SVG's style attribute.
+    :layer string Input svg file location
+    :output mixed Either a file handle or filename
+    :style string The input CSS, css file or '-'. Strings ending in ".css" are treated as files, "-" reads from stdin.
+    '''
+    if style == '-':
+        style = sys.stdin.read()
+
+    elif style[-4:] == '.css' or style == '/dev/stdin':
+        style = open(style, 'r').read()
+
     result = svg.add_style(layer, style, replace=replace)
     _echo(result, output)
 
@@ -70,14 +80,18 @@ def _proj(_, output, minx, miny, maxx, maxy, use_proj=None):
 
 def main():
     parent = argparse.ArgumentParser(add_help=None)
-    parent.add_argument('input', default='/dev/stdin', help="Input svg file")
-    parent.add_argument('output', nargs='?', default='/dev/stdout', help="defaults to stdout")
+    parent.add_argument('input', default='/dev/stdin', help="Input SVG file. Use '-' for stdin.")
+    parent.add_argument('output', nargs='?', default='/dev/stdout', help="(optional) defaults to stdout")
 
     parser = argparse.ArgumentParser('svgis')
     sp = parser.add_subparsers()
 
-    style = sp.add_parser('style', parents=[parent], help="Add a CSS style to an SVG")
-    style.add_argument('-s', '--style', type=str, help="Style string to append to SVG")
+    style = sp.add_parser('style', parents=[parent], usage='%(prog)s [options] input [output]', help="Add a CSS style to an SVG")
+    style.add_argument('-s', '--style', type=str, metavar='css',
+                       help=("Style to append to SVG. "
+                             "Either a valid CSS string, a file path (must end in '.css'). "
+                             "Use '-' for stdin."))
+
     style.add_argument('-r', '--replace', action='store_true', help="Replace the SVG's style")
     style.set_defaults(function=_style)
 
