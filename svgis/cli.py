@@ -47,7 +47,7 @@ def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
     use_proj = None
 
     if kwargs.get('epsg'):
-        out_crs = 'EPSG:' + kwargs.pop('epsg')
+        out_crs = 'EPSG:' + str(kwargs.pop('epsg'))
     elif kwargs.get('proj4'):
         out_crs = kwargs.pop('proj4')
     else:
@@ -125,8 +125,8 @@ def main():
     group.add_argument('-g', '--epsg', type=str, help='EPSG code to use in projecting output')
     group.add_argument('-j', '--proj4', type=str, help='Proj4 string defining projection use in output')
     group.add_argument('-m', '--projection-method', choices=('utm', 'local'), type=str, dest='use_proj',
-                       help=('Projection to use: ',
-                             'either the local UTM zone, or a custom Transverse Mercator projection'
+                       help=('Projection to use: '
+                             'either the local UTM zone, or a custom Transverse Mercator projection '
                              'centered on the bounding box'))
 
     draw.set_defaults(function=_draw)

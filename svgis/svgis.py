@@ -153,7 +153,7 @@ class SVGIS(object):
         scalar = scalar or self.scalar
         style = style or self.style
 
-        viewbox = kwargs.pop('viewbox', None)
+        viewbox = kwargs.pop('viewbox', True)
 
         container = svgwrite.container.Group(transform='scale(1, -1)', fill_rule='evenodd')
         container.translate(self.padding, -self.padding)
