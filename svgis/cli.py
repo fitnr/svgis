@@ -43,8 +43,8 @@ def _style(layer, output, style, replace=None, **_):
 def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
     '''Draw a geodata layer to a simple SVG'''
     scalar = (1 / scale) if scale else 1
+    style = None
     out_crs = None
-
     use_proj = None
 
     if kwargs.get('project', 'local').lower() in ('local', 'utm'):
@@ -54,24 +54,38 @@ def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
         epsg = kwargs.pop('project')
         out_crs = fiona.crs.from_epsg(int(epsg[5:]))
 
-    else: # I guess it's a proj4
+    else:  # I guess it's a proj4
         out_crs = fiona.crs.from_string(kwargs.pop('project'))
 
     # Try to read style file
-    if kwargs.get('style') and kwargs['style'][-3:] == 'css':
-        try:
-            kwargs['style'] = open(kwargs['style'], 'r').read()
-        except IOError:
-            print("Couldn't read {}, proceeding with default style".format(kwargs['style']), file=sys.stderr)
-            del kwargs['style']
+    if kwargs.get('style'):
+        if kwargs['style'][-3:] == 'css':
+            try:
+                style = open(kwargs['style'], 'r').read()
+
+            except IOError:
+                print("Couldn't read {}, proceeding with default style".format(kwargs['style']), file=sys.stderr)
+
+            finally:
+                del kwargs['style']
+
+        else:
+            style = kwargs.pop('style')
 
     if kwargs.get('class_fields'):
         kwargs['classes'] = kwargs.pop('class_fields').split(',')
 
     kwargs.pop('class_fields', None)
 
-    drawing = SVGIS(layers, bounds=bounds, scalar=scalar, use_proj=use_proj,
-                    out_crs=out_crs, padding=padding).compose(**kwargs)
+    drawing = SVGIS(
+        layers,
+        bounds=bounds,
+        scalar=scalar,
+        use_proj=use_proj,
+        out_crs=out_crs,
+        padding=padding,
+        style=style
+    ).compose(**kwargs)
 
     _echo(drawing.tostring(), output)
 

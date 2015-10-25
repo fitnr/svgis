@@ -55,7 +55,8 @@ class SVGIS(object):
 
     """Draw geodata files to SVG"""
 
-    in_crs = dict()
+    # pylint: disable=too-many-instance-attributes
+
     # bounds is the bounding box in input coordinates
     bounds = tuple()
     # MBR is the bounding box in output coordinates, to be determined as we draw.
@@ -86,11 +87,11 @@ class SVGIS(object):
 
         self.use_proj = kwargs.pop('use_proj', None)
 
-        self.scalar = kwargs.pop('scalar', 1)
+        self.scalar = kwargs.pop('scalar', None) or 1
 
-        self.style = kwargs.pop('style', STYLE)
+        self.style = kwargs.pop('style', None) or STYLE
 
-        self.padding = kwargs.pop('padding', 0)
+        self.padding = kwargs.pop('padding', None) or 0
 
     def __repr__(self):
         return ('SVGIS(files={0.files}, out_crs={0.out_crs}, '
@@ -145,8 +146,6 @@ class SVGIS(object):
         with fiona.open(filename, "r") as layer:
             group = svgwrite.container.Group(id=layer.name)
 
-            self.in_crs[layer.name] = layer.crs
-
             bounds = bounds or self.bounds or layer.bounds
 
             if not self.out_crs:
@@ -181,11 +180,12 @@ class SVGIS(object):
         '''
         Draw files to svg.
         :scalar int factor by which to scale the data.
-        :style string CSS
+        :style string CSS to append to parent object CSS
         :bounds list/tuple Bounding box to draw within. Defaults to map data bounds.
+        :viewbox bool If True, draw SVG with a viewbox. If False, translate coordinates to the frame. Defaults to True.
         '''
         scalar = scalar or self.scalar
-        style = style or self.style
+        style = self.style + (style or '')
 
         viewbox = kwargs.pop('viewbox', True)
 
@@ -211,6 +211,7 @@ class SVGIS(object):
     def dims(self, scalar, bounds=None):
         '''
         Calculate the width, height, origin X and max Y of the document
+        :scalar int map scale
         :bounds list/tuple input bounds to calculate with instead
         '''
         if bounds and len(bounds) == 4:
