@@ -33,7 +33,7 @@ test: svgis/test_data/cb_2014_us_nation_20m.shp svgis/test_data/test.svg
 		svgis scale -f 10 - > /dev/null
 
 svgis/test_data/test.svg: svgis/test_data/cb_2014_us_nation_20m.shp
-	svgis draw -j '$(PROJECTION)' -f 1000 $< -o $@
+	svgis draw -j '$(PROJECTION)' -f 1000  --bounds -124 20.5 -64 49 $< -o $@
 
 svgis/test_data/cb_2014_us_nation_20m.shp: svgis/test_data/cb_2014_us_nation_20m.zip
 	unzip -q -o $< -d $(@D)

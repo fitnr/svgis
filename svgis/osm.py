@@ -17,13 +17,13 @@ CRS = {'init': 'epsg:4326'}
 
 
 def get_root(osmfile):
-    if type(osmfile) == str:
+    if isinstance(osmfile, str):
         return ElementTree.parse(osmfile).getroot()
     else:
         return osmfile
 
 
-def bounds(osmfile):
+def get_bounds(osmfile):
     '''Calculate the bounds of an osm file or element'''
     osm = get_root(osmfile)
     lons, lats = zip(*[(n.get('lon'), n.get('lat')) for n in osm.findall('node')])
@@ -31,7 +31,7 @@ def bounds(osmfile):
     return float(min(lons)), float(min(lats)), float(max(lons)), float(max(lats))
 
 
-def draw_way(root, way, project, **kwargs):
+def draw_way(root, way, project, bounds=None, **kwargs):
     """Draw an OSM way as an svgwrite geometry."""
     scalar = kwargs.get('scalar', 1)
 
@@ -42,6 +42,13 @@ def draw_way(root, way, project, **kwargs):
         node = root.find('node[@id="' + ref.get('ref') + '"]')
         cx.append(float(node.get('lon')))
         cy.append(float(node.get('lat')))
+
+    # check for intersection with bounds
+    if bounds:
+        minx, miny, maxx, maxy = bounds
+
+        if all(x < minx for x in cx) or all(y < miny for y in cy) or all(x > maxx for x in cx) or all(y > maxy for y in cy):
+            return None
 
     px, py = project(cx, cy)
 
@@ -64,7 +71,7 @@ def draw_way(root, way, project, **kwargs):
     return svgisdraw.geometry(geometry, **kwargs)
 
 
-def draw(osmfile, scalar=None, out_crs=None, **kwargs):
+def draw(osmfile, scalar=None, bounds=None, out_crs=None, **kwargs):
     """Draw ways in a OSM file"""
     osm = get_root(osmfile)
 
@@ -74,8 +81,9 @@ def draw(osmfile, scalar=None, out_crs=None, **kwargs):
     group = svgwrite.container.Group()
 
     for way in osm.findall('way'):
-        for elem in draw_way(osm, way, project, scalar=scalar, **kwargs):
-            group.add(elem)
+        for elem in draw_way(osm, way, project, scalar=scalar, bounds=bounds, **kwargs):
+            if elem:
+                group.add(elem)
 
     return group
 

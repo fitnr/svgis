@@ -19,6 +19,7 @@ from svgis import cli
 
 
 PROJECTION = '+proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'
+BOUNDS = (-124.0, 20.5, -64.0, 49.0)
 
 class CliTestCase(unittest.TestCase):
 
@@ -111,7 +112,7 @@ class CliTestCase(unittest.TestCase):
     def testCliDraw(self):
         io = StringIO()
 
-        cli._draw(self.shp, io, scale=1000, project=PROJECTION)
+        cli._draw(self.shp, io, scale=1000, project=PROJECTION, bounds=BOUNDS)
         io.seek(0)
 
         result = minidom.parseString(io.read()).getElementsByTagName('svg').item(0)
@@ -126,7 +127,8 @@ class CliTestCase(unittest.TestCase):
     def testCli(self):
         try:
             io = StringIO()
-            sys.argv = ['svgis', 'draw', '-j', PROJECTION, '-f', '1000', self.shp, '-o', 'tmp.svg']
+            sys.argv = (['svgis', 'draw', '-j', PROJECTION, '-f', '1000', self.shp, '--bounds'] + 
+                        [str(b) for b in BOUNDS] + ['-o', 'tmp.svg'])
 
             cli.main()
             io.seek(0)
@@ -140,7 +142,10 @@ class CliTestCase(unittest.TestCase):
                 self.assertAlmostEqual(r, f, 5)
 
         finally:
-            os.remove('tmp.svg')
+            try:
+                os.remove('tmp.svg')
+            except OSError:
+                pass
 
 if __name__ == '__main__':
     unittest.main()

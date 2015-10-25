@@ -56,7 +56,10 @@ class SVGIS(object):
     """Draw geodata files to SVG"""
 
     in_crs = dict()
-    bbox = dict()
+    # bounds is the bounding box in input coordinates
+    bounds = tuple()
+    # MBR is the bounding box in output coordinates, to be determined as we draw.
+    mbr = (None, None, None, None)
 
     def __init__(self, files, bounds=None, out_crs=None, **kwargs):
         '''
@@ -77,9 +80,7 @@ class SVGIS(object):
             raise ValueError("'files' must be a file name or list of file names")
 
         if bounds and len(bounds) == 4:
-            self.bbox['bbox'] = bounds
-
-        self.mbr = (None, None, None, None)
+            self.bounds = bounds
 
         self.out_crs = out_crs
 
@@ -96,50 +97,65 @@ class SVGIS(object):
                 'bounds={0.bounds}, padding={0.padding}, '
                 'scalar={0.scalar})').format(self)
 
-    def compose_file(self, filename, scalar, **kwargs):
-        '''Draw file to svg
-        filename -- a fiona-readable file
-        mbr -- a tuple containing (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
+    def compose_file(self, filename, scalar, bounds=None, **kwargs):
+        '''
+        Draw file to svgwrite Group object.
+        :filename string path to a fiona-readable or OSM file
+        :scalar int map scale
+        :bounds tuple (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
         '''
         if filename[-4:] == path.extsep + 'osm':
-            return self._compose_osm(filename, scalar, **kwargs)
+            return self._compose_osm(filename, scalar, bounds, **kwargs)
         else:
-            return self._compose_fiona(filename, scalar, **kwargs)
+            return self._compose_fiona(filename, scalar, bounds, **kwargs)
 
-    def _compose_osm(self, filename, scalar, **kwargs):
+    def _compose_osm(self, filename, scalar, bounds=None, **kwargs):
+        '''
+        Draw OSM file to svgwrite Group object.
+        :filename string path to an OSM file
+        :scalar int map scale
+        :bounds tuple (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
+        '''
         kwargs.pop('id_field', None)
         kwargs.pop('classes', None)
 
         osm_root = osm.get_root(filename)
-        bounds = osm.bounds(osm_root)
+
+        # Checking bounds is a performance hit, so don't do it if we weren't passed bounds
+        draw_bounds = bounds
+        layer_bounds = bounds or osm.get_bounds(osm_root)
 
         if not self.out_crs:
-            self.out_crs = projection.choosecrs(osm.CRS, bounds, use_proj=self.use_proj)
+            self.out_crs = projection.choosecrs(osm.CRS, layer_bounds, use_proj=self.use_proj)
 
-        self.mbr = convert.updatebounds(self.mbr, projection.project_mbr(osm.CRS, self.out_crs, *bounds))
+        self.mbr = convert.updatebounds(self.mbr, projection.project_mbr(osm.CRS, self.out_crs, *layer_bounds))
 
-        group = osm.draw(osm_root, scalar, out_crs=self.out_crs, **kwargs)
+        group = osm.draw(osm_root, scalar, bounds=draw_bounds, out_crs=self.out_crs, **kwargs)
         group.attribs['id'] = filename
 
         return group
 
-    def _compose_fiona(self, filename, scalar, **kwargs):
-        '''Draw file to svg
-        filename -- a fiona-readable file
-        mbr -- a tuple containing (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
+    def _compose_fiona(self, filename, scalar, bounds=None, **kwargs):
+        '''
+        Draw fiona file to svgwrite Group object.
+        :filename string path to a fiona-readable file
+        :scalar int map scale
+        :bounds tuple (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
         '''
         with fiona.open(filename, "r") as layer:
             group = svgwrite.container.Group(id=layer.name)
 
             self.in_crs[layer.name] = layer.crs
 
+            bounds = bounds or self.bounds or layer.bounds
+
             if not self.out_crs:
                 # Determine projection transformation:
                 # either use something passed in, a non latlong layer projection,
                 # the local UTM, or customize local TM
-                self.out_crs = projection.choosecrs(layer.crs, layer.bounds, use_proj=self.use_proj)
+                self.out_crs = projection.choosecrs(layer.crs, bounds, use_proj=self.use_proj)
 
-            self.mbr = convert.updatebounds(self.mbr, projection.project_mbr(layer.crs, self.out_crs, *layer.bounds))
+            self.mbr = convert.updatebounds(self.mbr, projection.project_mbr(layer.crs, self.out_crs, *bounds))
 
             if 'classes' in kwargs:
                 kwargs['classes'] = [c for c in kwargs['classes'] if c in layer.schema['properties']]
@@ -153,8 +169,9 @@ class SVGIS(object):
             else:
                 reproject = lambda f: f
 
-            for _, f in layer.items(**self.bbox):
+            for _, f in layer.items(**{'bbox': bounds}):
                 geom = scale.geometry(reproject(f['geometry']), scalar)
+
                 target = _draw_feature(geom, f['properties'], **kwargs)
                 group.add(target)
 
@@ -177,7 +194,7 @@ class SVGIS(object):
 
         with fiona.drivers():
             for filename in self.files:
-                container.add(self.compose_file(filename, scalar, **kwargs))
+                container.add(self.compose_file(filename, scalar, bounds=bounds, **kwargs))
 
         w, h, x0, y1 = self.dims(scalar, bounds=bounds)
 
@@ -202,8 +219,10 @@ class SVGIS(object):
             mbr_ring = convert.mbr_to_bounds(*self.mbr)
 
         boundary = scale.scale(mbr_ring, scalar)
-
-        x0, y0, x1, y1 = fionautil.coords.bounds(list(boundary))
+        try:
+            x0, y0, x1, y1 = fionautil.coords.bounds(list(boundary))
+        except ValueError:
+            raise ValueError('Problem calculating bounds. Check that coordinates are in x, y order.')
 
         w = x1 - x0 + (self.padding * 2)
         h = y1 - y0 + (self.padding * 2)
