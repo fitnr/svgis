@@ -119,7 +119,7 @@ def main():
                       help='Draw SVG without a ViewBox. May improve compatibility.')
 
     draw.add_argument('--id-field', type=str, dest='id_field', help='Geodata field to use as ID')
-    draw.add_argument('--class', type=str, dest='class_fields',
+    draw.add_argument('--class-fields', type=str, dest='class_fields',
                       help='Geodata fields to use as class (comma-separated)')
 
     group = draw.add_mutually_exclusive_group()
