@@ -66,7 +66,7 @@ class SVGIS(object):
         else:
             raise ValueError("'files' must be a file name or list of file names")
 
-        if bounds:
+        if bounds and len(bounds) == 4:
             self.bbox['bbox'] = bounds
 
         self.mbr = (None, None, None, None)
@@ -145,10 +145,12 @@ class SVGIS(object):
 
         return group
 
-    def compose(self, style=None, scalar=None, **kwargs):
-        '''Draw files to svg.
-        scalar -- factor by which to scale the data.
-        style -- CSS
+    def compose(self, style=None, scalar=None, bounds=None, **kwargs):
+        '''
+        Draw files to svg.
+        :scalar int factor by which to scale the data.
+        :style string CSS
+        :bounds list/tuple Bounding box to draw within. Defaults to map data bounds.
         '''
         scalar = scalar or self.scalar
         style = style or self.style
@@ -162,7 +164,7 @@ class SVGIS(object):
             for filename in self.files:
                 container.add(self.compose_file(filename, scalar, **kwargs))
 
-        w, h, x0, y1 = self.dims(scalar)
+        w, h, x0, y1 = self.dims(scalar, bounds=bounds)
 
         if viewbox:
             drawing = svg.create((w, h), [container], style=style)
@@ -174,9 +176,16 @@ class SVGIS(object):
 
         return drawing
 
-    def dims(self, scalar):
-        '''Calculate the width, height, origin X and max Y of the document'''
-        mbr_ring = convert.mbr_to_bounds(*self.mbr)
+    def dims(self, scalar, bounds=None):
+        '''
+        Calculate the width, height, origin X and max Y of the document
+        :bounds list/tuple input bounds to calculate with instead
+        '''
+        if bounds and len(bounds) == 4:
+            mbr_ring = convert.mbr_to_bounds(*bounds)
+        else:
+            mbr_ring = convert.mbr_to_bounds(*self.mbr)
+
         boundary = scale.scale(mbr_ring, scalar)
 
         x0, y0, x1, y1 = fionautil.coords.bounds(list(boundary))
