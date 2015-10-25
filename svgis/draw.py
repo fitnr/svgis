@@ -14,7 +14,7 @@ def linestring(coordinates, precision=3, **kwargs):
     try:
         np.round(coordinates, precision)
     except NameError:
-        coordinates = [(round(x, precision), round(y, precision)) for x, y in coordinates]
+        coordinates = [(round(pt[0], precision), round(pt[1], precision)) for pt in coordinates]
 
     return svgwrite.shapes.Polyline(coordinates, **kwargs)
 
@@ -50,7 +50,7 @@ def polygon(coordinates, precision=3, **kwargs):
     '''Draw an svg polygon based on coordinates.'''
     # Drop possible Z coordinates and round. Two tracks here: numpy style and without-numpy style.
     try:
-        coordinates = [np.round(np.array(ring)[:, :, 0:2], precision) for ring in coordinates]
+        coordinates = [np.round(np.array(ring)[:, 0:2], precision) for ring in coordinates]
 
     except NameError:
         coordinates = [[(round(pt[0], precision), round(pt[1], precision)) for pt in ring] for ring in coordinates]
@@ -91,17 +91,17 @@ def points(geom, **kwargs):
 
 def point(coordinates, precision=3, **kwargs):
     try:
-        x, y = coordinates.pop()
+        pt = coordinates.pop()
     except (AttributeError, TypeError):
-        x, y = coordinates
+        pt = coordinates
 
-    x, y = round(x, precision), round(y, precision)
+    center = (round(pt[0], precision), round(pt[1], precision))
 
-    return svgwrite.shapes.Circle(center=(x, y), **kwargs)
+    return svgwrite.shapes.Circle(center=center, **kwargs)
 
 
 def multipoint(coordinates, **kwargs):
-    return [point((x, y), **kwargs) for x, y in coordinates]
+    return [point((pt[0], pt[1]), **kwargs) for pt in coordinates]
 
 
 def geometry(geom, **kwargs):
