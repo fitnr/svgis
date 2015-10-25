@@ -54,7 +54,7 @@ class CliTestCase(unittest.TestCase):
             self.assertIn('scale(123)', out.decode())
 
     def testSvgProjectUtm(self):
-        args = ['svgis', 'project', '-m', 'utm', '-110.277906', '35.450777', '-110.000477', '35.649030']
+        args = ['svgis', 'project', '-j', 'utm', '-110.277906', '35.450777', '-110.000477', '35.649030']
         p = subprocess.Popen(args, stdout=subprocess.PIPE)
         out, err = p.communicate()
 

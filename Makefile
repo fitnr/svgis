@@ -23,15 +23,15 @@ test: svgis/test_data/cb_2014_us_nation_20m.shp svgis/test_data/test.svg
 
 	svgis style -s 'polygon{fill:green}' $(lastword $^) > /dev/null
 	svgis scale -f 10 $(lastword $^) > /dev/null
-	svgis project -m utm -110.277906 35.450777 -110.000477 35.649030
+	svgis project -j utm -110.277906 35.450777 -110.000477 35.649030
 	svgis project -110.277906 35.450777 -110.000477 35.649030
 
-	svgis draw -g 102003 -f 1000 $< | \
+	svgis draw -j EPSG:102003 -f 1000 $< | \
 		svgis style -s 'polygon{fill:green}' - | \
 		svgis scale -f 10 - > /dev/null
 
 svgis/test_data/test.svg: svgis/test_data/cb_2014_us_nation_20m.shp
-	svgis draw -g 102003 -f 1000 $< -o $@
+	svgis draw -j EPSG:102003 -f 1000 $< -o $@
 
 svgis/test_data/cb_2014_us_nation_20m.shp: svgis/test_data/cb_2014_us_nation_20m.zip
 	unzip -o $< -d $(@D)

@@ -2,6 +2,7 @@
 from __future__ import print_function, division
 from signal import signal, SIGPIPE, SIG_DFL
 import argparse
+import fiona.crs
 from . import svg
 from .import projection
 from .svgis import SVGIS
@@ -46,16 +47,15 @@ def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
 
     use_proj = None
 
-    if kwargs.get('epsg'):
-        out_crs = 'EPSG:' + str(kwargs.pop('epsg'))
-    elif kwargs.get('proj4'):
-        out_crs = kwargs.pop('proj4')
-    else:
-        use_proj = kwargs.pop('use_proj', None)
+    if kwargs.get('project', 'local').lower() in ('local', 'utm'):
+        use_proj = kwargs.pop('project', 'local').lower()
 
-    # get rid of pesky kwargs
-    for x in ('use_proj', 'epsg', 'proj4'):
-        kwargs.pop(x, None)
+    elif kwargs['project'][:4].lower() == 'epsg':
+        epsg = kwargs.pop('project')
+        out_crs = fiona.crs.from_epsg(int(epsg[5:]))
+
+    else: # I guess it's a proj4
+        out_crs = fiona.crs.from_string(kwargs.pop('project'))
 
     # Try to read style file
     if kwargs.get('style') and kwargs['style'][-3:] == 'css':
@@ -76,9 +76,9 @@ def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
     _echo(drawing.tostring(), output)
 
 
-def _proj(_, output, minx, miny, maxx, maxy, use_proj=None):
+def _proj(_, output, minx, miny, maxx, maxy, project=None):
     '''Return a transverse mercator projection for the given bounds'''
-    prj = projection.generatecrs(minx, miny, maxx, maxy, use_proj)
+    prj = projection.generatecrs(minx, miny, maxx, maxy, project)
     _echo(prj + '\n', output)
 
 
@@ -90,7 +90,8 @@ def main():
     parser = argparse.ArgumentParser('svgis')
     sp = parser.add_subparsers()
 
-    style = sp.add_parser('style', parents=[parent], usage='%(prog)s [options] input [output]', help="Add a CSS style to an SVG")
+    style = sp.add_parser(
+        'style', parents=[parent], usage='%(prog)s [options] input [output]', help="Add a CSS style to an SVG")
     style.add_argument('-s', '--style', type=str, metavar='css',
                        help=("Style to append to SVG. "
                              "Either a valid CSS string, a file path (must end in '.css'). "
@@ -122,22 +123,22 @@ def main():
     draw.add_argument('--class-fields', type=str, dest='class_fields',
                       help='Geodata fields to use as class (comma-separated)')
 
-    group = draw.add_mutually_exclusive_group()
-    group.add_argument('-g', '--epsg', type=str, help='EPSG code to use in projecting output')
-    group.add_argument('-j', '--proj4', type=str, help='Proj4 string defining projection use in output')
-    group.add_argument('-m', '--projection-method', choices=('utm', 'local'), type=str, dest='use_proj',
-                       help=('Projection to use: '
-                             'either the local UTM zone, or a custom Transverse Mercator projection '
-                             'centered on the bounding box'))
+    draw.add_argument('-j', '--project', default='local', metavar='PROJECTION/KEYWORD', type=str, dest='project',
+                      help=('Specify a map projection. '
+                            'Accepts either a valid EPSG code (e.g. epsg:4456), '
+                            'a valid proj4 string, '
+                            'the keyword "utm" (use local UTM zone) or'
+                            'the keyword "local" (generate a local projection)'))
 
     draw.set_defaults(function=_draw)
 
-    proj = sp.add_parser('project', help='Get a local Transverse Mercator projection for a bounding box')
+    proj = sp.add_parser(
+        'project', help='Get a local Transverse Mercator projection for a bounding box. Expects WGS 84 coordinates.')
     proj.add_argument('minx', type=float, help='west')
     proj.add_argument('miny', type=float, help='south')
     proj.add_argument('maxx', type=float, help='east')
     proj.add_argument('maxy', type=float, help='north')
-    proj.add_argument('-m', '--projection-method', dest='use_proj', choices=('utm', 'local'), type=str,)
+    proj.add_argument('-j', '--project', dest='project', choices=('utm', 'local'), type=str,)
     proj.set_defaults(function=_proj, input=None, output='/dev/stdout')
 
     args = parser.parse_args()
