@@ -1,7 +1,7 @@
 svgis
 -----
 
-Create simple SVG drawings from geodata files (SHP, geoJSON, OSM, etc).
+Create SVG drawings from geodata files (SHP, geoJSON, OSM, etc).
 
 ```bash
 $ svgis draw in.shp -o out.svg
@@ -15,17 +15,28 @@ Requires [fiona](http://pypi.python.org/pypi/fiona), which in turn requires GDAL
 Before installing, run the following on OS X: `brew install gdal`.
 On Linux: `sudo apt-get -qq install -y libgdal1-dev`.
 
-## Command line options
+## Command line tools
 
+The `svgis` command line tool has four commands: `draw`, `project`, `scale` and `style`. `Svgis scale` and `svgis style` will add a scaling factor or CSS style to an existing SVG file. `Svgis project` is a utility for printing the projection that `svgis draw` will generate for given bounding boxes.
+
+The main command is `svgis draw`, which generates SVGs from input geodata.
+
+### svgis draw options
 #### --bounds
 
-Only draw the portion of the input file between latitudes 40 and 41 and longitudes -74 and -73 (roughly the New York City area). Note that coordinates are given as 'minx miny maxx maxy'.
+Takes four arguments in min-lon, min-lat, max-lon, max-lat order.
+
+This example draw the portion of the input file between latitudes 40 and 41 and longitudes -74 and -73 (roughly the New York City area).
 
 ````bash
 svgis draw --bounds -74 40 -73 41 in.geojson out.svg
 ````
 
+Note that coordinates are given in longitude, latitude order, since in the world of the computer, it's better to be consistent with things like (x, y) order.
+
 #### --scale
+
+A integer scale factor. The map will be scaled by the inverse of this number.
 
 While SVG is a vector format, clients may have trouble handling very large numbers. Use the scale option to scale down the output. Dimensions in the map will be divided by this number (so larger numbers yield smaller coordinates in the output SVG). 
 
@@ -33,32 +44,48 @@ While SVG is a vector format, clients may have trouble handling very large numbe
 svgis draw --scale 1000 in.shp -o out.svg
 ````
 
-### Projections
+### --project
 
-There are two ways to provide projections. Using both at the same time is unsupported. If the input file doesn't have an internal projection, SVGIS will assume [WGS84](http://epsg.io/4326).
+There are three ways to provide projections. Using both at the same time is unsupported. If the input file doesn't specify an internal projection, SVGIS will assume that the coordinates are given in [WGS84](http://epsg.io/4326).
 
-#### --epsg
+If none of these three flags are given, SVGIS will check to see if the file is already in non lat-lng projection (e.g. a state plane system or the British National Grid). If the first input file is projected, that projection will be used for the output. If the first file is in lat-long coordinates, a local projection will be generated, just like if `--projection-method=local` was given.
+
+#### EPSG codes
+
+Accepts a valid [EPSG](http://epsg.io) code.
 
 Use this option to provide the EPSG code of a desired projection. The example will draw an svg with [EPSG:2908](http://epsg.io/2908), the New York Long Island state plane projection.
 
 ````bash
-svgis draw --epsg 2908 in.shp -o out.svg
+svgis draw --project EPSG:2908 in.shp -o out.svg
 ````
 
-#### --proj4
+#### Proj4 strings
+
+Accepts a string in proj4 format.
 
 Use this option to provide a Proj4 string that defines a projection.
 
 ````bash
-svgis draw --epsg 2908 in.shp -o out.svg
+PROJECTION=+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs
+svgis draw --project $PROJECTION in.shp -o out.svg
 ````
 
-### --utm
+#### UTM
 
-Attempt to use a local UTM projection to draw the input geodata.
+Accepts either 'utm' or 'local'.
+
+For UTM, attempt to draw coordiantes in the local UTM projection. The centerpoint of the bounding box will be used to pick the zone. Expect poor results for input data that crosses several UTM boundaries.
+````bash
+svgis draw --project utm in.shp -o out.svg
+````
+
+#### Automatically generated projection
+
+When the local argument is given, SVGIS will generate a Transverse Mercator projection that centers on the input bounding box. This generally gives good results for an region roughly the size of a large urban area.
 
 ````bash
-svgis draw --utm in.shp -o out.svg
+svgis draw --project local in.shp -o out.svg
 ````
 
 ### Style
@@ -87,6 +114,22 @@ By default, SVGIS uses a viewbox. If you have a problem opening the created svg 
 ````bash
 svgis draw --no-viewbox in.shp -o out.svg
 svgis draw -x in.shp -o out.svg
+````
+
+#### --class-fields and --id-field
+
+Use these options to specify fields in the source geodata file to use to determine the class or id attributes of the output SVG features. In the output fields, spaces will be replaced with underscores.
+
+For example, assume a SHP file with a `countrycode`, `continent` and `currency` fields:
+````bash
+svgis draw --class-fields continent,foobr --id-field countrycode in.shp -o out.svg
+````
+
+The result may contain something like:
+````svg
+<g class="North_America dollar" id="US">/* USA */</g>
+<g class="Europe pound" id="UK">/* UK */</g>
+<g class="Europe euro" id="DE">/* Germany */</g>
 ````
 
 ## A note on OSM files

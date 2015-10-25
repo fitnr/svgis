@@ -59,6 +59,16 @@ class SVGIS(object):
     bbox = dict()
 
     def __init__(self, files, bounds=None, out_crs=None, **kwargs):
+        '''
+        Create an SVGIS object, which will stand ready to generate some maps
+        :files list/str A list of files to map
+        :bounds list/tuple An iterable with four float coordinates in (minx, miny, maxx, maxy) format
+        :out_crs dict A proj-4 like mapping
+        :use_proj string A keyword for picking a projection (either utm or local)
+        :style string CSS to add to output file
+        :scalar int Map scale to use (output coordinate are divided by this)
+        :padding number Buffer each edge by this many map units
+        '''
         if isinstance(files, basestring):
             self.files = [files]
         elif isinstance(files, Iterable):
