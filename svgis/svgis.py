@@ -91,6 +91,11 @@ class SVGIS(object):
 
         self.padding = kwargs.pop('padding', 0)
 
+    def __repr__(self):
+        return ('SVGIS(files={0.files}, out_crs={0.out_crs}, '
+                'bounds={0.bounds}, padding={0.padding}, '
+                'scalar={0.scalar})').format(self)
+
     def compose_file(self, filename, scalar, **kwargs):
         '''Draw file to svg
         filename -- a fiona-readable file

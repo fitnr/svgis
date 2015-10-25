@@ -22,4 +22,4 @@ from . import convert
 from . import draw
 from . import projection
 from . import svg
-from . import svgis
+from .svgis import SVGIS
