@@ -5,6 +5,8 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
 
+PROJECTION = +proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs
+
 all: README.rst svgis/test_data/cb_2014_us_nation_20m.shp
 
 README.rst: README.md
@@ -26,19 +28,19 @@ test: svgis/test_data/cb_2014_us_nation_20m.shp svgis/test_data/test.svg
 	svgis project -j utm -110.277906 35.450777 -110.000477 35.649030
 	svgis project -110.277906 35.450777 -110.000477 35.649030
 
-	svgis draw -j EPSG:102003 -f 1000 $< | \
+	svgis draw -j '$(PROJECTION)' -f 1000 $< | \
 		svgis style -s 'polygon{fill:green}' - | \
 		svgis scale -f 10 - > /dev/null
 
 svgis/test_data/test.svg: svgis/test_data/cb_2014_us_nation_20m.shp
-	svgis draw -j EPSG:102003 -f 1000 $< -o $@
+	svgis draw -j '$(PROJECTION)' -f 1000 $< -o $@
 
 svgis/test_data/cb_2014_us_nation_20m.shp: svgis/test_data/cb_2014_us_nation_20m.zip
-	unzip -o $< -d $(@D)
+	unzip -q -o $< -d $(@D)
 	@touch $@
 
 svgis/test_data/cb_2014_us_nation_20m.zip: svgis/test_data
-	curl -o $@ http://www2.census.gov/geo/tiger/GENZ2014/shp/cb_2014_us_nation_20m.zip
+	curl -s -o $@ http://www2.census.gov/geo/tiger/GENZ2014/shp/cb_2014_us_nation_20m.zip
 
 svgis/test_data: ; mkdir -p $@
 
