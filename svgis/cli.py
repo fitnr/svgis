@@ -58,11 +58,12 @@ def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
         kwargs.pop(x, None)
 
     # Try to read style file
-    if kwargs.get('style'):
+    if kwargs.get('style') and kwargs['style'][-3:] == 'css':
         try:
             kwargs['style'] = open(kwargs['style'], 'r').read()
         except IOError:
-            pass
+            print("Couldn't read {}, proceeding with default style".format(kwargs['style']), file=sys.stderr)
+            del kwargs['style']
 
     if kwargs.get('class_fields'):
         kwargs['classes'] = kwargs.pop('class_fields').split(',')
