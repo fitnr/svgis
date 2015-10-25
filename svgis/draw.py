@@ -49,7 +49,7 @@ def polygons(geom, **kwargs):
 def polygon(coordinates, precision=3, **kwargs):
     '''Draw an svg polygon based on coordinates.'''
     try:
-        coordinates = np.round(np.array(coordinates), precision)
+        coordinates = np.array(coordinates)
 
         if coordinates.shape[-1] > 2:
             shape = list(coordinates.shape)
@@ -60,10 +60,11 @@ def polygon(coordinates, precision=3, **kwargs):
 
     if len(coordinates) == 1:
         try:
-            return svgwrite.shapes.Polygon(coordinates[0], **kwargs)
+            ring = np.round(np.array(coordinates[0]), precision)
+            return svgwrite.shapes.Polygon(ring, **kwargs)
 
-        except ValueError:
-            raise
+        except NameError:
+            return svgwrite.shapes.Polygon(coordinates[0], **kwargs)
 
     # This is trickier because drawing holes in SVG.
     # We go clockwise on the first ring, then counterclockwise
