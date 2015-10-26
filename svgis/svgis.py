@@ -9,7 +9,7 @@ import fionautil.coords
 from . import projection
 from . import draw
 from . import svg
-from . import scale
+from fionautil import scale
 from . import convert
 
 STYLE = ('polyline, line, rect, path, polygon, .polygon {'

@@ -5,7 +5,7 @@ import utm
 from fiona import transform
 import fiona.crs
 from pyproj import Proj
-from . import scale
+from fionautil import scale
 
 
 def tm_proj4(x0, y0, y1):
