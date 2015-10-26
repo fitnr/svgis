@@ -29,18 +29,19 @@ def _draw_feature(geom, properties=None, **kwargs):
             kwargs['classes'] = [kwargs['classes']]
 
         try:
-            kwargs['class_'] = ' '.join(str(properties.get(c, '')).replace(' ', '_') for c in kwargs.pop('classes'))
+            kwargs['class_'] = ' '.join(svg.sanitize(properties.get(c, '')) for c in kwargs.pop('classes'))
 
         except TypeError:
             pass
 
     if kwargs.get('id_field'):
         try:
-            kwargs['id'] = str(properties.get(kwargs.pop('id_field'))).replace(' ', '_')
+            kwargs['id'] = svg.sanitize(properties.get(kwargs.pop('id_field')))
         except AttributeError:
             pass
 
-    return draw.geometry(geom, **kwargs)
+    result = draw.geometry(geom, **kwargs)
+    return result
 
 
 class SVGIS(object):
@@ -90,7 +91,6 @@ class SVGIS(object):
                 'bounds={0.bounds}, padding={0.padding}, '
                 'scalar={0.scalar})').format(self)
 
-
     def compose_file(self, filename, scalar, bounds=None, **kwargs):
         '''
         Draw fiona file to svgwrite Group object.
@@ -127,6 +127,7 @@ class SVGIS(object):
                 geom = scale.geometry(reproject(f['geometry']), scalar)
 
                 target = _draw_feature(geom, f['properties'], **kwargs)
+
                 group.add(target)
 
         return group
