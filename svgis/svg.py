@@ -72,7 +72,13 @@ def add_style(svgfile, newstyle, replace=False):
 
 def sanitize(x):
     '''Make input safe of use in an svg ID or class field'''
-    string = str(x).replace(' ', '_').replace('(', '').replace(')', '').replace('.', '')
+    try:
+        string = str(x)
+
+    except UnicodeEncodeError:
+        string = x.encode('ascii', 'ignore')
+
+    string = string.replace(' ', '_').replace('(', '').replace(')', '').replace('.', '')
     return string if string[0] in ('_-' + ascii_letters) else '_' + string
 
 def set_group(members=None, scale=None, translate=None, **kwargs):
