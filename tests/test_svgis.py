@@ -26,3 +26,9 @@ class SvgisTestCase(unittest.TestCase):
         svgis_obj = svgis.SVGIS(self.file)
         composed = svgis_obj.compose()
         assert type(composed) == svgwrite.drawing.Drawing
+
+
+    def testSvgisClassFields(self):
+        svgis_obj = svgis.SVGIS(self.file)
+        composed = svgis_obj.compose(classes=('NAME', 'GEOID'))
+        assert 'class="United_States US"' in composed.tostring()

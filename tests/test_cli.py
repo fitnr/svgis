@@ -21,14 +21,16 @@ from svgis import cli
 PROJECTION = '+proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'
 BOUNDS = (-124.0, 20.5, -64.0, 49.0)
 
+
 class CliTestCase(unittest.TestCase):
 
     def setUp(self):
         self.testsvg = resource_filename('svgis', 'test_data/test.svg')
         self.shp = resource_filename('svgis', 'test_data/cb_2014_us_nation_20m.shp')
+        self.css = 'polygon{fill:green}'
 
     def testSvgStyle(self):
-        args = ['svgis', 'style', '-s', 'polygon{fill:green}', self.testsvg]
+        args = ['svgis', 'style', '-s', self.css, self.testsvg]
         p = subprocess.Popen(args, stdout=subprocess.PIPE)
         out, err = p.communicate()
 
@@ -36,10 +38,9 @@ class CliTestCase(unittest.TestCase):
         self.assertIsNotNone(out, 'out is None')
 
         try:
-            self.assertIn('polygon{fill:green}', out)
+            self.assertIn(self.css, out)
         except TypeError:
-            self.assertIn('polygon{fill:green}', out.decode())
-
+            self.assertIn(self.css, out.decode())
 
     def testSvgScale(self):
         args = ['svgis', 'scale', '-f', '123', self.testsvg]
@@ -95,11 +96,42 @@ class CliTestCase(unittest.TestCase):
 
     def testCliStyle(self):
         io = StringIO()
-        new_style = 'polygon{fill:green}'
-        cli._style(self.testsvg, io, new_style)
+        cli._style(self.testsvg, io, self.css)
         io.seek(0)
 
-        self.assertIn(new_style, io.read())
+        self.assertIn(self.css, io.read())
+
+        style = 'tmp.css'
+        open(style, 'w').write(self.css)
+        io = StringIO()
+
+        try:
+            cli._style(self.testsvg, io, style)
+            io.seek(0)
+            self.assertIn(self.css, io.read())
+
+        finally:
+            os.remove('tmp.css')
+
+    def CliDrawWithStyle(self):
+        io = StringIO()
+        cli._draw(self.shp, io, style=self.css, scale=1000, project=PROJECTION, bounds=BOUNDS)
+        io.seek(0)
+
+        self.assertIn(self.css, io.read())
+
+        style = 'tmp.css'
+        open(style, 'w').write(self.css)
+        io = StringIO()
+
+        try:
+            cli._draw(self.shp, io, style=style, scale=1000, project=PROJECTION, bounds=BOUNDS)
+            io.seek(0)
+            self.assertIn(self.css, io.read())
+
+        finally:
+            os.remove('tmp.css')
+
 
     def testCliScale(self):
         io = StringIO()
@@ -125,13 +157,12 @@ class CliTestCase(unittest.TestCase):
             self.assertAlmostEqual(r, f, 5)
 
     def testCli(self):
-        try:
-            io = StringIO()
-            sys.argv = (['svgis', 'draw', '-j', PROJECTION, '-f', '1000', self.shp, '--bounds'] + 
-                        [str(b) for b in BOUNDS] + ['-o', 'tmp.svg'])
+        sys.argv = (['svgis', 'draw', '-j', PROJECTION, '-f', '1000', self.shp, '--bounds'] +
+                    [str(b) for b in BOUNDS] + ['-o', 'tmp.svg'])
 
-            cli.main()
-            io.seek(0)
+        cli.main()
+
+        try:
             result = minidom.parse('tmp.svg').getElementsByTagName('svg').item(0)
             fixture = minidom.parse(self.testsvg).getElementsByTagName('svg').item(0)
 
@@ -142,10 +173,22 @@ class CliTestCase(unittest.TestCase):
                 self.assertAlmostEqual(r, f, 5)
 
         finally:
-            try:
-                os.remove('tmp.svg')
-            except OSError:
-                pass
+            os.remove('tmp.svg')
+
+    def testErrs(self):
+        sys.argv = ['svgis', 'draw', 'lksdjlksjdf']
+
+        with self.assertRaises(IOError):
+            cli.main()
+
+        # sys.argv = ['svgis', 'draw', self.shp, '--bounds', '3', '4', '3']
+        # with self.assertRaises(SystemExit):
+        #     cli.main()
+
+        # sys.argv = ['svgis', 'project', '3', '4', '3']
+        # with self.assertRaises(SystemExit):
+        #     cli.main()
+
 
 if __name__ == '__main__':
     unittest.main()

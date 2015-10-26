@@ -8,6 +8,7 @@ from .import projection
 from .svgis import SVGIS
 import sys
 
+# sys.tracebacklimit = 0
 
 def _echo(content, output):
     '''Print something to either a file-like object or a file name.'''
@@ -106,7 +107,7 @@ def main():
 
     style = sp.add_parser(
         'style', parents=[parent], usage='%(prog)s [options] input [output]', help="Add a CSS style to an SVG")
-    style.add_argument('-s', '--style', type=str, metavar='css',
+    style.add_argument('-s', '--style', type=str, metavar='css', default='',
                        help=("Style to append to SVG. "
                              "Either a valid CSS string, a file path (must end in '.css'). "
                              "Use '-' for stdin."))

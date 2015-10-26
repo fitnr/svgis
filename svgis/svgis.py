@@ -89,7 +89,7 @@ class SVGIS(object):
 
         self.scalar = kwargs.pop('scalar', None) or 1
 
-        self.style = STYLE + kwargs.pop('style', '')
+        self.style = STYLE + (kwargs.pop('style', '') or '')
 
         self.padding = kwargs.pop('padding', None) or 0
 
