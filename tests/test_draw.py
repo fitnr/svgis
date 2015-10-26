@@ -1,6 +1,6 @@
 import unittest
 from svgis import draw
-
+import svgwrite.shapes, svgwrite.container
 
 class DrawTestCase(unittest.TestCase):
 
@@ -16,12 +16,13 @@ class DrawTestCase(unittest.TestCase):
             'coordinates': (0, 0),
             'type': 'Point'
         }
-        points = draw.points(geom)
-        assert len(points) == 1
-        self.assertEqual((points[0].attribs['cx'], points[0].attribs['cy']), (0, 0))
+        point = draw.points(geom)
+        assert isinstance(point, svgwrite.shapes.Circle)
 
-        assert draw.geometry(geom).pop(0).attribs['cy'] == 0
-        assert draw.geometry(geom).pop(0).attribs['cx'] == 0
+        self.assertEqual((point.attribs['cx'], point.attribs['cy']), (0, 0))
+
+        assert draw.geometry(geom).attribs['cy'] == 0
+        assert draw.geometry(geom).attribs['cx'] == 0
 
     def testDrawLine(self):
         geom = {
@@ -31,9 +32,9 @@ class DrawTestCase(unittest.TestCase):
 
         assert draw.linestring(geom['coordinates']).points == geom['coordinates']
 
-        lines = draw.lines(geom)
-        assert len(lines) == 1
-        assert lines[0].points == geom['coordinates']
+        line = draw.lines(geom)
+        assert isinstance(line, svgwrite.shapes.Polyline)
+        assert line.points == geom['coordinates']
 
     def testDrawMultiLine(self):
         geom = {
@@ -43,9 +44,12 @@ class DrawTestCase(unittest.TestCase):
         mls1 = draw.multilinestring(geom['coordinates'])
         mls2 = draw.lines(geom)
 
-        assert mls1.pop(0).points == geom['coordinates'][0]
-        assert mls2.pop(1).points == geom['coordinates'][1]
-        assert draw.geometry(geom).pop(1).points == geom['coordinates'][1]
+        assert isinstance(mls1, svgwrite.container.Group)
+        assert isinstance(mls2, svgwrite.container.Group)
+
+        assert mls1.elements.pop(0).points == geom['coordinates'][0]
+        assert mls2.elements.pop(1).points == geom['coordinates'][1]
+        assert draw.geometry(geom).elements.pop(1).points == geom['coordinates'][1]
 
         with self.assertRaises(TypeError):
             draw.linestring(geom['coordinates'])
@@ -74,9 +78,9 @@ class DrawTestCase(unittest.TestCase):
 
         drawn = draw.multipolygon(geom['coordinates'])
 
-        assert type(drawn) == list
-        assert len(drawn[0].points) == len(geom['coordinates'][0][0])
+        assert isinstance(drawn, svgwrite.container.Group)
+        assert len(drawn.elements[0].points) == len(geom['coordinates'][0][0])
 
-        for (px, py), (nx, ny) in zip(drawn[1].points, geom['coordinates'][1][0]):
+        for (px, py), (nx, ny) in zip(drawn.elements[1].points, geom['coordinates'][1][0]):
             self.assertAlmostEqual(px, nx, 3)
             self.assertAlmostEqual(py, ny, 3)

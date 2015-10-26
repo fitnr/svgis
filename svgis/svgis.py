@@ -23,32 +23,25 @@ STYLE = ('polyline, line, rect, path, polygon, .polygon {'
 
 def _draw_feature(geom, properties=None, **kwargs):
     '''Draw a single feature given a geometry object and properties object'''
-    attribs = {}
     properties = properties or {}
 
     if kwargs.get('classes'):
+        if not isinstance(kwargs['classes'], Iterable):
+            kwargs['classes'] = [kwargs['classes']]
+
         try:
-            attribs['class'] = ' '.join(str(properties.get(c, '')).replace(' ', '_') for c in kwargs.pop('classes'))
+            kwargs['class_'] = ' '.join(str(properties.get(c, '')).replace(' ', '_') for c in kwargs.pop('classes'))
+
         except TypeError:
             pass
 
     if kwargs.get('id_field'):
         try:
-            attribs['id'] = str(properties.get(kwargs.pop('id_field'))).replace(' ', '_')
+            kwargs['id'] = str(properties.get(kwargs.pop('id_field'))).replace(' ', '_')
         except AttributeError:
             pass
 
-    ps = draw.geometry(geom, **kwargs)
-
-    if len(ps) > 1:
-        target = svgwrite.container.Group()
-        for p in ps:
-            target.add(p)
-    else:
-        target = ps[0]
-
-    target.attribs.update(attribs)
-    return target
+    return draw.geometry(geom, **kwargs)
 
 
 class SVGIS(object):
