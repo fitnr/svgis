@@ -9,6 +9,25 @@ import svgwrite
 import fionautil.measure
 
 
+def applyid(multifunc):
+    '''
+    This decorator applies the ID attribute to the group that contains multi-part geometries,
+    rather than the elments of the group
+    '''
+
+    def func(coordinates, **kwargs):
+        ID = kwargs.pop('id', None)
+
+        result = _group(multifunc(coordinates, **kwargs))
+
+        if ID:
+            result.attribs['id'] = ID
+
+        return result
+
+    return func
+
+
 def linestring(coordinates, precision=3, **kwargs):
     try:
         np.round(coordinates, precision)
@@ -18,8 +37,9 @@ def linestring(coordinates, precision=3, **kwargs):
     return svgwrite.shapes.Polyline(coordinates, **kwargs)
 
 
+@applyid
 def multilinestring(coordinates, **kwargs):
-    return _group([linestring(coords, **kwargs) for coords in coordinates])
+    return [linestring(coords, **kwargs) for coords in coordinates]
 
 
 def lines(geom, **kwargs):
@@ -39,7 +59,7 @@ def polygons(geom, **kwargs):
     Draws first ring clockwise, and subsequent ones counter-clockwise
     '''
     if geom['type'] == 'Polygon':
-        return _group([polygon(geom['coordinates'], **kwargs)])
+        return polygon(geom['coordinates'], **kwargs)
 
     elif geom['type'] == 'MultiPolygon':
         return multipolygon(geom['coordinates'], **kwargs)
@@ -62,7 +82,9 @@ def polygon(coordinates, precision=3, **kwargs):
     if fionautil.measure.counterclockwise(coordinates[0]):
         coordinates[0] = coordinates[0][::-1]
 
-    pth = path(list(coordinates[0]) + ['z'], fill_rule='evenodd', class_='polygon', **kwargs)
+    class_ = 'polygon ' + kwargs.pop('class_', '')
+
+    pth = path(list(coordinates[0]) + ['z'], fill_rule='evenodd', class_=class_, **kwargs)
 
     for ring in coordinates[1:]:
         # make all interior run the counter-clockwise
@@ -74,8 +96,9 @@ def polygon(coordinates, precision=3, **kwargs):
     return pth
 
 
+@applyid
 def multipolygon(coordinates, **kwargs):
-    return _group([polygon(coords, **kwargs) for coords in coordinates])
+    return [polygon(coords, **kwargs) for coords in coordinates]
 
 
 def points(geom, **kwargs):
@@ -99,12 +122,13 @@ def point(coordinates, precision=3, **kwargs):
     return svgwrite.shapes.Circle(center=center, **kwargs)
 
 
+@applyid
 def multipoint(coordinates, **kwargs):
-    return _group([point((pt[0], pt[1]), **kwargs) for pt in coordinates])
+    return [point((pt[0], pt[1]), **kwargs) for pt in coordinates]
 
 
 def geometry(geom, **kwargs):
-    '''Draw a geometry. Will return either a single geometry or a group
+    '''Draw a geometry. Will return either a single geometry or a group.
     :geom object A GeoJSON-like geometry object
     :kwargs object keyword args to be passed onto svgwrite. Things like class_, id, style, etc.
     '''
@@ -137,6 +161,7 @@ def _group(elements, **kwargs):
         g.add(e)
 
     return g
+
 
 def group(features, **kwargs):
     '''Return a group with features drawn into it'''
