@@ -122,14 +122,19 @@ Use these options to specify fields in the source geodata file to use to determi
 
 For example, assume a SHP file with a `countrycode`, `continent` and `currency` fields:
 ````bash
-svgis draw --class-fields continent,foobr --id-field countrycode in.shp -o out.svg
+svgis draw --class-fields continent,foobr --id-field countrycode countries.shp -o out.svg
 ````
+
+By default, each layer is wrapped in a group (`<g>`) with id equal to the name of its source layer.
 
 The result may contain something like:
 ````svg
-<g class="North_America dollar" id="US">/* USA */</g>
-<g class="Europe pound" id="UK">/* UK */</g>
-<g class="Europe euro" id="DE">/* Germany */</g>
+<g id="countries">
+    <g class="North_America dollar" id="US">/* USA */</g>
+    <g class="Europe pound" id="UK">/* UK */</g>
+    <g class="Europe euro" id="DE">/* Germany */</g>
+    /* ... */
+</g>
 ````
 
 ## A note on OSM files
