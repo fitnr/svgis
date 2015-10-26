@@ -11,7 +11,6 @@ from . import draw
 from . import svg
 from . import scale
 from . import convert
-from . import osm
 
 STYLE = ('polyline, line, rect, path, polygon, .polygon {'
          ' fill: none;'
@@ -91,45 +90,8 @@ class SVGIS(object):
                 'bounds={0.bounds}, padding={0.padding}, '
                 'scalar={0.scalar})').format(self)
 
+
     def compose_file(self, filename, scalar, bounds=None, **kwargs):
-        '''
-        Draw file to svgwrite Group object.
-        :filename string path to a fiona-readable or OSM file
-        :scalar int map scale
-        :bounds tuple (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
-        '''
-        if filename[-4:] == path.extsep + 'osm':
-            return self._compose_osm(filename, scalar, bounds, **kwargs)
-        else:
-            return self._compose_fiona(filename, scalar, bounds, **kwargs)
-
-    def _compose_osm(self, filename, scalar, bounds=None, **kwargs):
-        '''
-        Draw OSM file to svgwrite Group object.
-        :filename string path to an OSM file
-        :scalar int map scale
-        :bounds tuple (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
-        '''
-        kwargs.pop('id_field', None)
-        kwargs.pop('classes', None)
-
-        osm_root = osm.get_root(filename)
-
-        # Checking bounds is a performance hit, so don't do it if we weren't passed bounds
-        draw_bounds = bounds
-        layer_bounds = bounds or osm.get_bounds(osm_root)
-
-        if not self.out_crs:
-            self.out_crs = projection.choosecrs(osm.CRS, layer_bounds, use_proj=self.use_proj)
-
-        self.mbr = convert.updatebounds(self.mbr, projection.project_mbr(osm.CRS, self.out_crs, *layer_bounds))
-
-        group = osm.draw(osm_root, scalar, bounds=draw_bounds, out_crs=self.out_crs, **kwargs)
-        group.attribs['id'] = filename
-
-        return group
-
-    def _compose_fiona(self, filename, scalar, bounds=None, **kwargs):
         '''
         Draw fiona file to svgwrite Group object.
         :filename string path to a fiona-readable file

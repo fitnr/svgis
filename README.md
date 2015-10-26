@@ -1,7 +1,7 @@
 svgis
 -----
 
-Create SVG drawings from geodata files (SHP, geoJSON, OSM, etc).
+Create SVG drawings from geodata files (SHP, geoJSON, etc).
 
 ```bash
 $ svgis draw in.shp -o out.svg
@@ -136,7 +136,3 @@ The result may contain something like:
     /* ... */
 </g>
 ````
-
-## A note on OSM files
-
-Conversion from OSM can be quite slow. You may find it more efficient to convert to `GeoJSON` or `Shapefile` using `ogr2ogr` or a similar tool.
