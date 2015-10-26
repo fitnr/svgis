@@ -7,6 +7,10 @@
 
 PROJECTION = +proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs
 
+OSMQUERY = [out:xml][timeout:25]; \
+    (way["highway"](41.8869593761126,12.486283779144287,41.89302938034043,12.49769926071167);); \
+    out body;>;out skel qt;
+
 all: README.rst svgis/test_data/cb_2014_us_nation_20m.shp
 
 README.rst: README.md
@@ -41,6 +45,9 @@ svgis/test_data/cb_2014_us_nation_20m.shp: svgis/test_data/cb_2014_us_nation_20m
 
 svgis/test_data/cb_2014_us_nation_20m.zip: svgis/test_data
 	curl -s -o $@ http://www2.census.gov/geo/tiger/GENZ2014/shp/cb_2014_us_nation_20m.zip
+
+svgis/test_data/sample.osm:
+	curl -s -o $@ http://overpass-api.de/api/interpreter --data "$(OSMQUERY)"
 
 svgis/test_data: ; mkdir -p $@
 
