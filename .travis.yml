@@ -15,7 +15,7 @@ python:
 
 os:
  - linux
- - osx
+
 sudo: true
 
 matrix:

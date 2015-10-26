@@ -1,3 +1,14 @@
+0.2.0
+-----
+* Simplify and update the draw api: draw.geometry now returns either a single svgwrite shape object or a svgwrite group.
+* Fix errors when input has a Z coordinate
+* Better bounds handling
+* Fix numpy errors when drawing MultiPolygons
+* --style flag now accepts a css file
+* Expand tests
+* Remove OSM support, which was broken and not easily fixable
+* Move scale functions to sibling project fionautil
+
 0.1.4
 -----
 

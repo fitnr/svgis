@@ -8,7 +8,7 @@ from .import projection
 from .svgis import SVGIS
 import sys
 
-# sys.tracebacklimit = 0
+sys.tracebacklimit = 0
 
 def _echo(content, output):
     '''Print something to either a file-like object or a file name.'''

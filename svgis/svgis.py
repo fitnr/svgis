@@ -1,6 +1,5 @@
 """Draw geodata layers into svg"""
 # -*- coding: utf-8 -*-
-from os import path
 from collections import Iterable
 import fiona
 import fiona.transform
