@@ -102,7 +102,9 @@ class CliTestCase(unittest.TestCase):
         self.assertIn(self.css, io.read())
 
         style = 'tmp.css'
-        open(style, 'w').write(self.css)
+        with open(style, 'w') as w:
+            w.write(self.css)
+
         io = StringIO()
 
         try:
@@ -121,7 +123,9 @@ class CliTestCase(unittest.TestCase):
         self.assertIn(self.css, io.read())
 
         style = 'tmp.css'
-        open(style, 'w').write(self.css)
+        with open(style, 'w') as w:
+            w.write(self.css)
+
         io = StringIO()
 
         try:

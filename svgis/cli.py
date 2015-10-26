@@ -16,7 +16,8 @@ def _echo(content, output):
         signal(SIGPIPE, SIG_DFL)
         output.write(content)
     else:
-        open(output, 'w').write(content)
+        with open(output, 'w') as w:
+            w.write(content)
 
 
 def _scale(layer, output, scale, **_):
@@ -35,7 +36,8 @@ def _style(layer, output, style, replace=None, **_):
         style = sys.stdin.read()
 
     elif style[-4:] == '.css' or style == '/dev/stdin':
-        style = open(style, 'r').read()
+        with open(style) as f:
+            style = f.read()
 
     result = svg.add_style(layer, style, replace=replace)
     _echo(result, output)
@@ -62,7 +64,8 @@ def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
     if kwargs.get('style'):
         if kwargs['style'][-3:] == 'css':
             try:
-                style = open(kwargs['style'], 'r').read()
+                with open(kwargs['style']) as f:
+                    style = f.read()
 
             except IOError:
                 print("Couldn't read {}, proceeding with default style".format(kwargs['style']), file=sys.stderr)
