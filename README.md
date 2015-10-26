@@ -1,11 +1,11 @@
 svgis
 -----
 
-Create SVG drawings from geodata files (SHP, geoJSON, etc).
+Create SVG drawings from vector geodata files (SHP, geoJSON, etc).
 
 ```bash
-$ svgis draw in.shp -o out.svg
-$ svgis draw in.shp in.geojson -o out.svg
+$ svgis draw input.shp -o out.svg
+$ svgis draw south_dakota.shp south_dakota.geojson -o dakota.svg
 ````
 
 ## Install
@@ -21,7 +21,7 @@ The `svgis` command line tool has four commands: `draw`, `project`, `scale` and 
 
 The main command is `svgis draw`, which generates SVGs from input geodata.
 
-### svgis draw options
+### svgis draw
 #### --bounds
 
 Takes four arguments in min-lon, min-lat, max-lon, max-lat order.
@@ -44,51 +44,39 @@ While SVG is a vector format, clients may have trouble handling very large numbe
 svgis draw --scale 1000 in.shp -o out.svg
 ````
 
-### --project
+#### --project
 
-There are three ways to provide projections. Using both at the same time is unsupported. If the input file doesn't specify an internal projection, SVGIS will assume that the coordinates are given in [WGS84](http://epsg.io/4326).
+The project argument accept a particular projection or a keyword that helps svgis pick a projection for you. 
 
-If none of these three flags are given, SVGIS will check to see if the file is already in non lat-lng projection (e.g. a state plane system or the British National Grid). If the first input file is projected, that projection will be used for the output. If the first file is in lat-long coordinates, a local projection will be generated, just like if `--projection-method=local` was given.
+* [EPSG](http://epsg.io) code
+* Proj4 string
+* Either the 'utm' or 'local' keyword
 
-#### EPSG codes
+The the flag isn't, SVGIS will check to see if the file is already in non lat-lng projection (e.g. a state plane system or the British National Grid). If the first input file is projected, that projection will be used for the output. If the first file is in lat-long coordinates, a local projection will be generated, just like if `--projection-method=local` was given.
 
-Accepts a valid [EPSG](http://epsg.io) code.
-
-Use this option to provide the EPSG code of a desired projection. The example will draw an svg with [EPSG:2908](http://epsg.io/2908), the New York Long Island state plane projection.
-
+This example will draw an svg with [EPSG:2908](http://epsg.io/2908), the New York Long Island state plane projection:
 ````bash
-svgis draw --project EPSG:2908 in.shp -o out.svg
+svgis draw --project EPSG:2908 nyc.shp -o nyc.svg
 ````
 
-#### Proj4 strings
-
-Accepts a string in proj4 format.
-
-Use this option to provide a Proj4 string that defines a projection.
-
+This example uses a Proj.4 string to draw with the [North America Albers Equal Area Conic](http://epsg.io/102008) projection, which doesn't have an EPSG code.
 ````bash
-PROJECTION=+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs
-svgis draw --project $PROJECTION in.shp -o out.svg
+PROJECTION=+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs
+svgis draw --project "$PROJECTION" in.shp -o out.svg
 ````
 
-#### UTM
-
-Accepts either 'utm' or 'local'.
-
-For UTM, attempt to draw coordiantes in the local UTM projection. The centerpoint of the bounding box will be used to pick the zone. Expect poor results for input data that crosses several UTM boundaries.
+With the `utm` keyword, svgis attempts to draw coordinates in the local UTM projection. The centerpoint of the bounding box will be used to pick the zone. Expect poor results for input data that crosses several UTM boundaries.
 ````bash
 svgis draw --project utm in.shp -o out.svg
 ````
 
-#### Automatically generated projection
-
 When the local argument is given, SVGIS will generate a Transverse Mercator projection that centers on the input bounding box. This generally gives good results for an region roughly the size of a large urban area.
-
 ````bash
-svgis draw --project local in.shp -o out.svg
+svgis draw --project local input.shp -o out.svg
+svgis draw -j local input.shp -o out.svg
 ````
 
-### Style
+To properly convert the input coordinate, svgis needs to know your input projection. If the input file doesn't specify an internal projection, SVGIS will assume that the coordinates are given in [WGS84](http://epsg.io/4326).
 
 #### --style
 
@@ -101,7 +89,7 @@ svgis draw --style "line { stroke: green; }" in.shp -o out.svg
 
 #### --padding
 
-Adds a padding around the output image.
+Adds a padding around the output image. Accepts an integer in svg units.
 
 ````bash
 svgis draw --padding 100 in.shp -o out.svg
@@ -109,7 +97,7 @@ svgis draw --padding 100 in.shp -o out.svg
 
 #### --no-viewbox
 
-By default, SVGIS uses a viewbox. If you have a problem opening the created svg file, try the '--no-viewbox' option, which will create an svg where the contents are translated into the frame
+By default, SVGIS uses a viewbox. If you have a problem opening the created svg file in your drawing program (e.g. Adobe Illustrator), try the '--no-viewbox' option, which will create an svg where the contents are translated into the frame.
 
 ````bash
 svgis draw --no-viewbox in.shp -o out.svg
@@ -120,19 +108,30 @@ svgis draw -x in.shp -o out.svg
 
 Use these options to specify fields in the source geodata file to use to determine the class or id attributes of the output SVG features. In the output fields, spaces will be replaced with underscores.
 
-For example, assume a SHP file with a `countrycode`, `continent` and `currency` fields:
+For example, the [Natural Earth admin_0](http://www.naturalearthdata.com/downloads/110m-cultural-vectors/) file contains nation polygons, and includes `continent`, `income_grp` and `name` fields:
 ````bash
-svgis draw --class-fields continent,foobr --id-field countrycode countries.shp -o out.svg
+svgis draw --class-fields continent,income_grp --id-field name ne_110m_admin_0_countries.shp -o out.svg
 ````
 
-By default, each layer is wrapped in a group (`<g>`) with id equal to the name of its source layer.
-
-The result may contain something like:
+The result will include something like:
 ````svg
-<g id="countries">
-    <g class="North_America dollar" id="US">/* USA */</g>
-    <g class="Europe pound" id="UK">/* UK */</g>
-    <g class="Europe euro" id="DE">/* Germany */</g>
+<g id="ne_110m_admin_0_countries">
+    <g class="Asia _5_Low_income" id="Afghanistan">/* Afghanistan */</g>
+    <g class="Africa _3_Upper_middle_income" id="Angola">/* Angola */</g>
     /* ... */
+    <g class="Africa _5_Low_income" id="Zimbabwe">/* Germany */</g>
 </g>
+````
+
+Note that the 'income_grp' field contains values like "4. Lower middle income", svgis has sanitized them for use in the output svg.
+
+Each layer is always wrapped in a group (`<g>`) with id equal to the name of its source layer.
+
+## Further examples
+
+Draw the outline of the contiguous United States, projected in Albers:
+````
+curl -O http://www2.census.gov/geo/tiger/GENZ2014/shp/cb_2014_us_nation_20m.zip
+unzip cb_2014_us_nation_20m.zip
+svgis draw --project EPSG:5070 --scale 1000 --bounds -124 20.5 -64 49 cb_2014_us_nation_20m.shp -o us.svg
 ````
