@@ -185,14 +185,5 @@ class CliTestCase(unittest.TestCase):
         with self.assertRaises(IOError):
             cli.main()
 
-        # sys.argv = ['svgis', 'draw', self.shp, '--bounds', '3', '4', '3']
-        # with self.assertRaises(SystemExit):
-        #     cli.main()
-
-        # sys.argv = ['svgis', 'project', '3', '4', '3']
-        # with self.assertRaises(SystemExit):
-        #     cli.main()
-
-
 if __name__ == '__main__':
     unittest.main()
