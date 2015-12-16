@@ -30,4 +30,4 @@ class SvgisTestCase(unittest.TestCase):
     def testSvgisClassFields(self):
         svgis_obj = svgis.SVGIS(self.file)
         composed = svgis_obj.compose(classes=('NAME', 'GEOID'))
-        self.assertIn('class="United_States US cb_2014_us_nation_20m"', composed.tostring())
+        self.assertIn('class="NAME_United_States GEOID_US cb_2014_us_nation_20m"', composed.tostring())
