@@ -1,14 +1,15 @@
 #!/usr/bin/python
 from __future__ import print_function, division
+import sys
 from signal import signal, SIGPIPE, SIG_DFL
 import argparse
 import fiona.crs
-from . import svg
-from .import projection
+from . import projection, svg
 from .svgis import SVGIS
-import sys
+
 
 sys.tracebacklimit = 0
+
 
 def _echo(content, output):
     '''Print something to either a file-like object or a file name.'''

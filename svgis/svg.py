@@ -1,11 +1,15 @@
-'''Edit SVGs'''
 # -*- coding: utf-8 -*-
 import sys
-import svgwrite.container
 from collections import Sequence
 from xml.dom import minidom
-import fionautil.coords
 from string import ascii_letters
+import fionautil.coords
+import svgwrite.container
+
+'''
+Edit SVGs.
+'''
+
 
 def rescale(svgfile, factor):
     svg = minidom.parse(svgfile)
@@ -70,6 +74,7 @@ def add_style(svgfile, newstyle, replace=False):
 
     return svg.toxml()
 
+
 def sanitize(x):
     '''Make input safe of use in an svg ID or class field'''
     try:
@@ -80,6 +85,7 @@ def sanitize(x):
 
     string = string.replace(' ', '_').replace('(', '').replace(')', '').replace('.', '')
     return string if string[0] in ('_-' + ascii_letters) else '_' + string
+
 
 def set_group(members=None, scale=None, translate=None, **kwargs):
     '''Create a group with the given scale and translation'''

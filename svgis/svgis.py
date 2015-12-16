@@ -4,12 +4,9 @@ from collections import Iterable
 import fiona
 import fiona.transform
 import svgwrite
-import fionautil.coords
-from . import projection
-from . import draw
-from . import svg
-from fionautil import scale
-from . import convert
+from fionautil import scale, coords
+from . import convert, draw, projection, svg
+
 
 STYLE = ('polyline, line, rect, path, polygon, .polygon {'
          ' fill: none;'
@@ -176,7 +173,7 @@ class SVGIS(object):
 
         boundary = scale.scale(mbr_ring, scalar)
         try:
-            x0, y0, x1, y1 = fionautil.coords.bounds(list(boundary))
+            x0, y0, x1, y1 = coords.bounds(list(boundary))
         except ValueError:
             raise ValueError('Problem calculating bounds. Check that coordinates are in x, y order.')
 
