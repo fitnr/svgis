@@ -1,3 +1,9 @@
+0.2.2
+-----
+
+* Prefix data classes with field name
+* Remove test data from build
+
 0.2.1
 -----
 
