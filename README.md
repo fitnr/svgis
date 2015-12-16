@@ -108,6 +108,8 @@ svgis draw -x in.shp -o out.svg
 
 Use these options to specify fields in the source geodata file to use to determine the class or id attributes of the output SVG features. In the output fields, spaces will be replaced with underscores.
 
+The name of a layer will always be in the classes of its child elements. This makes addressing a particular layer easy, given that some implementations of SVG don't properly handle id elements (e.g. Adobe Illustrator, ImageMagick).
+
 For example, the [Natural Earth admin_0](http://www.naturalearthdata.com/downloads/110m-cultural-vectors/) file contains nation polygons, and includes `continent`, `income_grp` and `name` fields:
 ````bash
 svgis draw --class-fields continent,income_grp --id-field name ne_110m_admin_0_countries.shp -o out.svg
@@ -116,10 +118,10 @@ svgis draw --class-fields continent,income_grp --id-field name ne_110m_admin_0_c
 The result will include something like:
 ````svg
 <g id="ne_110m_admin_0_countries">
-    <g class="Asia _5_Low_income" id="Afghanistan">/* Afghanistan */</g>
-    <g class="Africa _3_Upper_middle_income" id="Angola">/* Angola */</g>
+    <g class="ne_110m_admin_0_countries Asia _5_Low_income" id="Afghanistan">/* Afghanistan */</g>
+    <g class="ne_110m_admin_0_countries Africa _3_Upper_middle_income" id="Angola">/* Angola */</g>
     /* ... */
-    <g class="Africa _5_Low_income" id="Zimbabwe">/* Germany */</g>
+    <g class="ne_110m_admin_0_countries Africa _5_Low_income" id="Zimbabwe">/* Zimbabwe */</g>
 </g>
 ````
 

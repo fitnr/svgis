@@ -25,7 +25,7 @@ def _draw_feature(geom, properties=None, **kwargs):
             kwargs['classes'] = [kwargs['classes']]
 
         try:
-            kwargs['class_'] = ' '.join(svg.sanitize(properties.get(c, '')) for c in kwargs.pop('classes'))
+            kwargs['class_'] = ' '.join(svg.sanitize(properties.get(c, c)) for c in kwargs.pop('classes'))
 
         except TypeError:
             pass
@@ -107,8 +107,11 @@ class SVGIS(object):
 
             self.mbr = convert.updatebounds(self.mbr, projection.project_mbr(layer.crs, self.out_crs, *bounds))
 
-            if 'classes' in kwargs:
-                kwargs['classes'] = [c for c in kwargs['classes'] if c in layer.schema['properties']]
+            if 'classes' not in kwargs:
+                kwargs['classes'] = []
+
+            kwargs['classes'] = [c for c in kwargs['classes'] if c in layer.schema['properties']]
+            kwargs['classes'].append(layer.name)
 
             if 'id_field' in kwargs:
                 if kwargs['id_field'] not in layer.schema['properties'].keys():

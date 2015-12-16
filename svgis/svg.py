@@ -77,6 +77,10 @@ def add_style(svgfile, newstyle, replace=False):
 
 def sanitize(x):
     '''Make input safe of use in an svg ID or class field'''
+
+    if x is None:
+        return ''
+
     try:
         string = str(x)
 
