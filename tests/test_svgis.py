@@ -13,7 +13,7 @@ class SvgisTestCase(unittest.TestCase):
 
         self.assertEqual(svgis_obj.files, [self.file])
         assert svgis_obj.mbr == (None,) * 4
-        assert svgis_obj.out_crs == None
+        assert svgis_obj.out_crs is None
         assert svgis_obj.style == svgis.STYLE
 
         svgis_obj2 = svgis.SVGIS([self.file])
@@ -25,10 +25,10 @@ class SvgisTestCase(unittest.TestCase):
     def testSvgisCompose(self):
         svgis_obj = svgis.SVGIS(self.file)
         composed = svgis_obj.compose()
-        assert type(composed) == svgwrite.drawing.Drawing
+        assert isinstance(composed, svgwrite.drawing.Drawing)
 
 
     def testSvgisClassFields(self):
         svgis_obj = svgis.SVGIS(self.file)
         composed = svgis_obj.compose(classes=('NAME', 'GEOID'))
-        assert 'class="United_States US"' in composed.tostring()
+        self.assertIn('class="United_States US cb_2014_us_nation_20m"', composed.tostring())

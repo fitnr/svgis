@@ -36,12 +36,12 @@ class SvgTestCase(unittest.TestCase):
 
     def test_create(self):
         s = svg.create((100, 100), [])
-        assert type(s) == svgwrite.drawing.Drawing
+        assert isinstance(s, svgwrite.drawing.Drawing)
 
         s = svg.create(100, [])
-        assert type(s) == svgwrite.drawing.Drawing
+        assert isinstance(s, svgwrite.drawing.Drawing)
 
         s = svg.create(100, [], style=self.newstyle)
-        assert type(s) == svgwrite.drawing.Drawing
+        assert isinstance(s, svgwrite.drawing.Drawing)
         assert len(s.defs.elements) > 0
         assert self.newstyle in s.defs.elements[0].tostring()

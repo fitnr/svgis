@@ -84,7 +84,7 @@ class CliTestCase(unittest.TestCase):
         try:
             self.assertEqual(out, expected)
         except:
-            assert out.decode() == expected
+            self.assertEqual(out.decode(), expected)
 
     def testCliEcho(self):
         io = StringIO()
