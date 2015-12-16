@@ -13,7 +13,6 @@ import sys
 import os
 import subprocess
 from xml.dom import minidom
-from pkg_resources import resource_filename
 from io import StringIO
 from svgis import cli
 
@@ -25,8 +24,8 @@ BOUNDS = (-124.0, 20.5, -64.0, 49.0)
 class CliTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.testsvg = resource_filename('svgis', 'test_data/test.svg')
-        self.shp = resource_filename('svgis', 'test_data/cb_2014_us_nation_20m.shp')
+        self.testsvg = 'tests/test_data/test.svg'
+        self.shp = 'tests/test_data/cb_2014_us_nation_20m.shp'
         self.css = 'polygon{fill:green}'
 
     def testSvgStyle(self):

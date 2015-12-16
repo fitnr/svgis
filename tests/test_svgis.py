@@ -1,12 +1,11 @@
 import unittest
 from svgis import svgis
 import svgwrite
-from pkg_resources import resource_filename
 
 class SvgisTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.file = resource_filename('svgis', 'test_data/cb_2014_us_nation_20m.shp')
+        self.file = 'tests/test_data/cb_2014_us_nation_20m.shp'
 
     def testSvgisCreate(self):
         svgis_obj = svgis.SVGIS(self.file)

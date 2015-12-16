@@ -7,7 +7,7 @@
 
 PROJECTION = +proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs
 
-all: README.rst svgis/test_data/cb_2014_us_nation_20m.shp
+all: README.rst tests/test_data/cb_2014_us_nation_20m.shp
 
 README.rst: README.md
 	pandoc $< -o $@ || touch $@
@@ -20,7 +20,7 @@ cov:
 	coverage html
 	open htmlcov/index.html
 
-test: svgis/test_data/cb_2014_us_nation_20m.shp svgis/test_data/test.svg
+test: tests/test_data/cb_2014_us_nation_20m.shp tests/test_data/test.svg
 	python setup.py test
 
 	svgis style -s 'polygon{fill:green}' $(lastword $^) > /dev/null
@@ -32,17 +32,17 @@ test: svgis/test_data/cb_2014_us_nation_20m.shp svgis/test_data/test.svg
 		svgis style -s 'polygon{fill:green}' - | \
 		svgis scale -f 10 - > /dev/null
 
-svgis/test_data/test.svg: svgis/test_data/cb_2014_us_nation_20m.shp
+tests/test_data/test.svg: tests/test_data/cb_2014_us_nation_20m.shp
 	svgis draw -j '$(PROJECTION)' -f 1000  --bounds -124 20.5 -64 49 $< -o $@
 
-svgis/test_data/cb_2014_us_nation_20m.shp: svgis/test_data/cb_2014_us_nation_20m.zip
+tests/test_data/cb_2014_us_nation_20m.shp: tests/test_data/cb_2014_us_nation_20m.zip
 	unzip -q -o $< -d $(@D)
 	@touch $@
 
-svgis/test_data/cb_2014_us_nation_20m.zip: svgis/test_data
+tests/test_data/cb_2014_us_nation_20m.zip: tests/test_data
 	curl -s -o $@ http://www2.census.gov/geo/tiger/GENZ2014/shp/cb_2014_us_nation_20m.zip
 
-svgis/test_data: ; mkdir -p $@
+tests/test_data: ; mkdir -p $@
 
 deploy:
 	rm -rf dist build

@@ -1,16 +1,15 @@
 from __future__ import unicode_literals
 import unittest
 import re
-from pkg_resources import resource_filename
 from io import StringIO
-from svgis import svg
 from xml.dom import minidom
+from svgis import svg
 import svgwrite
 
 class SvgTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.file = resource_filename('svgis', 'test_data/test.svg')
+        self.file = 'tests/test_data/test.svg'
         self.newstyle = 'stroke {color:red;}'
 
     def test_add_style(self):
