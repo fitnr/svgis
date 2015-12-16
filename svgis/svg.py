@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
+import re
 from collections import Sequence
 from xml.dom import minidom
 from string import ascii_letters
@@ -87,7 +88,8 @@ def sanitize(x):
     except UnicodeEncodeError:
         string = x.encode('ascii', 'ignore')
 
-    string = string.replace(' ', '_').replace('(', '').replace(')', '').replace('.', '')
+    string = re.sub(r'[^_a-zA-Z0-9-]', '_', string)
+    string = re.sub(r'_{1,}', '_', string)
     return string if string[0] in ('_-' + ascii_letters) else '_' + string
 
 

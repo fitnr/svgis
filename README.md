@@ -116,13 +116,13 @@ svgis draw --class-fields continent,income_grp --id-field name ne_110m_admin_0_c
 The result will include something like:
 ````svg
 <g id="ne_110m_admin_0_countries">
-    <g class="ne_110m_admin_0_countries Asia _5_Low_income" id="Afghanistan">/* Afghanistan */</g>
-    <g class="ne_110m_admin_0_countries Africa _3_Upper_middle_income" id="Angola">/* Angola */</g>
+    <g class="ne_110m_admin_0_countries continent_Asia income_grp_5_Low_income" id="Afghanistan">/* Afghanistan */</g>
+    <g class="ne_110m_admin_0_countries continent_Africa income_grp_3_Upper_middle_income" id="Angola">/* Angola */</g>
     /* ... */
-    <g class="ne_110m_admin_0_countries Africa _5_Low_income" id="Zimbabwe">/* Zimbabwe */</g>
+    <g class="ne_110m_admin_0_countries continent_Africa income_grp_5_Low_income" id="Zimbabwe">/* Zimbabwe */</g>
 </g>
 ````
-The name of a layer (`ne_110m_admin_0_countries`) will always be in the classes of its child elements. This makes addressing a particular layer easy, given that some implementations of SVG don't properly handle id elements (e.g. Adobe Illustrator, ImageMagick).
+The name of a layer (`ne_110m_admin_0_countries`) will always be in the classes of its child elements. This makes writing CSS that addresses particular layers easier, given that some implementations of SVG don't properly css rules with ids (e.g. Adobe Illustrator, ImageMagick).
 
 Note that the 'income_grp' field contains values like "4. Lower middle income", SVGIS has sanitized them for use in the output svg.
 

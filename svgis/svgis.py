@@ -1,5 +1,6 @@
 """Draw geodata layers into svg"""
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 from collections import Iterable
 import fiona
 import fiona.transform
@@ -15,6 +16,11 @@ STYLE = ('polyline, line, rect, path, polygon, .polygon {'
          ' stroke-linejoin: round;'
          '}')
 
+def _property(prop, properties):
+    if prop in properties:
+        return prop + '_' + properties[prop]
+    else:
+        return prop
 
 def _draw_feature(geom, properties=None, **kwargs):
     '''Draw a single feature given a geometry object and properties object'''
@@ -25,7 +31,8 @@ def _draw_feature(geom, properties=None, **kwargs):
             kwargs['classes'] = [kwargs['classes']]
 
         try:
-            kwargs['class_'] = ' '.join(svg.sanitize(properties.get(c, c)) for c in kwargs.pop('classes'))
+            classes = [svg.sanitize(_property(x, properties)) for x in kwargs.pop('classes')]
+            kwargs['class_'] = ' '.join(classes).strip()
 
         except TypeError:
             pass
