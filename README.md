@@ -1,11 +1,11 @@
-svgis
+SVGIS
 -----
 
 Create SVG drawings from vector geodata files (SHP, geoJSON, etc).
 
 ```bash
-$ svgis draw input.shp -o out.svg
-$ svgis draw south_dakota.shp south_dakota.geojson -o dakota.svg
+svgis draw input.shp -o out.svg
+svgis draw south_dakota.shp south_dakota.geojson -o dakota.svg
 ````
 
 ## Install
@@ -46,7 +46,7 @@ svgis draw --scale 1000 in.shp -o out.svg
 
 #### --project
 
-The project argument accept a particular projection or a keyword that helps svgis pick a projection for you. 
+The project argument accept a particular projection or a keyword that helps SVGIS pick a projection for you. 
 
 * [EPSG](http://epsg.io) code
 * Proj4 string
@@ -61,11 +61,11 @@ svgis draw --project EPSG:2908 nyc.shp -o nyc.svg
 
 This example uses a Proj.4 string to draw with the [North America Albers Equal Area Conic](http://epsg.io/102008) projection, which doesn't have an EPSG code.
 ````bash
-PROJECTION=+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs
-svgis draw --project "$PROJECTION" in.shp -o out.svg
+svgis draw in.shp -o out.svg \
+    --project "+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
 ````
 
-With the `utm` keyword, svgis attempts to draw coordinates in the local UTM projection. The centerpoint of the bounding box will be used to pick the zone. Expect poor results for input data that crosses several UTM boundaries.
+With the `utm` keyword, SVGIS attempts to draw coordinates in the local UTM projection. The centerpoint of the bounding box will be used to pick the zone. Expect poor results for input data that crosses several UTM boundaries.
 ````bash
 svgis draw --project utm in.shp -o out.svg
 ````
@@ -108,8 +108,6 @@ svgis draw -x in.shp -o out.svg
 
 Use these options to specify fields in the source geodata file to use to determine the class or id attributes of the output SVG features. In the output fields, spaces will be replaced with underscores.
 
-The name of a layer will always be in the classes of its child elements. This makes addressing a particular layer easy, given that some implementations of SVG don't properly handle id elements (e.g. Adobe Illustrator, ImageMagick).
-
 For example, the [Natural Earth admin_0](http://www.naturalearthdata.com/downloads/110m-cultural-vectors/) file contains nation polygons, and includes `continent`, `income_grp` and `name` fields:
 ````bash
 svgis draw --class-fields continent,income_grp --id-field name ne_110m_admin_0_countries.shp -o out.svg
@@ -124,8 +122,9 @@ The result will include something like:
     <g class="ne_110m_admin_0_countries Africa _5_Low_income" id="Zimbabwe">/* Zimbabwe */</g>
 </g>
 ````
+The name of a layer (`ne_110m_admin_0_countries`) will always be in the classes of its child elements. This makes addressing a particular layer easy, given that some implementations of SVG don't properly handle id elements (e.g. Adobe Illustrator, ImageMagick).
 
-Note that the 'income_grp' field contains values like "4. Lower middle income", svgis has sanitized them for use in the output svg.
+Note that the 'income_grp' field contains values like "4. Lower middle income", SVGIS has sanitized them for use in the output svg.
 
 Each layer is always wrapped in a group (`<g>`) with id equal to the name of its source layer.
 
