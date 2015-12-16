@@ -18,22 +18,24 @@ STYLE = ('polyline, line, rect, path, polygon, .polygon {'
 
 def _property(prop, properties):
     if prop in properties:
-        return prop + '_' + properties[prop]
+        return prop + '_' + str(properties[prop])
     else:
         return prop
+
+def _construct_classes(classes, properties):
+    if isinstance(classes, unicode):
+        classes = [classes]
+
+    classes = [svg.sanitize(_property(x, properties)) for x in classes]
+    return (' '.join(classes)).strip()
 
 def _draw_feature(geom, properties=None, **kwargs):
     '''Draw a single feature given a geometry object and properties object'''
     properties = properties or {}
 
     if kwargs.get('classes'):
-        if not isinstance(kwargs['classes'], Iterable):
-            kwargs['classes'] = [kwargs['classes']]
-
         try:
-            classes = [svg.sanitize(_property(x, properties)) for x in kwargs.pop('classes')]
-            kwargs['class_'] = ' '.join(classes).strip()
-
+            kwargs['class_'] = _construct_classes(kwargs.pop('classes'), properties)
         except TypeError:
             pass
 
@@ -43,8 +45,7 @@ def _draw_feature(geom, properties=None, **kwargs):
         except AttributeError:
             pass
 
-    result = draw.geometry(geom, **kwargs)
-    return result
+    return draw.geometry(geom, **kwargs)
 
 
 class SVGIS(object):
