@@ -50,7 +50,7 @@ setup(
     packages=find_packages(),
 
     package_data={
-        'svgis': ['test_data/test.*', 'test_data/cb_2014_us_nation_20m.*']
+        'svgis': ['test_data/test.*']
     },
 
     install_requires=[
