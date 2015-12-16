@@ -11,6 +11,7 @@ all: README.rst tests/test_data/cb_2014_us_nation_20m.shp
 
 README.rst: README.md
 	pandoc $< -o $@ || touch $@
+	python setup.py check --restructuredtext
 
 .PHONY: all test cov deploy
 

@@ -114,7 +114,7 @@ svgis draw --class-fields continent,income_grp --id-field name ne_110m_admin_0_c
 ````
 
 The result will include something like:
-````svg
+````
 <g id="ne_110m_admin_0_countries">
     <g class="ne_110m_admin_0_countries continent_Asia income_grp_5_Low_income" id="Afghanistan">/* Afghanistan */</g>
     <g class="ne_110m_admin_0_countries continent_Africa income_grp_3_Upper_middle_income" id="Angola">/* Angola */</g>
