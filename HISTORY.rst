@@ -1,3 +1,8 @@
+0.2.1
+-----
+
+* Add layer name to class list to get around ID issues in some SVG clients.
+
 0.2.0
 -----
 * Simplify and update the draw api: draw.geometry now returns either a single svgwrite shape object or a svgwrite group.
