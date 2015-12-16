@@ -1,3 +1,8 @@
+0.2.3
+-----
+
+* Fix class bug for NULL values
+
 0.2.2
 -----
 
