@@ -1,5 +1,6 @@
 #!/usr/bin/python
 from __future__ import print_function, division
+import os.path
 import sys
 from signal import signal, SIGPIPE, SIG_DFL
 import argparse
@@ -55,11 +56,19 @@ def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
     if kwargs.get('project', 'local').lower() in ('local', 'utm'):
         use_proj = kwargs.pop('project', 'local').lower()
 
-    elif kwargs['project'][:4].lower() == 'epsg':
-        epsg = kwargs.pop('project')
-        out_crs = fiona.crs.from_epsg(int(epsg[5:]))
+    elif os.path.exists(kwargs['project']):
+        # Is a file
+        with open(kwargs.pop('project')) as f:
+            out_crs = fiona.crs.from_string(f.read())
 
-    else:  # I guess it's a proj4
+    elif kwargs['project'][:5].lower() == 'epsg:':
+        # Is an epsg code
+        _, epsg = kwargs.pop('project').split(':')
+        out_crs = fiona.crs.from_epsg(int(epsg))
+
+    else:
+        # Assume it's a proj4 string.
+        # fiona.crs.from_string returns {} if it isn't.
         out_crs = fiona.crs.from_string(kwargs.pop('project'))
 
     # Try to read style file
@@ -148,6 +157,7 @@ def main():
                       help=('Specify a map projection. '
                             'Accepts either a valid EPSG code (e.g. epsg:4456), '
                             'a valid proj4 string, '
+                            'a file containing a proj4, '
                             '"utm" (use local UTM zone) or '
                             '"local" (generate a local projection)'))
 

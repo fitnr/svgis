@@ -135,7 +135,6 @@ class CliTestCase(unittest.TestCase):
         finally:
             os.remove('tmp.css')
 
-
     def testCliScale(self):
         io = StringIO()
 
@@ -148,6 +147,21 @@ class CliTestCase(unittest.TestCase):
         io = StringIO()
 
         cli._draw(self.shp, io, scale=1000, project=PROJECTION, bounds=BOUNDS)
+        io.seek(0)
+
+        result = minidom.parseString(io.read()).getElementsByTagName('svg').item(0)
+        fixture = minidom.parse(self.testsvg).getElementsByTagName('svg').item(0)
+
+        result_vb = [float(x) for x in result.attributes.get('viewBox').value.split(',')]
+        fixture_vb = [float(x) for x in fixture.attributes.get('viewBox').value.split(',')]
+
+        for r, f in zip(result_vb, fixture_vb):
+            self.assertAlmostEqual(r, f, 5)
+
+    def testCliDrawProjFile(self):
+        io = StringIO()
+
+        cli._draw(self.shp, io, scale=1000, project='tests/test_data/test.proj4', bounds=BOUNDS)
         io.seek(0)
 
         result = minidom.parseString(io.read()).getElementsByTagName('svg').item(0)
