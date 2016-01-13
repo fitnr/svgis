@@ -47,7 +47,15 @@ def _style(layer, output, style, replace=None, **_):
 
 
 def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
-    '''Draw a geodata layer to a simple SVG'''
+    '''
+    Draw a geodata layer to a simple SVG.
+    :layers sequence Input geodata files.
+    :output path Output file name
+    :bounds sequence (minx, miny, maxx, maxy)
+    :scale int Map scale. Larger numbers -> smaller maps
+    :padding int Pad around bounds by this much. In projection units.
+    :project string EPSG code, PROJ.4 string, or file containing a PROJ.4 string
+    '''
     scalar = (1 / scale) if scale else 1
     style = None
     out_crs = None

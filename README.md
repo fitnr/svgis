@@ -50,6 +50,7 @@ The project argument accept a particular projection or a keyword that helps SVGI
 
 * [EPSG](http://epsg.io) code
 * Proj4 string
+* A text file containing a Proj4 string
 * Either the 'utm' or 'local' keyword
 
 The the flag isn't, SVGIS will check to see if the file is already in non lat-lng projection (e.g. a state plane system or the British National Grid). If the first input file is projected, that projection will be used for the output. If the first file is in lat-long coordinates, a local projection will be generated, just like if `--projection-method=local` was given.
@@ -63,6 +64,12 @@ This example uses a Proj.4 string to draw with the [North America Albers Equal A
 ````bash
 svgis draw in.shp -o out.svg \
     --project "+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
+````
+
+This is equivalent to the above, and uses a proj.4 file:
+````bash
+echo "+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs" > proj4.txt
+svgis draw in.shp --project proj4.txt -o out.svg
 ````
 
 With the `utm` keyword, SVGIS attempts to draw coordinates in the local UTM projection. The centerpoint of the bounding box will be used to pick the zone. Expect poor results for input data that crosses several UTM boundaries.
