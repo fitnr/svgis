@@ -5,6 +5,7 @@ from signal import signal, SIGPIPE, SIG_DFL
 import argparse
 import fiona.crs
 from . import projection, svg
+from . import __version__ as version
 from .svgis import SVGIS
 
 
@@ -107,6 +108,7 @@ def main():
     parent.add_argument('output', nargs='?', default='/dev/stdout', help="(optional) defaults to stdout")
 
     parser = argparse.ArgumentParser('svgis')
+    parser.add_argument('-V', action='version', version="%(prog)s " + version)
     sp = parser.add_subparsers()
 
     style = sp.add_parser(
@@ -146,8 +148,8 @@ def main():
                       help=('Specify a map projection. '
                             'Accepts either a valid EPSG code (e.g. epsg:4456), '
                             'a valid proj4 string, '
-                            'the keyword "utm" (use local UTM zone) or'
-                            'the keyword "local" (generate a local projection)'))
+                            '"utm" (use local UTM zone) or '
+                            '"local" (generate a local projection)'))
 
     draw.set_defaults(function=_draw)
 
