@@ -11,9 +11,9 @@ all: README.rst tests/test_data/cb_2014_us_nation_20m.shp
 
 README.rst: README.md
 	pandoc $< -o $@ || touch $@
-	python setup.py check --restructuredtext
+	python setup.py check --restructuredtext --strict
 
-.PHONY: all test cov deploy
+.PHONY: all test cov deploy clean
 
 cov:
 	coverage run --include='svgis/*' setup.py test
@@ -45,9 +45,13 @@ tests/test_data/cb_2014_us_nation_20m.zip: tests/test_data
 
 tests/test_data: ; mkdir -p $@
 
-deploy:
-	rm -rf dist build
+deploy: README.rst | clean
+	python setup.py register
 	python3 setup.py bdist_wheel
 	rm -rf build
 	python setup.py sdist bdist_wheel
 	twine upload dist/*
+	git push
+	git push --tags
+
+clean: ; rm -rf build dist
