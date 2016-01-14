@@ -1,3 +1,10 @@
+0.2.5
+-----
+
+* Accept a text file containing a proj4 string in `svgis draw --project`
+* fix typo in cli help
+* add version option to cli
+
 0.2.3
 -----
 
