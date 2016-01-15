@@ -102,6 +102,13 @@ class SVGIS(object):
         :scalar int map scale
         :bounds tuple (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
         '''
+        # OK, this gets a little complicated. We have:
+        # * self.bounds: bounds in input coords, passed to object
+        # * layer.bounds: the layer's bounding, input coords
+        # * projected_mbr: The bounds, in output coords
+        # * self.mbr: An in-progress combination of every layer's mbr
+        # * drawbox: A slightly extended version of projected_mbr
+
         with fiona.open(filename, "r") as layer:
             group = svgwrite.container.Group(id=layer.name)
 

@@ -27,6 +27,7 @@ class CliTestCase(unittest.TestCase):
         self.testsvg = 'tests/test_data/test.svg'
         self.shp = 'tests/test_data/cb_2014_us_nation_20m.shp'
         self.css = 'polygon{fill:green}'
+        sys.tracebacklimit = 99
 
     def testSvgStyle(self):
         args = ['svgis', 'style', '-s', self.css, self.testsvg]
