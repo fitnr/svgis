@@ -115,10 +115,7 @@ class SVGIS(object):
 
             self.mbr = convert.updatebounds(self.mbr, projection.project_mbr(layer.crs, self.out_crs, *bounds))
 
-            if 'classes' not in kwargs:
-                kwargs['classes'] = []
-
-            kwargs['classes'] = [c for c in kwargs['classes'] if c in layer.schema['properties']]
+            kwargs['classes'] = [c for c in kwargs.get('classes', []) if c in layer.schema['properties']]
             kwargs['classes'].append(layer.name)
 
             if 'id_field' in kwargs:
