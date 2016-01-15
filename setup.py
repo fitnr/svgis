@@ -57,13 +57,14 @@ setup(
         'pyproj>=1.9.3,<1.10',
         'fiona>=1.5.0,<2.0',
         'svgwrite>=1.1.6,<1.2',
-        'fionautil >=0.3.1, <1.0',
+        'fionautil >=0.4.2, <1.0',
         'utm>=0.4.0,<1'
     ],
 
     extras_require={
         'lxml': ['lxml'],
         'numpy': ['numpy'],
+        'clip': ['shapely>=1.5.7'],
     },
 
     test_suite='tests',

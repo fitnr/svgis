@@ -6,7 +6,7 @@ import fiona
 import fiona.transform
 import svgwrite
 from fionautil import scale, coords
-from . import convert, draw, projection, svg
+from . import convert, clip, draw, projection, svg
 
 
 STYLE = ('polyline, line, rect, path, polygon, .polygon {'
@@ -90,6 +90,8 @@ class SVGIS(object):
 
         self.padding = kwargs.pop('padding', None) or 0
 
+        self.clip = kwargs.get('clip', True)
+
     def __repr__(self):
         return ('SVGIS(files={0.files}, out_crs={0.out_crs}, '
                 'bounds={0.bounds}, padding={0.padding}, '
@@ -120,7 +122,13 @@ class SVGIS(object):
                 # the local UTM, or customize local TM
                 self.out_crs = projection.choosecrs(layer.crs, bounds, use_proj=self.use_proj)
 
-            self.mbr = convert.updatebounds(self.mbr, projection.project_mbr(layer.crs, self.out_crs, *bounds))
+            projected_mbr = projection.project_mbr(layer.crs, self.out_crs, *bounds)
+            self.mbr = convert.updatebounds(self.mbr, projected_mbr)
+
+            if self.clip and bounds != layer.bounds:
+                clipper = clip.prepare([c * scalar for c in convert.extend_bbox(projected_mbr)])
+            else:
+                clipper = None
 
             kwargs['classes'] = [c for c in kwargs.get('classes', []) if c in layer.schema['properties']]
             kwargs['classes'].append(layer.name)
@@ -134,10 +142,10 @@ class SVGIS(object):
             else:
                 reproject = lambda f: f
 
-            for _, f in layer.items(**{'bbox': bounds}):
+            for _, f in layer.items(bbox=bounds):
                 geom = scale.geometry(reproject(f['geometry']), scalar)
 
-                target = _draw_feature(geom, f['properties'], **kwargs)
+                target = _draw_feature(geom, f['properties'], clipper=clipper, **kwargs)
 
                 group.add(target)
 

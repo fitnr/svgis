@@ -22,3 +22,9 @@ class ConvertTestCase(unittest.TestCase):
 
         self.assertSequenceEqual(convert.updatebounds(bounds1, bounds2), (0.2, 0.1, 1.2, 1.2))
         self.assertSequenceEqual(convert.updatebounds(bounds3, bounds2), (0.1, 0.2, 1.5, 1.2))
+
+    def testConvertBbox(self):
+        bounds = (-100, -100, 100, 100)
+
+        assert convert.extend_bbox(bounds, ext=100) == (-200, -200, 200, 200)
+        assert convert.extend_bbox(bounds, ext=10) == (-110, -110, 110, 110)

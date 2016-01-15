@@ -117,7 +117,7 @@ class CliTestCase(unittest.TestCase):
 
     def CliDrawWithStyle(self):
         io = StringIO()
-        cli._draw(self.shp, io, style=self.css, scale=1000, project=PROJECTION, bounds=BOUNDS)
+        cli._draw(self.shp, io, style=self.css, scale=1000, project=PROJECTION, bounds=BOUNDS, clip=None)
         io.seek(0)
 
         self.assertIn(self.css, io.read())
@@ -129,7 +129,7 @@ class CliTestCase(unittest.TestCase):
         io = StringIO()
 
         try:
-            cli._draw(self.shp, io, style=style, scale=1000, project=PROJECTION, bounds=BOUNDS)
+            cli._draw(self.shp, io, style=style, scale=1000, project=PROJECTION, bounds=BOUNDS, clip=None)
             io.seek(0)
             self.assertIn(self.css, io.read())
 
@@ -147,7 +147,7 @@ class CliTestCase(unittest.TestCase):
     def testCliDraw(self):
         io = StringIO()
 
-        cli._draw(self.shp, io, scale=1000, project=PROJECTION, bounds=BOUNDS)
+        cli._draw(self.shp, io, scale=1000, project=PROJECTION, bounds=BOUNDS, clip=False)
         io.seek(0)
 
         result = minidom.parseString(io.read()).getElementsByTagName('svg').item(0)
@@ -162,7 +162,7 @@ class CliTestCase(unittest.TestCase):
     def testCliDrawProjFile(self):
         io = StringIO()
 
-        cli._draw(self.shp, io, scale=1000, project='tests/test_data/test.proj4', bounds=BOUNDS)
+        cli._draw(self.shp, io, scale=1000, project='tests/test_data/test.proj4', bounds=BOUNDS, clip=False)
         io.seek(0)
 
         result = minidom.parseString(io.read()).getElementsByTagName('svg').item(0)
@@ -176,7 +176,7 @@ class CliTestCase(unittest.TestCase):
 
     def testCli(self):
         sys.argv = (['svgis', 'draw', '-j', PROJECTION, '-f', '1000', self.shp, '--bounds'] +
-                    [str(b) for b in BOUNDS] + ['-o', 'tmp.svg'])
+                    [str(b) for b in BOUNDS] + ['-o', 'tmp.svg', '--no-clip'])
 
         cli.main()
 

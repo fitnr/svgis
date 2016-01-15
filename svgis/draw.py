@@ -7,6 +7,7 @@ except ImportError:
     pass
 import svgwrite
 import fionautil.measure
+from .clip import clip
 
 
 def applyid(multifunc):
@@ -127,11 +128,17 @@ def multipoint(coordinates, **kwargs):
     return [point((pt[0], pt[1]), **kwargs) for pt in coordinates]
 
 
-def geometry(geom, **kwargs):
+def geometry(geom, clipper=None, bbox=None, **kwargs):
     '''Draw a geometry. Will return either a single geometry or a group.
     :geom object A GeoJSON-like geometry object
+    :bbox tuple An optional bounding minimum bounding box
     :kwargs object keyword args to be passed onto svgwrite. Things like class_, id, style, etc.
     '''
+    if clipper:
+        geom = clipper(geom)
+    elif bbox:
+        geom = clip(geom, bbox)
+
     if geom['type'] in ('Point', 'MultiPoint'):
         return points(geom, **kwargs)
 

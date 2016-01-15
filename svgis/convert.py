@@ -1,5 +1,6 @@
 from __future__ import division
 import math
+from itertools import izip, tee
 
 
 def rect(length, angle):
@@ -30,9 +31,17 @@ def updatebounds(old, new):
             bounds.append(None)
 
     if any(not v for v in bounds):
-        bounds = tuple((a or b or c) for a, b, c in zip(bounds, new, old))
+        bounds = list((a or b or c) for a, b, c in zip(bounds, new, old))
 
     return bounds
+
+
+def extend_bbox(bbox, ext=100):
+    '''
+    Widen the bounding box just a little bit
+    Assumes the bbox is in feet or meters or something
+    '''
+    return bbox[0] - ext, bbox[1] - ext, bbox[2] + ext, bbox[3] + ext
 
 
 def _frange(a, b, count=None):
@@ -56,3 +65,13 @@ def mbr_to_bounds(minx, miny, maxx, maxy):
     xs.reverse()
 
     return left_top + [(maxx, y) for y in ys] + [(x, miny) for x in xs]
+
+
+def pairwise(iterable):
+    '''
+    Iterate in repeating chunks of two
+    s -> (s0, s1), (s1, s2), (s2, s3), ...
+    '''
+    a, b = tee(iterable, 2)
+    next(b, None)
+    return izip(a, b)

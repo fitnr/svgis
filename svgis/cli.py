@@ -107,7 +107,8 @@ def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
         use_proj=use_proj,
         out_crs=out_crs,
         padding=padding,
-        style=style
+        style=style,
+        clip=kwargs.pop('clip', True)
     ).compose(**kwargs)
 
     _echo(drawing.tostring(), output)
@@ -156,6 +157,9 @@ def main():
 
     draw.add_argument('-x', '--no-viewbox', action='store_false', dest='viewbox',
                       help='Draw SVG without a ViewBox. May improve compatibility.')
+
+    draw.add_argument('-n', '--no-clip', action='store_false', dest='clip',
+                      help="Don't clip shapes to bounds. Faster, but possibly larger files")
 
     draw.add_argument('--id-field', type=str, dest='id_field', help='Geodata field to use as ID')
     draw.add_argument('--class-fields', type=str, dest='class_fields',
