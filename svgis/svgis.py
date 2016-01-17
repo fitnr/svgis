@@ -65,7 +65,7 @@ class SVGIS(object):
         :files list/str A list of files to map
         :bounds list/tuple An iterable with four float coordinates in (minx, miny, maxx, maxy) format
         :out_crs dict A proj-4 like mapping
-        :use_proj string A keyword for picking a projection (either utm or local)
+        :use_proj string A keyword for picking a projection (file, utm or local)
         :style string CSS to add to output file
         :scalar int Map scale to use (output coordinate are divided by this)
         :padding number Buffer each edge by this many map units

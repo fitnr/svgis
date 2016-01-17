@@ -166,6 +166,7 @@ def main():
                             'Accepts either a valid EPSG code (e.g. epsg:4456), '
                             'a valid proj4 string, '
                             'a file containing a proj4, '
+                            '"file" (use existing ) or '
                             '"utm" (use local UTM zone) or '
                             '"local" (generate a local projection)'))
 

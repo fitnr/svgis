@@ -65,7 +65,7 @@ def choosecrs(in_crs, bounds, use_proj=None):
     :use_proj string wither 'utm' or 'local'
     :returns dict fiona-type proj4 dictionary
     '''
-    if use_proj is None and not pyproj.Proj(**in_crs).is_latlong():
+    if (use_proj is None or use_proj == 'file') and not pyproj.Proj(**in_crs).is_latlong():
         # it's projected already, so noop.
         return in_crs
 
