@@ -16,10 +16,9 @@ README.rst: README.md
 .PHONY: all test cov deploy clean
 
 cov:
-	coverage run --include='svgis/*' setup.py test
+	- coverage run --include='svgis/*' setup.py test
 	coverage report
 	coverage html
-	open htmlcov/index.html
 
 test: tests/test_data/cb_2014_us_nation_20m.shp tests/test_data/test.svg
 	python setup.py test
