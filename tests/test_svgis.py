@@ -1,7 +1,6 @@
 import unittest
 import re
 from svgis import svgis
-import svgwrite
 
 
 class SvgisTestCase(unittest.TestCase):
@@ -24,11 +23,11 @@ class SvgisTestCase(unittest.TestCase):
 
     def testSvgisCompose(self):
         composed = self.svgis_obj.compose()
-        assert isinstance(composed, svgwrite.drawing.Drawing)
+        assert isinstance(composed, basestring)
 
     def testSvgisClassFields(self):
         composed = self.svgis_obj.compose(classes=('NAME', 'GEOID'))
-        match = re.search(r'class="(.+)"', composed.tostring())
+        match = re.search(r'class="(.+)"', composed)
         self.assertIsNotNone(match)
         self.assertIn('NAME_United_States', match.groups()[0])
         self.assertIn('GEOID_US', match.groups()[0])

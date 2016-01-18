@@ -6,7 +6,7 @@ import fiona
 import fiona.transform
 import svgwrite
 from fionautil import scale, coords
-from . import convert, clip, draw, projection, svg
+from . import convert, clip, css, draw, projection, svg
 
 
 STYLE = ('polyline, line, rect, path, polygon, .polygon {'
@@ -153,7 +153,7 @@ class SVGIS(object):
 
     def compose(self, style=None, scalar=None, bounds=None, **kwargs):
         '''
-        Draw files to svg.
+        Draw files to svg. Returns unicode.
         :scalar int factor by which to scale the data.
         :style string CSS to append to parent object CSS
         :bounds list/tuple Bounding box to draw within. Defaults to map data bounds.
@@ -163,6 +163,7 @@ class SVGIS(object):
         style = self.style + (style or '')
 
         viewbox = kwargs.pop('viewbox', True)
+        inline_css = kwargs.pop('inline_css', False)
 
         container = svgwrite.container.Group(transform='scale(1, -1)', fill_rule='evenodd')
         container.translate(self.padding, -self.padding)
@@ -173,15 +174,22 @@ class SVGIS(object):
 
         w, h, x0, y1 = self.dims(scalar, bounds=bounds)
 
+        if not viewbox:
+            container.translate(-x0, -y1)
+
+        drawing = svg.create((w, h), [container], style=style)
+
         if viewbox:
-            drawing = svg.create((w, h), [container], style=style)
             drawing.viewbox(x0, -y1, w, h)
 
-        else:
-            container.translate(-x0, -y1)
-            drawing = svg.create((w, h), [container], style=style)
+        result = drawing.tostring()
 
-        return drawing
+        if inline_css:
+            return css.inline(result, style)
+
+        else:
+            return result
+
 
     def dims(self, scalar, bounds=None):
         '''
@@ -192,7 +200,7 @@ class SVGIS(object):
         if bounds and len(bounds) == 4:
             mbr_ring = convert.mbr_to_bounds(*bounds)
         else:
-            mbr_ring = convert.mbr_to_bounds(*self.mbr)
+            mbr_ring = convert.mbr_to_bounds(self.mbr[0], self.mbr[1], self.mbr[2], self.mbr[3])
 
         boundary = scale.scale(mbr_ring, scalar)
         try:

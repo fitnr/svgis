@@ -62,9 +62,13 @@ setup(
     ],
 
     extras_require={
-        'lxml': ['lxml'],
         'numpy': ['numpy'],
         'clip': ['shapely>=1.5.7'],
+        'inline': [
+            'cssselect>=0.9.1,<1',
+            'tinycss>=0.3,<0.4',
+            'lxml>=3.5.0,<4.0',
+        ],
     },
 
     test_suite='tests',

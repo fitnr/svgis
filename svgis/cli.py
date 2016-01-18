@@ -5,7 +5,7 @@ import sys
 from signal import signal, SIGPIPE, SIG_DFL
 import argparse
 import fiona.crs
-from . import projection, svg
+from . import css, projection, svg
 from . import __version__ as version
 from .svgis import SVGIS
 
@@ -42,7 +42,7 @@ def _style(layer, output, style, replace=None, **_):
         with open(style) as f:
             style = f.read()
 
-    result = svg.add_style(layer, style, replace=replace)
+    result = css.add_style(layer, style, replace=replace)
     _echo(result, output)
 
 
@@ -111,7 +111,7 @@ def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
         clip=kwargs.pop('clip', True)
     ).compose(**kwargs)
 
-    _echo(drawing.tostring(), output)
+    _echo(drawing, output)
 
 
 def _proj(_, output, minx, miny, maxx, maxy, project=None):

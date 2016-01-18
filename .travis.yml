@@ -26,7 +26,7 @@ matrix:
 
 before_install:
     - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -qq update; fi
-    - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -qq install -y libgdal1-dev; fi
+    - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -qq install -y libgdal1-dev libxml2-dev libxslt-dev python-dev; fi
 
 install:
     - pip install docutils
@@ -38,4 +38,6 @@ script:
     - pip install -e .[numpy]
     - make test QUIET= -W svgis/test_data/cb_2014_us_nation_20m.zip
     - pip install -e .[clip]
+    - make test QUIET= -W svgis/test_data/cb_2014_us_nation_20m.zip
+    - pip install -e .[inline]
     - make test QUIET= -W svgis/test_data/cb_2014_us_nation_20m.zip
