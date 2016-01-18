@@ -21,6 +21,10 @@ cov:
 	coverage report
 	coverage html
 
+profile: tests/profile.py
+	@echo "    ncalls  tottime  percall  cumtime  percall filename:lineno(function)"
+	python -m cProfile -s tottime $< | grep -E '(svgis|draw|css|projection|svg|cli|clip)'
+
 test: tests/test_data/cb_2014_us_nation_20m.shp tests/test_data/test.svg
 	python setup.py $(QUIET) test
 
