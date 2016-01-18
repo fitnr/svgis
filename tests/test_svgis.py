@@ -1,4 +1,5 @@
 import unittest
+import re
 from svgis import svgis
 import svgwrite
 
@@ -27,7 +28,11 @@ class SvgisTestCase(unittest.TestCase):
 
     def testSvgisClassFields(self):
         composed = self.svgis_obj.compose(classes=('NAME', 'GEOID'))
-        self.assertIn('class="NAME_United_States GEOID_US cb_2014_us_nation_20m"', composed.tostring())
+        match = re.search(r'class="(.+)"', composed.tostring())
+        self.assertIsNotNone(match)
+        self.assertIn('NAME_United_States', match.groups()[0])
+        self.assertIn('GEOID_US', match.groups()[0])
+        self.assertIn('cb_2014_us_nation_20m', match.groups()[0])
 
     def testCreateClasses(self):
         classes = svgis._construct_classes(('apple', 'potato'), {'apple': 'fruit'})

@@ -109,7 +109,7 @@ class SVGIS(object):
         # * layer.bounds: the layer's bounding, input coords
         # * projected_mbr: The bounds, in output coords
         # * self.mbr: An in-progress combination of every layer's mbr
-        # * drawbox: A slightly extended version of projected_mbr
+        # * clipper: A clipping function based on a slightly extended version of projected_mbr
 
         with fiona.open(filename, "r") as layer:
             group = svgwrite.container.Group(id=layer.name)
@@ -131,7 +131,7 @@ class SVGIS(object):
                 clipper = None
 
             kwargs['classes'] = [c for c in kwargs.get('classes', []) if c in layer.schema['properties']]
-            kwargs['classes'].append(layer.name)
+            kwargs['classes'].insert(0, layer.name)
 
             if 'id_field' in kwargs:
                 if kwargs['id_field'] not in layer.schema['properties'].keys():
