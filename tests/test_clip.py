@@ -38,11 +38,11 @@ try:
             result = shapely.geometry.mapping(i)
             self.assertSequenceEqual(result['coordinates'], self.expected)
 
-        def test_clip(self):
+        def testClip(self):
             clipped = clip.clip({"type": "Polygon", "coordinates": self.coords}, self.bounds)
             self.assertSequenceEqual(clipped['coordinates'], self.expected)
 
-        def test_clip_geometry(self):
+        def testClipGeometry(self):
             geometry = {"type": "Polygon", "coordinates": self.coords}
             clipped = clip.clip(geometry, self.bounds)
 

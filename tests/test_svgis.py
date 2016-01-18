@@ -49,10 +49,9 @@ class SvgisTestCase(unittest.TestCase):
         self.assertEqual(classes, 'apple_None potato')
 
     def testRepr(self):
-        self.assertEqual(str(self.svgis_obj), ("SVGIS(files=['tests/test_data/cb_2014_us_nation_20m.shp'], "
-                'out_crs=None, '
-                'bounds=(), padding=0, '
-                'scalar=1)'))
+        expected = ("SVGIS(files=['tests/test_data/cb_2014_us_nation_20m.shp'], "
+                    'out_crs=None, bounds=(), padding=0, scalar=1)')
+        self.assertEqual(str(self.svgis_obj), expected)
 
 
 if __name__ == '__main__':

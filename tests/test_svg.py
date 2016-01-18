@@ -6,6 +6,7 @@ from xml.dom import minidom
 from svgis import svg
 import svgwrite
 
+
 class SvgTestCase(unittest.TestCase):
 
     def setUp(self):

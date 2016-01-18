@@ -11,7 +11,9 @@
 import unittest
 from svgis import convert
 
+
 class ConvertTestCase(unittest.TestCase):
+
     def test_rect(self):
         pass
 

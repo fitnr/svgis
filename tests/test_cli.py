@@ -24,13 +24,13 @@ BOUNDS = (-124.0, 20.5, -64.0, 49.0)
 class CliTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.testsvg = 'tests/test_data/test.svg'
+        self.fixture = 'tests/test_data/test.svg'
         self.shp = 'tests/test_data/cb_2014_us_nation_20m.shp'
         self.css = 'polygon{fill:green}'
         sys.tracebacklimit = 99
 
     def testSvgStyle(self):
-        args = ['svgis', 'style', '-s', self.css, self.testsvg]
+        args = ['svgis', 'style', '-s', self.css, self.fixture]
         p = subprocess.Popen(args, stdout=subprocess.PIPE)
         out, err = p.communicate()
 
@@ -43,7 +43,7 @@ class CliTestCase(unittest.TestCase):
             self.assertIn(self.css, out.decode())
 
     def testSvgScale(self):
-        args = ['svgis', 'scale', '-f', '123', self.testsvg]
+        args = ['svgis', 'scale', '-f', '123', self.fixture]
         p = subprocess.Popen(args, stdout=subprocess.PIPE)
         out, err = p.communicate()
 
@@ -96,7 +96,7 @@ class CliTestCase(unittest.TestCase):
 
     def testCliStyle(self):
         io = StringIO()
-        cli._style(self.testsvg, io, self.css)
+        cli._style(self.fixture, io, self.css)
         io.seek(0)
 
         self.assertIn(self.css, io.read())
@@ -108,7 +108,7 @@ class CliTestCase(unittest.TestCase):
         io = StringIO()
 
         try:
-            cli._style(self.testsvg, io, style)
+            cli._style(self.fixture, io, style)
             io.seek(0)
             self.assertIn(self.css, io.read())
 
@@ -139,7 +139,7 @@ class CliTestCase(unittest.TestCase):
     def testCliScale(self):
         io = StringIO()
 
-        cli._scale(self.testsvg, io, 1.37)
+        cli._scale(self.fixture, io, 1.37)
         io.seek(0)
         result = io.read()
         self.assertIn('scale(1.37)', result)
@@ -151,7 +151,7 @@ class CliTestCase(unittest.TestCase):
         io.seek(0)
 
         result = minidom.parseString(io.read()).getElementsByTagName('svg').item(0)
-        fixture = minidom.parse(self.testsvg).getElementsByTagName('svg').item(0)
+        fixture = minidom.parse(self.fixture).getElementsByTagName('svg').item(0)
 
         result_vb = [float(x) for x in result.attributes.get('viewBox').value.split(',')]
         fixture_vb = [float(x) for x in fixture.attributes.get('viewBox').value.split(',')]
@@ -166,7 +166,7 @@ class CliTestCase(unittest.TestCase):
         io.seek(0)
 
         result = minidom.parseString(io.read()).getElementsByTagName('svg').item(0)
-        fixture = minidom.parse(self.testsvg).getElementsByTagName('svg').item(0)
+        fixture = minidom.parse(self.fixture).getElementsByTagName('svg').item(0)
 
         result_vb = [float(x) for x in result.attributes.get('viewBox').value.split(',')]
         fixture_vb = [float(x) for x in fixture.attributes.get('viewBox').value.split(',')]
@@ -175,14 +175,14 @@ class CliTestCase(unittest.TestCase):
             self.assertAlmostEqual(r, f, 5)
 
     def testCli(self):
-        sys.argv = (['svgis', 'draw', '-j', PROJECTION, '-f', '1000', self.shp, '--bounds'] +
-                    [str(b) for b in BOUNDS] + ['-o', 'tmp.svg', '--no-clip'])
+        sys.argv = (['svgis', 'draw', '-j', PROJECTION, '-f', '1000', self.shp,
+                     '-o', 'tmp.svg', '--no-clip', '--bounds'] + [str(b) for b in BOUNDS])
 
         cli.main()
 
         try:
             result = minidom.parse('tmp.svg').getElementsByTagName('svg').item(0)
-            fixture = minidom.parse(self.testsvg).getElementsByTagName('svg').item(0)
+            fixture = minidom.parse(self.fixture).getElementsByTagName('svg').item(0)
 
             result_vb = [float(x) for x in result.attributes.get('viewBox').value.split(',')]
             fixture_vb = [float(x) for x in fixture.attributes.get('viewBox').value.split(',')]
