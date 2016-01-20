@@ -12,8 +12,8 @@ from .errors import SvgisError
 
 def applyid(multifunc):
     '''
-    This decorator applies the ID attribute to the group that contains multi-part geometries,
-    rather than the elments of the group
+    This decorator applies the ID attribute to the group that
+    contains multi-part geometries, rather than the elements of the group.
     '''
 
     def func(coordinates, **kwargs):
@@ -57,7 +57,7 @@ def path(coordinates, **kwargs):
 
 def polygons(geom, **kwargs):
     '''Draw polygon(s) in a feature. transform is a function to operate on coords.
-    Draws first ring clockwise, and subsequent ones counter-clockwise
+    Draws first ring clockwise, and subsequent ones counter-clockwise.
     '''
     if geom['type'] == 'Polygon':
         return polygon(geom['coordinates'], **kwargs)
@@ -129,7 +129,8 @@ def multipoint(coordinates, **kwargs):
 
 
 def geometry(geom, clipper=None, bbox=None, **kwargs):
-    '''Draw a geometry. Will return either a single geometry or a group.
+    '''
+    Draw a geometry. Will return either a single geometry or a group.
     :geom object A GeoJSON-like geometry object
     :bbox tuple An optional bounding minimum bounding box
     :kwargs object keyword args to be passed onto svgwrite. Things like class_, id, style, etc.
@@ -153,7 +154,7 @@ def geometry(geom, clipper=None, bbox=None, **kwargs):
 
 
 def feature(feat, **kwargs):
-    '''Draw a feature'''
+    '''Draw a feature.'''
     return geometry(feat['geometry'], **kwargs)
 
 
@@ -171,5 +172,5 @@ def _group(elements, **kwargs):
 
 
 def group(features, **kwargs):
-    '''Return a group with features drawn into it'''
+    '''Return a group with features drawn into it.'''
     return _group([feature(f, **kwargs) for f in features])

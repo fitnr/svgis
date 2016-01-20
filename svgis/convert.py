@@ -11,7 +11,7 @@ def rect(length, angle):
 def updatebounds(old, new):
     '''
     Extend old with any more distant values from newpoints.
-    Also replace any missing min/max points in old with values from new
+    Also replace any missing min/max points in old with values from new.
     '''
     bounds = []
 
@@ -38,8 +38,7 @@ def updatebounds(old, new):
 
 def extend_bbox(bbox, ext=100):
     '''
-    Widen the bounding box just a little bit
-    Assumes the bbox is in feet or meters or something
+    Widen the bounding box just a little bit. Assumes the bbox is in feet or meters or something.
     '''
     return bbox[0] - ext, bbox[1] - ext, bbox[2] + ext, bbox[3] + ext
 
@@ -55,7 +54,7 @@ def _frange(a, b, count=None):
 
 
 def mbr_to_bounds(minx, miny, maxx, maxy):
-    """Convert min, max points to a boundary ring"""
+    """Convert min, max points to a boundary ring."""
 
     xs, ys = list(_frange(minx, maxx)), list(_frange(miny, maxy))
 
@@ -69,7 +68,7 @@ def mbr_to_bounds(minx, miny, maxx, maxy):
 
 def pairwise(iterable):
     '''
-    Iterate in repeating chunks of two
+    Iterate in repeating chunks of two.
     s -> (s0, s1), (s1, s2), (s2, s3), ...
     '''
     a, b = tee(iterable, 2)

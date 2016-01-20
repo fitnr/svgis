@@ -28,6 +28,8 @@ def expand_rings(rings):
 
 
 def expand_geom(geom):
+    '''Expand generators in a geometry's coordinates.'''
+
     coordinates = geom['coordinates']
 
     if geom['type'] == 'MultiPolygon':

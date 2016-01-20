@@ -73,7 +73,7 @@ class SVGIS(object):
 
     def __init__(self, files, bounds=None, out_crs=None, **kwargs):
         '''
-        Create an SVGIS object, which will stand ready to generate some maps
+        An SVGIS object, which will stand ready to generate some maps.
         :files list/str A list of files to map
         :bounds list/tuple An iterable with four float coordinates in (minx, miny, maxx, maxy) format
         :out_crs dict A proj-4 like mapping
@@ -113,7 +113,7 @@ class SVGIS(object):
 
     def get_clipper(self, in_crs, in_bounds, out_bounds, scalar=None):
         '''
-        Get a clipping function for the given input crs and bounds
+        Get a clipping function for the given input crs and bounds.
         Returns None if in_bounds == out_bounds or clipping is off.
         '''
         scalar = scalar or self.scalar
@@ -128,7 +128,7 @@ class SVGIS(object):
         return clipper
 
     def reprojector(self, in_crs):
-        '''Return a reprojection transform from in_crs to self.out_crs'''
+        '''Return a reprojection transform from in_crs to self.out_crs.'''
         if self.out_crs != in_crs:
             reproject = lambda geom: fiona.transform.transform_geom(in_crs, self.out_crs, geom)
         else:
@@ -137,7 +137,7 @@ class SVGIS(object):
         return reproject
 
     def set_out_crs(self, layer_crs, bounds):
-        '''Set the out CRS, if not yet set'''
+        '''Set the out CRS, if not yet set.'''
         if not self.out_crs:
             # Determine projection transformation:
             # either use something passed in, a non latlong layer projection,
