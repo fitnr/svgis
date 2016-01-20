@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import sys
-import re
 from xml.dom import minidom
 from collections import Sequence
 from string import ascii_letters
@@ -41,19 +40,12 @@ def dims(boundary, padding=0):
 
 def sanitize(x):
     '''Make input safe of use in an svg ID or class field'''
-
-    if x is None:
-        return ''
-
     try:
-        string = str(x)
+        string = x.replace(' ', '_')
+        return string if string[0] in ('_-' + ascii_letters) else '_' + string
 
-    except UnicodeEncodeError:
-        string = x.encode('ascii', 'ignore')
-
-    string = re.sub(r'[^_a-zA-Z0-9-]', '_', string)
-    string = re.sub(r'_{1,}', '_', string)
-    return string if string[0] in ('_-' + ascii_letters) else '_' + string
+    except (AttributeError, IndexError):
+        return ''
 
 
 def set_group(members=None, scale=None, translate=None, **kwargs):

@@ -1,7 +1,7 @@
 import unittest
 import re
 import svgwrite.shapes
-from svgis import svgis
+from svgis import svgis, errors
 
 
 class SvgisTestCase(unittest.TestCase):
@@ -9,6 +9,10 @@ class SvgisTestCase(unittest.TestCase):
     def setUp(self):
         self.file = 'tests/test_data/cb_2014_us_nation_20m.shp'
         self.svgis_obj = svgis.SVGIS(self.file)
+
+    def testSvgisError(self):
+        with self.assertRaises(errors.SvgisError):
+            raise errors.SvgisError('This is an error')
 
     def testSvgisCreate(self):
         self.assertEqual(self.svgis_obj.files, [self.file])
