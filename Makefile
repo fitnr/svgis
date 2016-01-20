@@ -6,7 +6,7 @@
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
 
 PROJECTION = +proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs
-QUIET = -q
+QUIET ?= -q
 
 all: README.rst tests/test_data/cb_2014_us_nation_20m.shp
 
@@ -17,16 +17,16 @@ README.rst: README.md
 .PHONY: all test cov deploy clean
 
 cov:
-	- coverage run --include='svgis/*' setup.py $(QUIET) test
+	- coverage run --include='svgis/*' $(PYTHONFLAGS) setup.py $(QUIET) test
 	coverage report
 	coverage html
 
 profile: tests/profile.py
 	@echo "    ncalls  tottime  percall  cumtime  percall filename:lineno(function)"
-	python -m cProfile -s tottime $< | grep -E '(svgis|draw|css|projection|svg|cli|clip)'
+	python -m cProfile -s tottime $< | grep -E '(svgis|draw|css|projection|svg|cli|clip|convert|errors).py'
 
 test: tests/test_data/cb_2014_us_nation_20m.shp tests/test_data/test.svg
-	python setup.py $(QUIET) test
+	python $(PYTHONFLAGS) setup.py $(QUIET) test
 
 	svgis style -s 'polygon{fill:green}' $(lastword $^) > /dev/null
 	svgis scale -f 10 $(lastword $^) > /dev/null
