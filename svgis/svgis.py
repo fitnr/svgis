@@ -33,19 +33,27 @@ def _construct_classes(classes, properties):
     return (' '.join(classes)).strip()
 
 
-def _draw_feature(geom, properties=None, **kwargs):
+def _get_classes(classlist, properties, name=None):
+    '''Create a list of classes that also appear in the properties'''
+    classes = [c for c in classlist if c in properties]
+    if name:
+        classes.insert(0, name)
+    return classes
+
+
+def _draw_feature(geom, properties=None, classes=None, id_field=None, **kwargs):
     '''Draw a single feature given a geometry object and properties object'''
     properties = properties or {}
+    classes = classes or []
 
-    if kwargs.get('classes'):
-        try:
-            kwargs['class_'] = _construct_classes(kwargs.pop('classes'), properties)
-        except TypeError:
-            pass
+    try:
+        kwargs['class_'] = _construct_classes(classes, properties)
+    except TypeError:
+        pass
 
-    if kwargs.get('id_field'):
+    if id_field:
         try:
-            kwargs['id'] = svg.sanitize(properties.get(kwargs.pop('id_field')))
+            kwargs['id'] = svg.sanitize(properties.get(id_field))
         except AttributeError:
             pass
 
@@ -128,6 +136,14 @@ class SVGIS(object):
 
         return reproject
 
+    def set_out_crs(self, layer_crs, bounds):
+        '''Set the out CRS, if not yet set'''
+        if not self.out_crs:
+            # Determine projection transformation:
+            # either use something passed in, a non latlong layer projection,
+            # the local UTM, or customize local TM
+            self.out_crs = projection.choosecrs(layer_crs, bounds, use_proj=self.use_proj)
+
     def compose_file(self, filename, scalar, bounds=None, **kwargs):
         '''
         Draw fiona file to svgwrite Group object.
@@ -135,29 +151,22 @@ class SVGIS(object):
         :scalar int map scale
         :bounds tuple (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
         '''
-        # OK, this gets a little complicated. We have:
-        # * self.bounds: bounds in input coords, passed to object
-        # * layer.bounds: the layer's bounding, input coords
-        # * projected_mbr: The bounds, in output coords
-        # * self.mbr: An in-progress combination of every layer's mbr
-        # * clipper: A clipping function based on a slightly extended version of projected_mbr
-
         with fiona.open(filename, "r") as layer:
             bounds = bounds or self.bounds or layer.bounds
 
-            if not self.out_crs:
-                # Determine projection transformation:
-                # either use something passed in, a non latlong layer projection,
-                # the local UTM, or customize local TM
-                self.out_crs = projection.choosecrs(layer.crs, bounds, use_proj=self.use_proj)
+            # Set the output CRS, if not yet set.
+            self.set_out_crs(layer.crs, bounds)
 
+            # Get clipping function based on a slightly extended version of projected_mbr.
             clipper = self.get_clipper(layer.crs, layer.bounds, bounds, scalar=scalar)
 
+            # feature reprojection function (could be no op).
             reproject = self.reprojector(layer.crs)
 
-            kwargs['classes'] = [c for c in kwargs.get('classes', []) if c in layer.schema['properties']]
-            kwargs['classes'].insert(0, layer.name)
+            # A list of class names to get from layer properties.
+            kwargs['classes'] = _get_classes(kwargs.get('classes', []), layer.schema['properties'], layer.name)
 
+            # Remove the id field if it doesn't appear in the properties.
             if 'id_field' in kwargs:
                 if kwargs['id_field'] not in layer.schema['properties'].keys():
                     del kwargs['id_field']
