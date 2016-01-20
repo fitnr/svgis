@@ -6,10 +6,28 @@ from signal import signal, SIGPIPE, SIG_DFL
 import argparse
 import logging
 import fiona.crs
+
+try:
+    import shapely
+    clipaction = 'store_false'
+    cliphelp = ''
+except ImportError:
+    clipaction = 'store_const'
+    cliphelp = ' (not enabled)'
+
+try:
+    import lxml
+    import cssselect
+    import tinycss
+    cssaction = 'store_true'
+    csshelp = ''
+except ImportError:
+    cssaction = 'store_false'
+    csshelp = ' (not enabled)'
+
 from . import css, projection, svg
 from . import __version__ as version
 from .svgis import SVGIS
-
 
 sys.tracebacklimit = 0
 
@@ -165,21 +183,11 @@ def main():
     draw.add_argument('-x', '--no-viewbox', action='store_false', dest='viewbox',
                       help='Draw SVG without a ViewBox. May improve compatibility.')
 
-    try:
-        import shapely
-        draw.add_argument('-n', '--no-clip', action='store_false', dest='clip',
-                          help="Don't clip shapes to bounds. Faster, but possibly larger files")
-    except ImportError:
-        pass
+    draw.add_argument('-n', '--no-clip', action=clipaction, dest='clip',
+                      help="Don't clip shapes to bounds. Faster, but possibly larger files"+cliphelp)
 
-    try:
-        import lxml
-        import cssselect
-        import tinycss
-        draw.add_argument('-l', '--inline-css', action='store_true',
-                          help="Inline CSS. Slightly slower, but required by some clients (Adobe Illustrator)")
-    except ImportError:
-        pass
+    draw.add_argument('-l', '--inline-css', action=cssaction,
+                      help="Inline CSS. Slightly slower, but required by some clients (Adobe Illustrator)"+csshelp)
 
     draw.add_argument('--id-field', type=str, dest='id_field', help='Geodata field to use as ID')
     draw.add_argument('--class-fields', type=str, dest='class_fields',
