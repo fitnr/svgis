@@ -176,7 +176,7 @@ class CliTestCase(unittest.TestCase):
 
     def testCli(self):
         sys.argv = (['svgis', 'draw', '-j', PROJECTION, '-f', '1000', self.shp,
-                     '-o', 'tmp.svg', '--no-clip', '--bounds'] + [str(b) for b in BOUNDS])
+                     '-o', 'tmp.svg', '--bounds'] + [str(b) for b in BOUNDS])
 
         cli.main()
 

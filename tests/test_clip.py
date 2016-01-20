@@ -19,6 +19,7 @@ try:
             self.bounds = (1, 1, 9, 9)
             self.coords = [[(2, 2), (100, 2), (11, 11), (12, 12), (2, 10), (2, 2)]]
             self.expected = [((2.0, 9.0), (9.0, 9.0), (9.0, 2.0), (2.0, 2.0), (2.0, 9.0))]
+            self.gen = (x for x in self.coords[0])
 
         def testShapely(self):
             minx, miny, maxx, maxy = self.bounds
@@ -48,9 +49,52 @@ try:
 
             self.assertSequenceEqual(set(self.expected), set(clipped['coordinates']))
 
+        def testExpand(self):
+            expanded = clip.expand(self.gen)
+
+            try:
+                expanded = expanded.tolist()
+            except AttributeError:
+                pass
+
+            self.assertSequenceEqual([tuple(x) for x in expanded], self.coords[0])
+
+        def testExpandGeometry(self):
+            geom = {
+                "type": "LineString",
+                "coordinates": self.gen
+            }
+
+            expanded = clip.expand_geom(geom)
+
+            try:
+                expanded['coordinates'] = expanded['coordinates'].tolist()
+            except AttributeError:
+                pass
+
+            self.assertSequenceEqual([tuple(x) for x in expanded['coordinates']], self.coords[0])
+
+        def testStrangeGeometry(self):
+            with self.assertRaises(NotImplementedError):
+                clip.expand_geom({"type": "GeometryCollection", "coordinates": self.coords})
+
 except ImportError:
     class EmptyTestCase(unittest.TestCase):
-        pass
+
+        def setUp(self):
+            self.bounds = (1, 1, 9, 9)
+            self.coords = [[(2, 2), (100, 2), (11, 11), (12, 12), (2, 10), (2, 2)]]
+            self.expected = [((2.0, 9.0), (9.0, 9.0), (9.0, 2.0), (2.0, 2.0), (2.0, 9.0))]
+            self.gen = (x for x in self.coords[0])
+
+        def testClip(self):
+            geometry = {"type": "Polygon", "coordinates": self.coords}
+            assert clip.clip(geometry, self.bounds) == geometry
+
+        def testStrangeGeometry(self):
+            with self.assertRaises(NotImplementedError):
+                clip.expand_geom({"type": "GeometryCollection", "coordinates": self.coords})
+
 
 if __name__ == '__main__':
     unittest.main()
