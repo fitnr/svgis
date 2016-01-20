@@ -68,6 +68,6 @@ def inline(svg, css):
 
         return etree.tounicode(document)
 
-    # embed style in SVG with minidom
+    # Return plain old SVG.
     except NameError:
-        return add_style(svg, css, True)
+        return svg
