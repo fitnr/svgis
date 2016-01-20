@@ -49,51 +49,67 @@ try:
 
             self.assertSequenceEqual(set(self.expected), set(clipped['coordinates']))
 
-        def testExpand(self):
-            expanded = clip.expand(self.gen)
-
-            try:
-                expanded = expanded.tolist()
-            except AttributeError:
-                pass
-
-            self.assertSequenceEqual([tuple(x) for x in expanded], self.coords[0])
-
-        def testExpandGeometry(self):
-            geom = {
-                "type": "LineString",
-                "coordinates": self.gen
-            }
-
-            expanded = clip.expand_geom(geom)
-
-            try:
-                expanded['coordinates'] = expanded['coordinates'].tolist()
-            except AttributeError:
-                pass
-
-            self.assertSequenceEqual([tuple(x) for x in expanded['coordinates']], self.coords[0])
-
-        def testStrangeGeometry(self):
-            with self.assertRaises(NotImplementedError):
-                clip.expand_geom({"type": "GeometryCollection", "coordinates": self.coords})
-
 except ImportError:
-    class EmptyTestCase(unittest.TestCase):
+    pass
 
-        def setUp(self):
-            self.bounds = (1, 1, 9, 9)
-            self.coords = [[(2, 2), (100, 2), (11, 11), (12, 12), (2, 10), (2, 2)]]
-            self.expected = [((2.0, 9.0), (9.0, 9.0), (9.0, 2.0), (2.0, 2.0), (2.0, 9.0))]
-            self.gen = (x for x in self.coords[0])
 
-        def testClip(self):
-            geometry = {"type": "Polygon", "coordinates": self.coords}
-            assert clip.clip(geometry, self.bounds) == geometry
+class ExpandTestCase(unittest.TestCase):
 
-        def testStrangeGeometry(self):
-            with self.assertRaises(NotImplementedError):
-                clip.expand_geom({"type": "GeometryCollection", "coordinates": self.coords})
+    def setUp(self):
+        self.bounds = (1, 1, 9, 9)
+        self.coords = [[(2, 2), (100, 2), (11, 11), (12, 12), (2, 10), (2, 2)]]
+        self.expected = [((2.0, 9.0), (9.0, 9.0), (9.0, 2.0), (2.0, 2.0), (2.0, 9.0))]
+        self.gen = (x for x in self.coords[0])
+
+    def testExpand(self):
+        expanded = clip.expand(self.gen)
+
+        try:
+            expanded = expanded.tolist()
+        except AttributeError:
+            pass
+
+        self.assertSequenceEqual([tuple(x) for x in expanded], self.coords[0])
+
+    def testExpandGeometry(self):
+        geom = {
+            "type": "LineString",
+            "coordinates": self.gen
+        }
+
+        expanded = clip.expand_geom(geom)
+
+        try:
+            expanded['coordinates'] = expanded['coordinates'].tolist()
+        except AttributeError:
+            pass
+
+        self.assertSequenceEqual([tuple(x) for x in expanded['coordinates']], self.coords[0])
+
+    def testExpandGeomCollection(self):
+        gen = (x for x in self.coords[0])
+
+        GC = {
+            "type": "GeometryCollection",
+            "geometries": [
+                {
+                    "type": "LineString",
+                    "coordinates": self.gen
+                },
+                {
+                    "type": "LineString",
+                    "coordinates": gen
+                }
+            ]
+        }
+        a = clip.expand_geom(GC)
+        assert len(a['geometries']) == 2
+        self.assertSequenceEqual(a['geometries'][0]['coordinates'][0], [2, 2])
+
+
+    def testStrangeGeometry(self):
+        with self.assertRaises(NotImplementedError):
+            clip.expand_geom({"type": "Magic", "coordinates": [], "geometries": []})
 
 
 if __name__ == '__main__':

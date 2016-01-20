@@ -7,6 +7,7 @@ import fionautil.round
 from .clip import clip
 from .errors import SvgisError
 
+
 def applyid(multifunc):
     '''
     This decorator applies the ID attribute to the group that
@@ -19,6 +20,7 @@ def applyid(multifunc):
         return result
 
     return func
+
 
 def linestring(coordinates, **kwargs):
     return svgwrite.shapes.Polyline(coordinates, **kwargs)
@@ -108,6 +110,12 @@ def multipoint(coordinates, **kwargs):
     return [point((pt[0], pt[1]), **kwargs) for pt in coordinates]
 
 
+def geometrycollection(collection, bbox, precision, **kwargs):
+    ID = kwargs.pop('id', None)
+    geoms = [geometry(g, bbox=bbox, precision=precision, **kwargs) for g in collection['geometries']]
+    return _group(geoms, id=ID)
+
+
 def geometry(geom, bbox=None, precision=3, **kwargs):
     '''
     Draw a geometry. Will return either a single geometry or a group.
@@ -130,6 +138,9 @@ def geometry(geom, bbox=None, precision=3, **kwargs):
 
     elif geom['type'] in ('Polygon', 'MultiPolygon'):
         return polygons(geom, **kwargs)
+
+    elif geom['type'] == 'GeometryCollection':
+        return geometrycollection(geom, bbox, precision, **kwargs)
 
     else:
         raise SvgisError("Can't draw features of type: {}".format(geom['type']))

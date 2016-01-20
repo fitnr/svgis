@@ -30,19 +30,20 @@ def expand_rings(rings):
 def expand_geom(geom):
     '''Expand generators in a geometry's coordinates.'''
 
-    coordinates = geom['coordinates']
-
     if geom['type'] == 'MultiPolygon':
-        geom['coordinates'] = [expand_rings(rings) for rings in coordinates]
+        geom['coordinates'] = [expand_rings(rings) for rings in geom['coordinates']]
 
     elif geom['type'] in ('Polygon', 'MultiLineString'):
-        geom['coordinates'] = expand_rings(coordinates)
+        geom['coordinates'] = expand_rings(geom['coordinates'])
 
     elif geom['type'] in ('MultiPoint', 'LineString'):
-        geom['coordinates'] = expand(coordinates)
+        geom['coordinates'] = expand(geom['coordinates'])
 
     elif geom['type'] == 'Point':
-        geom['coordinates'] = expand(coordinates)
+        geom['coordinates'] = expand(geom['coordinates'])
+
+    elif geom['type'] == 'GeometryCollection':
+        geom['geometries'] = [expand_geom(g) for g in geom['geometries']]
 
     else:
         raise NotImplementedError("Unsupported geometry type " + geom['type'])
