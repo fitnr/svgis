@@ -33,10 +33,14 @@ matrix:
       env: NUMPY=yes
     - python: 3.3
       env: NUMPY=no
+    - python: 3.3
+      env: NUMPY=no  CLIP=yes INLINE=yes
     - python: 3.4
       env: NUMPY=no
     - python: 3.4
       env: NUMPY=yes
+    - python: 3.4
+      env: NUMPY=yes CLIP=yes INLINE=yes
 
 cache:
   directories:
