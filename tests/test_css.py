@@ -55,7 +55,7 @@ class CssTestCase(unittest.TestCase):
         with open(self.file) as f:
             replaced_svg = re.sub(r'<defs></defs>', '', f.read())
 
-        io_svg = StringIO(replaced_svg.decode('utf-8'))
+        io_svg = StringIO(unicode(replaced_svg))
 
         new = css.add_style(io_svg, self.css)
         result = minidom.parseString(new).getElementsByTagName('defs').item(0).getElementsByTagName('style').item(0)

@@ -1,6 +1,6 @@
 from __future__ import division
 import math
-from itertools import izip, tee
+from itertools import tee, izip as zip
 
 
 def rect(length, angle):
@@ -74,4 +74,4 @@ def pairwise(iterable):
     '''
     a, b = tee(iterable, 2)
     next(b, None)
-    return izip(a, b)
+    return zip(a, b)
