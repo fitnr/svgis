@@ -1,8 +1,11 @@
 import unittest
-from svgis import draw, svgis
+from svgis import draw, errors, svgis
 import svgwrite.shapes
 import svgwrite.container
-
+try:
+    import numpy as np
+except ImportError:
+    pass
 
 class DrawTestCase(unittest.TestCase):
 
@@ -14,22 +17,22 @@ class DrawTestCase(unittest.TestCase):
 
         self.classes = [u'foo', 'cat']
 
-        self.lis1 = [[-110.277906, 35.590313], [-110.271087, 35.590375], [-110.26093, 35.590865], [-110.259592, 35.590881], [-110.250972, 35.590888], [-110.250543, 35.590882],
-                     [-110.248341, 35.591048], [-110.247998, 35.591065], [-110.230537, 35.59107], [-110.228281, 35.591044], [-110.2257, 35.591041], [-110.277906, 35.590313]]
+        self.lis1 = [[-110.6, 35.3], [-110.7, 35.5], [-110.3, 35.5], [-110.2, 35.1], [-110.2, 35.8], [-110.3, 35.2],
+                     [-110.1, 35.8], [-110.8, 35.5], [-110.7, 35.7], [-110.1, 35.4], [-110.7, 35.1], [-110.6, 35.3]]
 
     def testDrawPoint(self):
-        drawn = draw.point((0, 0), r=2)
-        self.assertEqual((drawn.attribs['cx'], drawn.attribs['cy']), (0, 0))
+        drawn = draw.point((0.0, 0.0), r=2)
+        self.assertEqual((drawn.attribs['cx'], drawn.attribs['cy']), (0.0, 0))
         self.assertEqual(drawn.attribs['r'], 2)
 
         geom = {
-            'coordinates': (0, 0),
+            'coordinates': (0.0, 0),
             'type': 'Point'
         }
         point = draw.points(geom)
         assert isinstance(point, svgwrite.shapes.Circle)
 
-        self.assertEqual((point.attribs['cx'], point.attribs['cy']), (0, 0))
+        self.assertEqual((point.attribs['cx'], point.attribs['cy']), (0.0, 0))
 
         assert draw.geometry(geom).attribs['cy'] == 0
         assert draw.geometry(geom).attribs['cx'] == 0
@@ -41,7 +44,7 @@ class DrawTestCase(unittest.TestCase):
 
     def testDrawLine(self):
         geom = {
-            'coordinates': [(0, 0), (1, 1)],
+            'coordinates': [(0.0, 0), (1, 1)],
             'type': 'LineString'
         }
 
@@ -97,8 +100,8 @@ class DrawTestCase(unittest.TestCase):
         assert 'cat_meow' in feat.attribs['class']
 
     def testDrawMultiPolygon(self):
-        lis2 = [[-110.005828, 35.498343], [-110.008466, 35.498454], [-110.014261, 35.498655], [-110.019361, 35.499385], [-110.021204, 35.499652],
-                [-110.025195, 35.50001], [-110.028655, 35.50001], [-110.034659, 35.496338], [-110.032935, 35.49411], [-110.005828, 35.498343]]
+        lis2 = [[-110.8, 35.3], [-110.6, 35.4], [-110.1, 35.5], [-110.1, 35.5], [-110.4, 35.2],
+                [-110.5, 35.1], [-110.5, 35.1], [-110.9, 35.8], [-110.5, 35.1], [-110.8, 35.3]]
 
         geom = {
             "type": "MultiPolygon",
@@ -120,10 +123,47 @@ class DrawTestCase(unittest.TestCase):
             'type': 'Point'
         }
         point = draw.points(geom, class_=u'boston')
-        assert isinstance(point, svgwrite.shapes.Circle)
+        self.assertIsInstance(point, svgwrite.shapes.Circle)
 
         point = draw.points(geom, class_='boston')
         assert isinstance(point, svgwrite.shapes.Circle)
+
+    def testDrawPath(self):
+        path = draw.path(self.lis1)
+        assert isinstance(path, svgwrite.path.Path)
+
+    def testDrawPolygonComplicated(self):
+        coordinates = [
+            [(0.0, 0.0), (10.0, 0.0), (10.0, 10.0), (0.0, 10.0), (0.0, 0.0)],
+            [(4.0, 4.0), (4.0, 5.0), (5.0, 5.0), (5.0, 4.0), (4.0, 4.0)]
+        ]
+
+        polygon = draw.polygon(coordinates)
+        assert isinstance(polygon, svgwrite.path.Path)
+        assert polygon.attribs['class'] == 'polygon'
+
+        polygon = draw.polygon(coordinates, class_='a')
+        assert polygon.attribs['class'] == 'polygon a'
+
+    def testRound(self):
+        ring = [(10.00011111, 10.00011111), (10.00011111, 10.00011111)]
+        assert draw._round_pt(ring[0], 1) == (10.0, 10.0)
+        assert draw._round_ring(ring, 1) == [(10.0, 10.0), (10.0, 10.0)]
+
+    def testRoundPolygonCoordinates(self):
+        ring = [(0.00001, 0.0), (10.00111, 0.0), (10.0, 10.0), (0.0, 10.0), (0.0, 0.0)]
+
+        try:
+            rounded = np.round(np.array(ring)[:, 0:2], 3)
+            rounded = rounded.tolist()
+        except NameError:
+            rounded = np.round(np.array(ring)[:, 0:2], 3)
+
+        assert rounded[0] == [0.0, 0.0]
+
+    def testUnkownGeometry(self):
+        with self.assertRaises(errors.SvgisError):
+            draw.geometry({"type": "GeometryCollection", "coordinates": []})
 
 if __name__ == '__main__':
     unittest.main()

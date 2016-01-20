@@ -29,12 +29,19 @@ def applyid(multifunc):
     return func
 
 
-def linestring(coordinates, precision=3, **kwargs):
+def _round_pt(pt, precision):
+    return round(pt[0], precision), round(pt[1], precision)
+
+
+def _round_ring(ring, precision):
     try:
         np.round(coordinates, precision)
     except NameError:
-        coordinates = [(round(pt[0], precision), round(pt[1], precision)) for pt in coordinates]
+        return [_round_pt(pt, precision) for pt in ring]
 
+
+def linestring(coordinates, precision=3, **kwargs):
+    coordinates = _round_ring(coordinates, precision)
     return svgwrite.shapes.Polyline(coordinates, **kwargs)
 
 
@@ -66,14 +73,18 @@ def polygons(geom, **kwargs):
         return multipolygon(geom['coordinates'], **kwargs)
 
 
-def polygon(coordinates, precision=3, **kwargs):
-    '''Draw an svg polygon based on coordinates.'''
+def _round_polygon_coordinates(coordinates, precision):
     # Drop possible Z coordinates and round. Two tracks here: numpy style and without-numpy style.
     try:
-        coordinates = [np.round(np.array(ring)[:, 0:2], precision) for ring in coordinates]
+        return [np.round(np.array(ring)[:, 0:2], precision) for ring in coordinates]
 
     except NameError:
-        coordinates = [[(round(pt[0], precision), round(pt[1], precision)) for pt in ring] for ring in coordinates]
+        return [_round_ring(coordinates, precision) for ring in coordinates]
+
+
+def polygon(coordinates, precision=3, **kwargs):
+    '''Draw an svg polygon based on coordinates.'''
+    coordinates = _round_polygon_coordinates(coordinates, precision)
 
     if len(coordinates) == 1:
         return svgwrite.shapes.Polygon(coordinates[0], **kwargs)
@@ -83,7 +94,10 @@ def polygon(coordinates, precision=3, **kwargs):
     if fionautil.measure.counterclockwise(coordinates[0]):
         coordinates[0] = coordinates[0][::-1]
 
-    class_ = 'polygon ' + kwargs.pop('class_', '')
+    if 'class_' in kwargs:
+        class_ = 'polygon ' + kwargs.pop('class_')
+    else:
+        class_ = 'polygon'
 
     pth = path(list(coordinates[0]) + ['z'], fill_rule='evenodd', class_=class_, **kwargs)
 
@@ -118,9 +132,7 @@ def point(coordinates, precision=3, **kwargs):
     except (AttributeError, TypeError):
         pt = coordinates
 
-    center = (round(pt[0], precision), round(pt[1], precision))
-
-    return svgwrite.shapes.Circle(center=center, **kwargs)
+    return svgwrite.shapes.Circle(center=_round_pt(pt, precision), **kwargs)
 
 
 @applyid
