@@ -8,7 +8,7 @@ except ImportError:
 import svgwrite
 import fionautil.measure
 from .clip import clip
-
+from .errors import SvgisError
 
 def applyid(multifunc):
     '''
@@ -149,7 +149,7 @@ def geometry(geom, clipper=None, bbox=None, **kwargs):
         return polygons(geom, **kwargs)
 
     else:
-        raise ValueError("Can't draw features like this: {}".format(geom['type']))
+        raise SvgisError("Can't draw features like this: {}".format(geom['type']))
 
 
 def feature(feat, **kwargs):

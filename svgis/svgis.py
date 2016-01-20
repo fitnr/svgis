@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from collections import Iterable
+import logging
 import fiona
 import fiona.transform
 import svgwrite
 from fionautil import scale, coords
-from . import convert, clip, css, draw, projection, svg
+from . import convert, clip, css, draw, errors, projection, svg
 
 
 STYLE = ('polyline, line, rect, path, polygon, .polygon {'
@@ -92,6 +93,8 @@ class SVGIS(object):
 
         self.clip = kwargs.get('clip', True)
 
+        self.log = logging.getLogger('svgis')
+
     def __repr__(self):
         return ('SVGIS(files={0.files}, out_crs={0.out_crs}, '
                 'bounds={0.bounds}, padding={0.padding}, '
@@ -145,9 +148,13 @@ class SVGIS(object):
             for _, f in layer.items(bbox=bounds):
                 geom = scale.geometry(reproject(f['geometry']), scalar)
 
-                target = _draw_feature(geom, f['properties'], clipper=clipper, **kwargs)
 
-                group.add(target)
+                try:
+                    target = _draw_feature(geom, f['properties'], clipper=clipper, **kwargs)
+                    group.add(target)
+
+                except errors.SvgisError as e:
+                    self.log.error("Error drawing %s: %s", filename, e.message)
 
         return group
 
@@ -190,6 +197,7 @@ class SVGIS(object):
         else:
             return result
 
+        return css.inline(drawing.tostring(), self.style)
 
     def dims(self, scalar, bounds=None):
         '''

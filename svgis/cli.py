@@ -4,6 +4,7 @@ import os.path
 import sys
 from signal import signal, SIGPIPE, SIG_DFL
 import argparse
+import logging
 import fiona.crs
 from . import css, projection, svg
 from . import __version__ as version
@@ -121,6 +122,12 @@ def _proj(_, output, minx, miny, maxx, maxy, project=None):
 
 
 def main():
+    log = logging.getLogger('svgis')
+    log.setLevel(logging.WARN)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.WARN)
+    log.addHandler(ch)
+
     parent = argparse.ArgumentParser(add_help=None)
     parent.add_argument('input', default='/dev/stdin', help="Input SVG file. Use '-' for stdin.")
     parent.add_argument('output', nargs='?', default='/dev/stdout', help="(optional) defaults to stdout")
@@ -158,8 +165,21 @@ def main():
     draw.add_argument('-x', '--no-viewbox', action='store_false', dest='viewbox',
                       help='Draw SVG without a ViewBox. May improve compatibility.')
 
-    draw.add_argument('-n', '--no-clip', action='store_false', dest='clip',
-                      help="Don't clip shapes to bounds. Faster, but possibly larger files")
+    try:
+        import shapely
+        draw.add_argument('-n', '--no-clip', action='store_false', dest='clip',
+                          help="Don't clip shapes to bounds. Faster, but possibly larger files")
+    except ImportError:
+        pass
+
+    try:
+        import lxml
+        import cssselect
+        import tinycss
+        draw.add_argument('-l', '--inline-css', action='store_true',
+                          help="Inline CSS. Slightly slower, but required by some clients (Adobe Illustrator)")
+    except ImportError:
+        pass
 
     draw.add_argument('--id-field', type=str, dest='id_field', help='Geodata field to use as ID')
     draw.add_argument('--class-fields', type=str, dest='class_fields',
@@ -170,8 +190,8 @@ def main():
                             'Accepts either a valid EPSG code (e.g. epsg:4456), '
                             'a valid proj4 string, '
                             'a file containing a proj4, '
-                            '"file" (use existing ) or '
-                            '"utm" (use local UTM zone) or '
+                            '"utm", '
+                            '"file" (use existing), '
                             '"local" (generate a local projection)'))
 
     draw.set_defaults(function=_draw)
