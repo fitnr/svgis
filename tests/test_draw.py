@@ -2,10 +2,6 @@ import unittest
 from svgis import draw, errors, svgis
 import svgwrite.shapes
 import svgwrite.container
-try:
-    import numpy as np
-except ImportError:
-    pass
 
 class DrawTestCase(unittest.TestCase):
 
@@ -70,9 +66,17 @@ class DrawTestCase(unittest.TestCase):
         assert isinstance(mls1, svgwrite.container.Group)
         assert isinstance(mls2, svgwrite.container.Group)
 
-        assert mls1.elements.pop(0).points == geom['coordinates'][0]
-        assert mls2.elements.pop(1).points == geom['coordinates'][1]
-        assert draw.geometry(geom).elements.pop(1).points == geom['coordinates'][1]
+        self.assertSequenceEqual(mls1.elements.pop(0).points, geom['coordinates'][0])
+        self.assertSequenceEqual(mls2.elements.pop(1).points, geom['coordinates'][1])
+
+        points = draw.geometry(geom).elements.pop(1).points
+
+        try:
+            self.assertSequenceEqual(points, geom['coordinates'][1])
+        except AssertionError:
+            print points
+            print geom['coordinates']
+
 
         with self.assertRaises(TypeError):
             draw.linestring(geom['coordinates'])
@@ -139,27 +143,11 @@ class DrawTestCase(unittest.TestCase):
         ]
 
         polygon = draw.polygon(coordinates)
-        assert isinstance(polygon, svgwrite.path.Path)
+        self.assertIsInstance(polygon, svgwrite.path.Path)
         assert polygon.attribs['class'] == 'polygon'
 
         polygon = draw.polygon(coordinates, class_='a')
         assert polygon.attribs['class'] == 'polygon a'
-
-    def testRound(self):
-        ring = [(10.00011111, 10.00011111), (10.00011111, 10.00011111)]
-        assert draw._round_pt(ring[0], 1) == (10.0, 10.0)
-        assert draw._round_ring(ring, 1) == [(10.0, 10.0), (10.0, 10.0)]
-
-    def testRoundPolygonCoordinates(self):
-        ring = [(0.00001, 0.0), (10.00111, 0.0), (10.0, 10.0), (0.0, 10.0), (0.0, 0.0)]
-
-        try:
-            rounded = np.round(np.array(ring)[:, 0:2], 3)
-            rounded = rounded.tolist()
-        except NameError:
-            rounded = np.round(np.array(ring)[:, 0:2], 3)
-
-        assert rounded[0] == [0.0, 0.0]
 
     def testUnkownGeometry(self):
         with self.assertRaises(errors.SvgisError):

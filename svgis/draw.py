@@ -1,12 +1,9 @@
 """Draw a geometries elements as SVG"""
 # -*- coding: utf-8 -*-
 from __future__ import division, print_function
-try:
-    import numpy as np
-except ImportError:
-    pass
 import svgwrite
 import fionautil.measure
+import fionautil.round
 from .clip import clip
 from .errors import SvgisError
 
@@ -18,30 +15,12 @@ def applyid(multifunc):
 
     def func(coordinates, **kwargs):
         ID = kwargs.pop('id', None)
-
-        result = _group(multifunc(coordinates, **kwargs))
-
-        if ID:
-            result.attribs['id'] = ID
-
+        result = _group(multifunc(coordinates, **kwargs), id=ID)
         return result
 
     return func
 
-
-def _round_pt(pt, precision):
-    return round(pt[0], precision), round(pt[1], precision)
-
-
-def _round_ring(ring, precision):
-    try:
-        np.round(coordinates, precision)
-    except NameError:
-        return [_round_pt(pt, precision) for pt in ring]
-
-
-def linestring(coordinates, precision=3, **kwargs):
-    coordinates = _round_ring(coordinates, precision)
+def linestring(coordinates, **kwargs):
     return svgwrite.shapes.Polyline(coordinates, **kwargs)
 
 
@@ -73,19 +52,8 @@ def polygons(geom, **kwargs):
         return multipolygon(geom['coordinates'], **kwargs)
 
 
-def _round_polygon_coordinates(coordinates, precision):
-    # Drop possible Z coordinates and round. Two tracks here: numpy style and without-numpy style.
-    try:
-        return [np.round(np.array(ring)[:, 0:2], precision) for ring in coordinates]
-
-    except NameError:
-        return [_round_ring(coordinates, precision) for ring in coordinates]
-
-
-def polygon(coordinates, precision=3, **kwargs):
+def polygon(coordinates, **kwargs):
     '''Draw an svg polygon based on coordinates.'''
-    coordinates = _round_polygon_coordinates(coordinates, precision)
-
     if len(coordinates) == 1:
         return svgwrite.shapes.Polygon(coordinates[0], **kwargs)
 
@@ -126,13 +94,13 @@ def points(geom, **kwargs):
         return multipoint(geom['coordinates'], **kwargs)
 
 
-def point(coordinates, precision=3, **kwargs):
+def point(coordinates, **kwargs):
     try:
         pt = coordinates.pop()
     except (AttributeError, TypeError):
         pt = coordinates
 
-    return svgwrite.shapes.Circle(center=_round_pt(pt, precision), **kwargs)
+    return svgwrite.shapes.Circle(center=pt, **kwargs)
 
 
 @applyid
@@ -140,15 +108,19 @@ def multipoint(coordinates, **kwargs):
     return [point((pt[0], pt[1]), **kwargs) for pt in coordinates]
 
 
-def geometry(geom, bbox=None, **kwargs):
+def geometry(geom, bbox=None, precision=3, **kwargs):
     '''
     Draw a geometry. Will return either a single geometry or a group.
     :geom object A GeoJSON-like geometry object
     :bbox tuple An optional bounding minimum bounding box
+    :precision int Rounding precision. A falsy value (e.g. 0) disables rounding.
     :kwargs object keyword args to be passed onto svgwrite. Things like class_, id, style, etc.
     '''
     if bbox:
         geom = clip(geom, bbox)
+
+    if precision:
+        geom = fionautil.round.geometry(geom, precision)
 
     if geom['type'] in ('Point', 'MultiPoint'):
         return points(geom, **kwargs)
@@ -160,7 +132,7 @@ def geometry(geom, bbox=None, **kwargs):
         return polygons(geom, **kwargs)
 
     else:
-        raise SvgisError("Can't draw features like this: {}".format(geom['type']))
+        raise SvgisError("Can't draw features of type: {}".format(geom['type']))
 
 
 def feature(feat, **kwargs):
