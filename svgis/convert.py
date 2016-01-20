@@ -45,8 +45,7 @@ def extend_bbox(bbox, ext=100):
 
 def _frange(a, b, count=None):
     """Yield <count> points between two floats"""
-    count = count or 10
-    jump = (b - a) / 10
+    jump = (b - a) / (count or 5)
 
     while a < b:
         yield a
