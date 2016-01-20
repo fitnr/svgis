@@ -15,6 +15,24 @@ Requires [fiona](http://pypi.python.org/pypi/fiona), which in turn requires GDAL
 Before installing, run the following on OS X: `brew install gdal`.
 On Linux: `sudo apt-get -qq install -y libgdal1-dev`.
 
+Then:
+```
+pip install svgis
+```
+
+Some additional options are available if you want to download more prerequisites:
+````
+# Include the ability to inline CSS, which is pretty much required by Adobe Illustrator
+sudo apt-get libxml2-dev libxslt-dev python-dev
+pip install svgis[inline]
+
+# Clip output shapes to the bounding box (smaller files)
+pip install svgis[clip]
+
+# Use numpy internally, which may well be faster for really complicated polygons
+pip install svgis[numpy]
+````
+
 ## Command line tools
 
 The `svgis` command line tool has four commands: `draw`, `project`, `scale` and `style`. `Svgis scale` and `svgis style` will add a scaling factor or CSS style to an existing SVG file. `Svgis project` is a utility for printing the projection that `svgis draw` will generate for given bounding boxes.
