@@ -1,5 +1,6 @@
 import unittest
 import re
+import svgwrite.shapes
 from svgis import svgis
 
 
@@ -52,6 +53,26 @@ class SvgisTestCase(unittest.TestCase):
                     'out_crs=None, bounds=(), padding=0, scalar=1)')
         self.assertEqual(str(self.svgis_obj), expected)
 
+    def testDrawGeometry(self):
+        geom = {
+            'type': 'LineString',
+            'coordinates': [(1, 2), (4, 5), (6, 7), (9, 10)]
+        }
+        props = {
+            'foo': 'bar',
+            'cat': 'meow'
+        }
+        drawn = svgis._draw_feature(geom, properties=props, classes=['foo'], id_field='cat')
+        assert isinstance(drawn, svgwrite.shapes.Polyline)
+        stringed = drawn.tostring()
+        self.assertIn('id="meow"', stringed)
+        assert 'class="foo_bar"' in stringed
+
+    def testConstructClasses(self):
+        self.assertEqual(svgis._construct_classes('foo', {'foo': 'bar'}), 'foo_bar')
+        self.assertEqual(svgis._construct_classes(['foo'], {'foo': 'bar'}), 'foo_bar')
+
+        self.assertEqual(svgis._construct_classes(['foo'], {'foo': None}), 'foo_None')
 
 if __name__ == '__main__':
     unittest.main()

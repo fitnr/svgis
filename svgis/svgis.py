@@ -26,7 +26,7 @@ def _property(prop, properties):
 
 
 def _construct_classes(classes, properties):
-    if isinstance(classes, unicode):
+    if isinstance(classes, basestring):
         classes = [classes]
 
     classes = [svg.sanitize(_property(x, properties)) for x in classes]
