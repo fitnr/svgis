@@ -17,11 +17,13 @@ STYLE = ('polyline, line, rect, path, polygon, .polygon {'
          ' stroke-linejoin: round;'
          '}')
 
+
 def _property(prop, properties):
     if prop in properties:
         return prop + '_' + str(properties[prop])
     else:
         return prop
+
 
 def _construct_classes(classes, properties):
     if isinstance(classes, unicode):
@@ -29,6 +31,7 @@ def _construct_classes(classes, properties):
 
     classes = [svg.sanitize(_property(x, properties)) for x in classes]
     return (' '.join(classes)).strip()
+
 
 def _draw_feature(geom, properties=None, **kwargs):
     '''Draw a single feature given a geometry object and properties object'''
@@ -100,6 +103,31 @@ class SVGIS(object):
                 'bounds={0.bounds}, padding={0.padding}, '
                 'scalar={0.scalar})').format(self)
 
+    def get_clipper(self, in_crs, in_bounds, out_bounds, scalar=None):
+        '''
+        Get a clipping function for the given input crs and bounds
+        Returns None if in_bounds == out_bounds or clipping is off.
+        '''
+        scalar = scalar or self.scalar
+        projected_mbr = projection.project_mbr(in_crs, self.out_crs, *out_bounds)
+        self.mbr = convert.updatebounds(self.mbr, projected_mbr)
+
+        if self.clip and out_bounds != in_bounds:
+            clipper = clip.prepare([c * scalar for c in convert.extend_bbox(projected_mbr)])
+        else:
+            clipper = None
+
+        return clipper
+
+    def reprojector(self, in_crs):
+        '''Return a reprojection transform from in_crs to self.out_crs'''
+        if self.out_crs != in_crs:
+            reproject = lambda geom: fiona.transform.transform_geom(in_crs, self.out_crs, geom)
+        else:
+            reproject = lambda f: f
+
+        return reproject
+
     def compose_file(self, filename, scalar, bounds=None, **kwargs):
         '''
         Draw fiona file to svgwrite Group object.
@@ -115,8 +143,6 @@ class SVGIS(object):
         # * clipper: A clipping function based on a slightly extended version of projected_mbr
 
         with fiona.open(filename, "r") as layer:
-            group = svgwrite.container.Group(id=layer.name)
-
             bounds = bounds or self.bounds or layer.bounds
 
             if not self.out_crs:
@@ -125,13 +151,9 @@ class SVGIS(object):
                 # the local UTM, or customize local TM
                 self.out_crs = projection.choosecrs(layer.crs, bounds, use_proj=self.use_proj)
 
-            projected_mbr = projection.project_mbr(layer.crs, self.out_crs, *bounds)
-            self.mbr = convert.updatebounds(self.mbr, projected_mbr)
+            clipper = self.get_clipper(layer.crs, layer.bounds, bounds, scalar=scalar)
 
-            if self.clip and bounds != layer.bounds:
-                clipper = clip.prepare([c * scalar for c in convert.extend_bbox(projected_mbr)])
-            else:
-                clipper = None
+            reproject = self.reprojector(layer.crs)
 
             kwargs['classes'] = [c for c in kwargs.get('classes', []) if c in layer.schema['properties']]
             kwargs['classes'].insert(0, layer.name)
@@ -140,14 +162,10 @@ class SVGIS(object):
                 if kwargs['id_field'] not in layer.schema['properties'].keys():
                     del kwargs['id_field']
 
-            if self.out_crs != layer.crs:
-                reproject = lambda geom: fiona.transform.transform_geom(layer.crs, self.out_crs, geom)
-            else:
-                reproject = lambda f: f
+            group = svgwrite.container.Group(id=layer.name)
 
             for _, f in layer.items(bbox=bounds):
                 geom = scale.geometry(reproject(f['geometry']), scalar)
-
 
                 try:
                     target = _draw_feature(geom, f['properties'], clipper=clipper, **kwargs)
@@ -163,7 +181,7 @@ class SVGIS(object):
         Draw files to svg. Returns unicode.
         :scalar int factor by which to scale the data.
         :style string CSS to append to parent object CSS
-        :bounds list/tuple Bounding box to draw within. Defaults to map data bounds.
+        :bounds list/tuple Map bounding box in input units. Defaults to map data bounds.
         :viewbox bool If True, draw SVG with a viewbox. If False, translate coordinates to the frame. Defaults to True.
         '''
         scalar = scalar or self.scalar
@@ -196,8 +214,6 @@ class SVGIS(object):
 
         else:
             return result
-
-        return css.inline(drawing.tostring(), self.style)
 
     def dims(self, scalar, bounds=None):
         '''
