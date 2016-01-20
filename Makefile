@@ -40,7 +40,8 @@ test: tests/test_data/cb_2014_us_nation_20m.shp tests/test_data/test.svg
 		svgis scale -f 10 - > /dev/null
 
 tests/test_data/test.svg: tests/test_data/cb_2014_us_nation_20m.shp
-	svgis draw -j '$(PROJECTION)' -f 1000 -c "polygon { fill: blue }" --bounds -124 20.5 -64 49 $< -o $@
+	- svgis draw -j '$(PROJECTION)' -f 1000 -c "polygon { fill: blue }" --bounds -124 20.5 -64 49 $< -o $@
+	@touch $@
 
 tests/test_data/cb_2014_us_nation_20m.shp: tests/test_data/cb_2014_us_nation_20m.zip
 	unzip -q -o $< -d $(@D)
