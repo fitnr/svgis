@@ -123,7 +123,7 @@ class SVGIS(object):
         if self.clip and out_bounds != in_bounds:
             clipper = clip.prepare([c * scalar for c in convert.extend_bbox(projected_mbr)])
         else:
-            clipper = None
+            clipper = lambda g: g
 
         return clipper
 
@@ -175,9 +175,10 @@ class SVGIS(object):
 
             for _, f in layer.items(bbox=bounds):
                 geom = scale.geometry(reproject(f['geometry']), scalar)
+                geom = clipper(geom)
 
                 try:
-                    target = _draw_feature(geom, f['properties'], clipper=clipper, **kwargs)
+                    target = _draw_feature(geom, f['properties'], **kwargs)
                     group.add(target)
 
                 except errors.SvgisError as e:
