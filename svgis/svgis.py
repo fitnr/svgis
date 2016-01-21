@@ -180,6 +180,8 @@ class SVGIS(object):
             for _, f in layer.items(bbox=bounds):
                 geom = scale.geometry(reproject(f['geometry']), scalar)
                 geom = clipper(geom)
+                geom = clip.d2_geom(geom)
+
                 geom = simplifier(geom)
 
                 try:
@@ -209,6 +211,8 @@ class SVGIS(object):
             kwargs['simplifier'] = convert.simplifier(kwargs.pop('simplify'))
         else:
             kwargs['simplifier'] = self.simplifier
+
+        kwargs['precision'] = kwargs.get('precision', 0)
 
         container = svgwrite.container.Group(transform='scale(1, -1)', fill_rule='evenodd')
         container.translate(self.padding, -self.padding)

@@ -127,10 +127,8 @@ def geometry(geom, bbox=None, precision=3, **kwargs):
     if bbox:
         geom = clip.clip(geom, bbox)
 
-    if precision:
+    if precision is not None:
         geom = fionautil.round.geometry(geom, precision)
-
-    geom = clip.d2_geom(geom)
 
     if geom['type'] in ('Point', 'MultiPoint'):
         return points(geom, **kwargs)
