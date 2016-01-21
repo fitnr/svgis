@@ -22,25 +22,25 @@ git:
 sudo: true
 
 env:
-  - NUMPY=no  CLIP=yes INLINE=yes 
-  - NUMPY=yes CLIP=yes INLINE=yes
-  - NUMPY=no
   - NUMPY=yes
+  - CLIP=yes
+  - INLINE=yes
+  - NUMPY= CLIP= INLINE=
 
 matrix:
   exclude:
     - python: 3.3
       env: NUMPY=yes
     - python: 3.3
-      env: NUMPY=no
+      env: CLIP=yes
     - python: 3.3
-      env: NUMPY=no  CLIP=yes INLINE=yes
-    - python: 3.4
-      env: NUMPY=no
+      env: INLINE=yes
     - python: 3.4
       env: NUMPY=yes
     - python: 3.4
-      env: NUMPY=yes CLIP=yes INLINE=yes
+      env: CLIP=yes
+    - python: 3.4
+      env: INLINE=yes
 
 cache:
   directories:
@@ -66,3 +66,5 @@ script:
 after_script:
     - make cov
     - make profile
+    - pip list
+
