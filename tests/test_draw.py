@@ -84,10 +84,18 @@ class DrawTestCase(unittest.TestCase):
         points = draw.geometry(self.multilinestring).elements.pop(1).points
 
         try:
-            self.assertSequenceEqual(points, self.multilinestring['coordinates'][1])
-        except AssertionError:
-            print points
-            print self.multilinestring['coordinates']
+            c0 = self.multilinestring['coordinates'][1][0].tolist()
+            c1 = self.multilinestring['coordinates'][1][1].tolist()
+            p0 = points[0].tolist()
+            p1 = points[1].tolist()
+        except AttributeError:
+            c0 = self.multilinestring['coordinates'][1][0]
+            c1 = self.multilinestring['coordinates'][1][1]
+            p0 = points[0]
+            p1 = points[1]
+
+        self.assertSequenceEqual(p0, c0)
+        self.assertSequenceEqual(p1, c1)
 
         with self.assertRaises(TypeError):
             draw.linestring(self.multilinestring['coordinates'])
