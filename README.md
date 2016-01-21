@@ -38,7 +38,12 @@ pip install svgis[numpy]
 The `svgis` command line tool has four commands: `draw`, `project`, `scale` and `style`. `Svgis scale` and `svgis style` will add a scaling factor or CSS style to an existing SVG file. `Svgis project` is a utility for printing the projection that `svgis draw` will generate for given bounding boxes.
 
 The main command is `svgis draw`, which generates SVGs from input geodata.
-
+````
+usage: svgis draw [-h] [-o OUTPUT] [--bounds minx miny maxx maxy] [-c CSS]
+                  [-f SCALE] [-p PADDING] [-i ID_FIELD] [-a FIELDS]
+                  [-j KEYWORD] [-s FACTOR] [-n] [-x] [-l]
+                  input [input ...]
+````
 ### svgis draw
 #### --bounds
 
@@ -52,7 +57,7 @@ svgis draw --bounds -74 40 -73 41 in.geojson out.svg
 
 Note that coordinates are given in longitude, latitude order, since in the world of the computer, it's better to be consistent with things like (x, y) order.
 
-#### --scale
+#### --scale, -f
 
 A integer scale factor. The map will be scaled by the inverse of this number.
 
@@ -62,7 +67,7 @@ While SVG is a vector format, clients may have trouble handling very large numbe
 svgis draw --scale 1000 in.shp -o out.svg
 ````
 
-#### --project
+#### --project, -j
 
 The project argument accept a particular projection or a keyword that helps SVGIS pick a projection for you. 
 
@@ -103,7 +108,7 @@ svgis draw -j local input.shp -o out.svg
 
 To properly convert the input coordinate, svgis needs to know your input projection. If the input file doesn't specify an internal projection, SVGIS will assume that the coordinates are given in [WGS84](http://epsg.io/4326).
 
-#### --style
+#### --style, -c
 
 The style parameter takes either a CSS file or a CSS string.
 
@@ -112,7 +117,7 @@ svgis draw --style style.css in.shp -o out.svg
 svgis draw --style "line { stroke: green; }" in.shp -o out.svg
 ````
 
-#### --padding
+#### --padding, -p
 
 Adds a padding around the output image. Accepts an integer in svg units.
 
@@ -120,7 +125,7 @@ Adds a padding around the output image. Accepts an integer in svg units.
 svgis draw --padding 100 in.shp -o out.svg
 ````
 
-#### --no-viewbox
+#### --no-viewbox, -x
 
 By default, SVGIS uses a viewbox. If you have a problem opening the created svg file in your drawing program (e.g. Adobe Illustrator), try the '--no-viewbox' option, which will create an svg where the contents are translated into the frame.
 
@@ -129,7 +134,7 @@ svgis draw --no-viewbox in.shp -o out.svg
 svgis draw -x in.shp -o out.svg
 ````
 
-#### --class-fields and --id-field
+#### --class-fields, -a and --id-field, -i
 
 Use these options to specify fields in the source geodata file to use to determine the class or id attributes of the output SVG features. In the output fields, spaces will be replaced with underscores.
 
@@ -153,7 +158,31 @@ Note that the 'income_grp' field contains values like "4. Lower middle income", 
 
 Each layer is always wrapped in a group (`<g>`) with id equal to the name of its source layer.
 
-## Further examples
+### Extra options
+
+The options are available when additional prerequisites are installed.
+
+#### --simplify, -s
+
+Requires numpy. Install with `pip install svgis[simplify]` to make this available.
+
+```
+svgis draw --simplify 0.50 in.shp -o out.svg
+```
+
+#### --inline-css, -l
+
+Install with `pip install svgis[inline]` to make this available. This requires additional libraries, see [`lxml` installation notes](http://lxml.de/installation.html).
+
+Some SVG clients (Adobe Illustrator) prefer inline style information. Run with this option to add style information onto each element.
+
+#### --no-clip, -n
+
+Install with `pip install svgis[clip]` to make this available. This requires additional libraries, see [`shapely` installation notes](https://github.com/Toblerity/Shapely).
+
+When installed with the clip option, SVGIS will try to clip output shapes to just outside of the bounding box. Use this option to disable that behavior.
+
+#### Further examples
 
 Draw the outline of the contiguous United States, projected in Albers:
 ````

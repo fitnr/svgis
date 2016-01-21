@@ -39,6 +39,7 @@ try:
     import visvalingamwyatt as vw
     simplifykwargs = {
         'type': float,
+        'metavar': 'FACTOR',
         'help': 'Simplify geometries. Accepts a float, which it the ratio of points to keep in each geometry',
     }
 except ImportError:
@@ -163,11 +164,13 @@ def _proj(_, output, minx, miny, maxx, maxy, project=None):
 
 
 class CommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
+
     def _format_action(self, action):
         parts = super(CommandHelpFormatter, self)._format_action(action)
         if action.nargs == argparse.PARSER:
             parts = "\n".join(parts.split("\n")[1:])
         return parts
+
 
 class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
@@ -181,12 +184,10 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
         else:
             parts = []
-
             # if the Optional doesn't take a value, format is:
             #    -s, --long
             if action.nargs == 0:
                 parts.extend(action.option_strings)
-
             # if the Optional takes a value, format is:
             #    -s ARGS, --long ARGS
             else:
@@ -197,6 +198,7 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 parts.append('%s %s' % (action.option_strings[-1], args_string))
 
             return ', '.join(parts)
+
 
 def main():
     log = logging.getLogger('svgis')

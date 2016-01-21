@@ -152,6 +152,9 @@ class SVGIS(object):
         :filename string path to a fiona-readable file
         :scalar int map scale
         :bounds tuple (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
+        :simplifier function Simplification function. Defaults to self.simplify.
+        :classes list Fields to turn in the element classes
+        :id_field string Field to use as element ID
         '''
         with fiona.open(filename, "r") as layer:
             bounds = bounds or self.bounds or layer.bounds
@@ -178,10 +181,16 @@ class SVGIS(object):
             group = svgwrite.container.Group(id=layer.name)
 
             for _, f in layer.items(bbox=bounds):
+                # Project and scale
                 geom = scale.geometry(reproject(f['geometry']), scalar)
+
+                # clip to bounds
                 geom = clipper(geom)
+
+                # limit to 2 dimensions
                 geom = clip.d2_geom(geom)
 
+                # Simplify
                 geom = simplifier(geom)
 
                 try:
@@ -200,6 +209,9 @@ class SVGIS(object):
         :style string CSS to append to parent object CSS
         :bounds list/tuple Map bounding box in input units. Defaults to map data bounds.
         :viewbox bool If True, draw SVG with a viewbox. If False, translate coordinates to the frame. Defaults to True.
+        :precision float Round coordinates to this precision [default: 0].
+        :simplify float Must be between 0 and 1. Fraction of removable coordinates to keep.
+        :inline_css bool If True, try to run CSS into each element.
         '''
         scalar = scalar or self.scalar
         style = self.style + (style or '')

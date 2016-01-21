@@ -119,9 +119,9 @@ def geometrycollection(collection, bbox, precision, **kwargs):
 def geometry(geom, bbox=None, precision=3, **kwargs):
     '''
     Draw a geometry. Will return either a single geometry or a group.
-    :geom object A GeoJSON-like geometry object
+    :geom object A GeoJSON-like geometry object. Coordinates must be 2-dimensional.
     :bbox tuple An optional bounding minimum bounding box
-    :precision int Rounding precision. A falsy value (e.g. 0) disables rounding.
+    :precision int Rounding precision. precision=None disables rounding.
     :kwargs object keyword args to be passed onto svgwrite. Things like class_, id, style, etc.
     '''
     if bbox:
