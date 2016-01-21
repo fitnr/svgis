@@ -4,7 +4,7 @@ from __future__ import division, print_function
 import svgwrite
 import fionautil.measure
 import fionautil.round
-from .clip import clip
+from . import clip 
 from .errors import SvgisError
 
 
@@ -125,10 +125,12 @@ def geometry(geom, bbox=None, precision=3, **kwargs):
     :kwargs object keyword args to be passed onto svgwrite. Things like class_, id, style, etc.
     '''
     if bbox:
-        geom = clip(geom, bbox)
+        geom = clip.clip(geom, bbox)
 
     if precision:
         geom = fionautil.round.geometry(geom, precision)
+
+    geom = clip.d2_geom(geom)
 
     if geom['type'] in ('Point', 'MultiPoint'):
         return points(geom, **kwargs)

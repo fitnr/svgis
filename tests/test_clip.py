@@ -7,7 +7,6 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
-
 import unittest
 from svgis import clip
 try:
@@ -103,9 +102,16 @@ class ExpandTestCase(unittest.TestCase):
             ]
         }
         a = clip.expand_geom(GC)
-        assert len(a['geometries']) == 2
-        self.assertSequenceEqual(a['geometries'][0]['coordinates'][0], [2, 2])
 
+        assert len(a['geometries']) == 2
+
+        try:
+            b = a['geometries'][0]['coordinates'].tolist()
+
+        except AttributeError:
+            b = a['geometries'][0]['coordinates']
+
+        self.assertSequenceEqual(b[0], [2, 2])
 
     def testStrangeGeometry(self):
         with self.assertRaises(NotImplementedError):

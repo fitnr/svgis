@@ -4,6 +4,42 @@ try:
 except ImportError:
     pass
 
+def d2(pt):
+    try:
+        return pt[:2]
+
+    except (TypeError, NameError):
+        return pt[0], pt[1]
+
+def d2_ring(ring):
+    try:
+        return ring[:, 0:2]
+    except (TypeError, NameError):
+        return [d2(p) for p in ring]
+
+
+def d2_ringlist(ringlist):
+    return [d2_ring(r) for r in ringlist]
+
+def d2_geom(geom):
+
+    if geom['type'] == 'Point':
+        geom['coordinates'] = d2(geom['coordinates'])
+
+    elif geom['type'] in ('MultiPoint', 'LineString'):
+        geom['coordinates'] = d2_ring(geom['coordinates'])
+
+    elif geom['type'] in ('MultiLineString', 'Polygon'):
+        geom['coordinates'] = d2_ringlist(geom['coordinates'])
+
+    elif geom['type'] == 'MultiPolygon':
+        geom['coordinates'] = [d2_ringlist(r) for r in geom['coordinates']]
+
+    elif geom['type'] == 'GeometryCollection':
+        geom['geometries'] = [d2_geom(g) for g in geom['geometries']]
+
+
+    return geom
 
 def _expand_np(coordinates):
     return np.array(_expand_py(coordinates))
