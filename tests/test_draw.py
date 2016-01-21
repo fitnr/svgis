@@ -3,6 +3,7 @@ from svgis import draw, errors, svgis
 import svgwrite.shapes
 import svgwrite.container
 
+
 class DrawTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -39,7 +40,6 @@ class DrawTestCase(unittest.TestCase):
             'coordinates': (0.0, 0),
             'type': 'Point'
         }
-
 
     def testDrawPoint(self):
         drawn = draw.point((0.0, 0.0), r=2)
@@ -173,10 +173,10 @@ class DrawTestCase(unittest.TestCase):
         a = draw.geometry(gc, id='cats')
         assert isinstance(a, svgwrite.container.Group)
         assert a.attribs['id'] == 'cats'
-        b = a.tostring()
-        assert '<polygon ' in b
-        assert '<circle ' in b
-        assert '<polyline ' in b
+
+        assert any([isinstance(x, svgwrite.shapes.Polygon) for x in a.elements])
+        assert any([isinstance(x, svgwrite.shapes.Circle) for x in a.elements])
+        assert any([isinstance(x, svgwrite.shapes.Polyline) for x in a.elements])
 
 if __name__ == '__main__':
     unittest.main()

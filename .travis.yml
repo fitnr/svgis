@@ -23,8 +23,7 @@ sudo: true
 
 env:
   - NUMPY=yes
-  - CLIP=yes
-  - INLINE=yes
+  - CLIP=yes INLINE=yes
   - NUMPY= CLIP= INLINE=
 
 matrix:
@@ -32,15 +31,11 @@ matrix:
     - python: 3.3
       env: NUMPY=yes
     - python: 3.3
-      env: CLIP=yes
-    - python: 3.3
-      env: INLINE=yes
+      env: CLIP=yes INLINE=yes
     - python: 3.4
       env: NUMPY=yes
     - python: 3.4
-      env: CLIP=yes
-    - python: 3.4
-      env: INLINE=yes
+      env: CLIP=yes INLINE=yes
 
 cache:
   directories:
@@ -52,7 +47,7 @@ before_install:
     - if [[ $TRAVIS_OS_NAME == "linux" && $INLINE == "yes" ]]; then sudo apt-get -qq install -y libxml2-dev libxslt-dev python-dev; fi
     - pip install docutils coverage
     - if [[ $NUMPY == "yes" ]]; then pip install numpy; fi
-    - if [[ $NUMPY == "no" ]]; then pip uninstall -y numpy; fi
+    - if [[ $NUMPY != "yes" ]]; then pip uninstall -y numpy; fi
 
 install:
     - make
