@@ -1,6 +1,10 @@
 from __future__ import division
 import math
 from itertools import tee, izip as zip
+try:
+    import visvalingamwyatt as vw
+except ImportError:
+    pass
 
 
 def rect(length, angle):
@@ -73,3 +77,11 @@ def pairwise(iterable):
     a, b = tee(iterable, 2)
     next(b, None)
     return zip(a, b)
+
+
+def simplifier(ratio):
+    try:
+        vw
+        return lambda g: vw.simplify_geometry(g, ratio=ratio)
+    except NameError:
+        return lambda g: g

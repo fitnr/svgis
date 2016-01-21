@@ -54,12 +54,17 @@ install:
     - python setup.py install
     - if [[ $CLIP == "yes" ]]; then pip install -e .[clip]; fi
     - if [[ $INLINE == "yes" ]]; then pip install -e .[inline]; fi
+    - if [[ $NUMPY == "yes" ]]; then pip install -e .[simplify]; fi
 
 script:
     - make test QUIET= -W svgis/test_data/cb_2014_us_nation_20m.zip
 
 after_script:
-    - make cov
-    - make profile
-    - pip list
-
+  - svgis -h
+  - svgis draw -h
+  - svgis style -h
+  - svgis scale -h
+  - svgis project -h
+  - make cov
+  - make profile
+  - pip list

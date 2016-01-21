@@ -33,6 +33,18 @@ except ImportError:
         'action': 'store_const',
         'help': '(not enabled)',
         'const': None
+
+try:
+    import visvalingamwyatt as vw
+    simplifykwargs = {
+        'type': float,
+        'help': 'Simplify geometries. Accepts a float, which it the ratio of points to keep in each geometry',
+    }
+except ImportError:
+    simplifykwargs = {
+        'action': 'store_const',
+        'const': None,
+        'help': argparse.SUPPRESS,
     }
 
 from . import css, projection, svg
@@ -209,6 +221,8 @@ def main():
                             '"utm", '
                             '"file" (use existing), '
                             '"local" (generate a local projection)'))
+
+    draw.add_argument('-s', '--simplify', **simplifykwargs)
 
     draw.set_defaults(function=_draw)
 

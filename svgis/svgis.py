@@ -106,6 +106,8 @@ class SVGIS(object):
 
         self.log = logging.getLogger('svgis')
 
+        self.simplifier = convert.simplifier(kwargs.pop('simplify', 0.95))
+
     def __repr__(self):
         return ('SVGIS(files={0.files}, out_crs={0.out_crs}, '
                 'bounds={0.bounds}, padding={0.padding}, '
@@ -154,6 +156,8 @@ class SVGIS(object):
         with fiona.open(filename, "r") as layer:
             bounds = bounds or self.bounds or layer.bounds
 
+            simplifier = kwargs.pop('simplifier', lambda x: x)
+
             # Set the output CRS, if not yet set.
             self.set_out_crs(layer.crs, bounds)
 
@@ -176,6 +180,7 @@ class SVGIS(object):
             for _, f in layer.items(bbox=bounds):
                 geom = scale.geometry(reproject(f['geometry']), scalar)
                 geom = clipper(geom)
+                geom = simplifier(geom)
 
                 try:
                     target = _draw_feature(geom, f['properties'], **kwargs)
@@ -199,6 +204,11 @@ class SVGIS(object):
 
         viewbox = kwargs.pop('viewbox', True)
         inline_css = kwargs.pop('inline_css', False)
+
+        if 'simplify' in kwargs:
+            kwargs['simplifier'] = convert.simplifier(kwargs.pop('simplify'))
+        else:
+            kwargs['simplifier'] = self.simplifier
 
         container = svgwrite.container.Group(transform='scale(1, -1)', fill_rule='evenodd')
         container.translate(self.padding, -self.padding)

@@ -69,6 +69,7 @@ setup(
             'tinycss>=0.3,<0.4',
             'lxml>=3.5.0,<4.0',
         ],
+        'simplify': ['visvalingamwyatt']
     },
 
     test_suite='tests',
