@@ -13,7 +13,7 @@ import sys
 import os
 import subprocess
 from xml.dom import minidom
-from io import StringIO
+from io import BytesIO, StringIO
 from svgis import cli
 
 
@@ -192,6 +192,32 @@ class CliTestCase(unittest.TestCase):
 
         finally:
             os.remove('tmp.svg')
+
+    def testCliHelp(self):
+        if sys.version_info.major == 2:
+            sys.stdout = BytesIO()
+        else:
+            sys.stdout = StringIO()
+
+        sys.argv = (['svgis', '-h'])
+        with self.assertRaises(SystemExit):
+            cli.main()
+
+        sys.argv = (['svgis', 'style', '-h'])
+        with self.assertRaises(SystemExit):
+            cli.main()
+
+        sys.argv = (['svgis', 'draw', '-h'])
+        with self.assertRaises(SystemExit):
+            cli.main()
+
+        sys.argv = (['svgis', 'project', '-h'])
+        with self.assertRaises(SystemExit):
+            cli.main()
+
+        sys.argv = (['svgis', 'scale', '-h'])
+        with self.assertRaises(SystemExit):
+            cli.main()
 
     def testErrs(self):
         sys.argv = ['svgis', 'draw', 'lksdjlksjdf']

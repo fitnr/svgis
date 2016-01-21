@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import unittest
 import re
-from io import StringIO
+from io import BytesIO, StringIO
 from xml.dom import minidom
 from svgis import css
 
@@ -55,7 +55,10 @@ class CssTestCase(unittest.TestCase):
         with open(self.file) as f:
             replaced_svg = re.sub(r'<defs></defs>', '', f.read())
 
-        io_svg = StringIO(unicode(replaced_svg))
+        try:
+            io_svg = BytesIO(replaced_svg)
+        except TypeError:
+            io_svg = StringIO(replaced_svg)
 
         new = css.add_style(io_svg, self.css)
         result = minidom.parseString(new).getElementsByTagName('defs').item(0).getElementsByTagName('style').item(0)

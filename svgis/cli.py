@@ -17,7 +17,7 @@ except ImportError:
     clipkwargs = {
         'action': 'store_const',
         'const': None,
-        'help': '(not enabled)'
+        'help': argparse.SUPPRESS
     }
 
 try:
@@ -31,8 +31,9 @@ try:
 except ImportError:
     csskwargs = {
         'action': 'store_const',
-        'help': '(not enabled)',
-        'const': None
+        'const': None,
+        'help': argparse.SUPPRESS,
+    }
 
 try:
     import visvalingamwyatt as vw
@@ -161,6 +162,42 @@ def _proj(_, output, minx, miny, maxx, maxy, project=None):
     _echo(prj + '\n', output)
 
 
+class CommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
+    def _format_action(self, action):
+        parts = super(CommandHelpFormatter, self)._format_action(action)
+        if action.nargs == argparse.PARSER:
+            parts = "\n".join(parts.split("\n")[1:])
+        return parts
+
+class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
+
+    def _format_action_invocation(self, action):
+        sup = super(SubcommandHelpFormatter, self)
+
+        if not action.option_strings:
+            default = action.dest
+            metavar, = sup._metavar_formatter(action, default)(1)
+            return metavar
+
+        else:
+            parts = []
+
+            # if the Optional doesn't take a value, format is:
+            #    -s, --long
+            if action.nargs == 0:
+                parts.extend(action.option_strings)
+
+            # if the Optional takes a value, format is:
+            #    -s ARGS, --long ARGS
+            else:
+                default = action.dest
+                args_string = self._format_args(action, default)
+                for option_string in action.option_strings[:-1]:
+                    parts.append('%s' % (option_string))
+                parts.append('%s %s' % (action.option_strings[-1], args_string))
+
+            return ', '.join(parts)
+
 def main():
     log = logging.getLogger('svgis')
     log.setLevel(logging.WARN)
@@ -172,12 +209,15 @@ def main():
     parent.add_argument('input', default='/dev/stdin', help="Input SVG file. Use '-' for stdin.")
     parent.add_argument('output', nargs='?', default='/dev/stdout', help="(optional) defaults to stdout")
 
-    parser = argparse.ArgumentParser('svgis')
+    parser = argparse.ArgumentParser('svgis', formatter_class=CommandHelpFormatter)
     parser.add_argument('-V', action='version', version="%(prog)s " + version)
     sp = parser.add_subparsers()
 
-    style = sp.add_parser(
-        'style', parents=[parent], usage='%(prog)s [options] input [output]', help="Add a CSS style to an SVG")
+    # Style
+
+    style = sp.add_parser('style', parents=[parent], help="Add a CSS style to an SVG",
+                          usage='%(prog)s [options] input [output]', formatter_class=SubcommandHelpFormatter)
+
     style.add_argument('-s', '--style', type=str, metavar='css', default='',
                        help=("Style to append to SVG. "
                              "Either a valid CSS string, a file path (must end in '.css'). "
@@ -190,30 +230,30 @@ def main():
     scale.add_argument('-f', '--scale', type=int)
     scale.set_defaults(function=_scale)
 
-    draw = sp.add_parser('draw', help='Draw SVGs from input geodata ')
+    # Draw
+
+    draw = sp.add_parser('draw', help='Draw SVGs from input geodata', formatter_class=SubcommandHelpFormatter)
+
     draw.add_argument('input', nargs='+', default='/dev/stdin', help="Input geodata layers")
     draw.add_argument('-o', '--output', default='/dev/stdout', help="defaults to stdout")
+
     draw.add_argument('--bounds', nargs=4, type=float, metavar=('minx', 'miny', 'maxx', 'maxy'),
                       help='In the same coordinate system as the input layers', default=None)
 
     draw.add_argument('-c', '--style', type=str, metavar='CSS', help="CSS file or string")
+
     draw.add_argument('-f', '--scale', type=int, default=1,
                       help='Scale for the map (units are divided by this number)')
+
     draw.add_argument('-p', '--padding', type=int, default=0, required=None,
                       help='Buffer the map bounds (in projection units)')
 
-    draw.add_argument('-x', '--no-viewbox', action='store_false', dest='viewbox',
-                      help='Draw SVG without a ViewBox. May improve compatibility.')
+    draw.add_argument('-i', '--id-field', type=str, dest='id_field', help='Geodata field to use as ID')
 
-    draw.add_argument('-n', '--no-clip', dest='clip', **clipkwargs)
-
-    draw.add_argument('-l', '--inline-css', **csskwargs)
-
-    draw.add_argument('--id-field', type=str, dest='id_field', help='Geodata field to use as ID')
-    draw.add_argument('--class-fields', type=str, dest='class_fields',
+    draw.add_argument('-a', '--class-fields', type=str, metavar='FIELDS', dest='class_fields',
                       help='Geodata fields to use as class (comma-separated)')
 
-    draw.add_argument('-j', '--project', default='local', metavar='PROJECTION/KEYWORD', type=str, dest='project',
+    draw.add_argument('-j', '--project', default='local', metavar='KEYWORD', type=str, dest='project',
                       help=('Specify a map projection. '
                             'Accepts either a valid EPSG code (e.g. epsg:4456), '
                             'a valid proj4 string, '
@@ -224,10 +264,19 @@ def main():
 
     draw.add_argument('-s', '--simplify', **simplifykwargs)
 
+    draw.add_argument('-n', '--no-clip', dest='clip', **clipkwargs)
+
+    draw.add_argument('-x', '--no-viewbox', action='store_false', dest='viewbox',
+                      help='Draw SVG without a ViewBox. May improve compatibility.')
+
+    draw.add_argument('-l', '--inline-css', **csskwargs)
+
     draw.set_defaults(function=_draw)
 
-    proj = sp.add_parser(
-        'project', help='Get a local Transverse Mercator projection for a bounding box. Expects WGS 84 coordinates.')
+    # Proj
+
+    proj = sp.add_parser('project', formatter_class=SubcommandHelpFormatter,
+                         help='Get a local Transverse Mercator projection for a bounding box. Expects WGS 84 coordinates.')
     proj.add_argument('minx', type=float, help='west')
     proj.add_argument('miny', type=float, help='south')
     proj.add_argument('maxx', type=float, help='east')
