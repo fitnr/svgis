@@ -2,7 +2,10 @@ import unittest
 import re
 import svgwrite.shapes
 from svgis import svgis, errors
-
+try:
+    basestring
+except NameError:
+    basestring = str
 
 class SvgisTestCase(unittest.TestCase):
 

@@ -25,23 +25,28 @@ class DrawTestCase(unittest.TestCase):
 
         self.multipolygon = {
             "type": "MultiPolygon",
+            "id": "MultiPolygon",
             "coordinates": [[self.lis1], [lis2]]
         }
         self.polygon = {
             "type": "Polygon",
+            "id": "Polygon",
             "coordinates": [self.lis1]
         }
         self.multilinestring = {
             'type': 'MultiLineString',
+            "id": "MultiLineString",
             'coordinates': [lis2, lis2]
         }
         self.linestring = {
             'coordinates': lis2,
-            'type': 'LineString'
+            'type': 'LineString',
+            "id": "LineString",
         }
         self.point = {
             'coordinates': (0.0, 0),
-            'type': 'Point'
+            'type': 'Point',
+            "id": "Point",
         }
 
     def testDrawPoint(self):
@@ -97,8 +102,11 @@ class DrawTestCase(unittest.TestCase):
             p0 = points[0]
             p1 = points[1]
 
-        self.assertSequenceEqual(p0, c0)
-        self.assertSequenceEqual(p1, c1)
+        for z in zip(p0, c0):
+            self.assertEqual(*z)
+
+        for z in zip(p1, c1):
+            self.assertEqual(*z)
 
         with self.assertRaises(ValueError):
             draw.linestring(self.multilinestring['coordinates'])
@@ -165,6 +173,7 @@ class DrawTestCase(unittest.TestCase):
     def testGeometryCollection(self):
         gc = {
             "type": "GeometryCollection",
+            "id": "GC",
             "geometries": [
                 self.polygon,
                 self.linestring,
