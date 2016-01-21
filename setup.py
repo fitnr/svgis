@@ -8,7 +8,7 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 try:
     readme = open('README.rst').read()
@@ -18,7 +18,7 @@ except IOError:
 setup(
     name='svgis',
 
-    version='0.2.5',
+    version='0.3.0',
 
     description='Draw geodata in SVG',
 
@@ -47,7 +47,7 @@ setup(
         'Operating System :: OS Independent',
     ],
 
-    packages=find_packages(),
+    packages=['svgis'],
 
     package_data={
         'svgis': ['test_data/test.*']
@@ -57,7 +57,7 @@ setup(
         'pyproj>=1.9.5,<1.10',
         'fiona>=1.6.0,<2.0',
         'svgwrite>=1.1.6,<1.2',
-        'fionautil >=0.4.4, <1.0',
+        'fionautil >=0.4.6, <1.0',
         'utm>=0.4.0,<1'
     ],
 
@@ -69,7 +69,7 @@ setup(
             'tinycss>=0.3,<0.4',
             'lxml>=3.5.0,<4.0',
         ],
-        'simplify': ['visvalingamwyatt']
+        'simplify': ['visvalingamwyatt>=0.1.1']
     },
 
     test_suite='tests',

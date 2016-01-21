@@ -14,11 +14,14 @@ from . import projection
 from . import svg
 from .svgis import SVGIS
 
-__version__ = '0.2.5'
+__version__ = '0.3.0'
 
 __all__ = [
     'convert',
+    'clip',
+    'css',
     'draw',
+    'errors',
     'projection',
     'svg',
     'svgis',
