@@ -9,21 +9,31 @@ import fiona.crs
 
 try:
     import shapely
-    clipaction = 'store_false'
-    cliphelp = ''
+    clipkwargs = {
+        'action': 'store_false',
+        'help': "Don't clip shapes to bounds. Faster, but possibly larger files"
+    }
 except ImportError:
-    clipaction = 'store_const'
-    cliphelp = ' (not enabled)'
+    clipkwargs = {
+        'action': 'store_const',
+        'const': None,
+        'help': '(not enabled)'
+    }
 
 try:
     import lxml
     import cssselect
     import tinycss
-    cssaction = 'store_true'
-    csshelp = ''
+    csskwargs = {
+        'action': 'store_true',
+        'help': 'Inline CSS. Slightly slower, but required by some clients (Adobe Illustrator)',
+    }
 except ImportError:
-    cssaction = 'store_false'
-    csshelp = ' (not enabled)'
+    csskwargs = {
+        'action': 'store_const',
+        'help': '(not enabled)',
+        'const': None
+    }
 
 from . import css, projection, svg
 from . import __version__ as version
@@ -183,11 +193,9 @@ def main():
     draw.add_argument('-x', '--no-viewbox', action='store_false', dest='viewbox',
                       help='Draw SVG without a ViewBox. May improve compatibility.')
 
-    draw.add_argument('-n', '--no-clip', action=clipaction, dest='clip',
-                      help="Don't clip shapes to bounds. Faster, but possibly larger files"+cliphelp)
+    draw.add_argument('-n', '--no-clip', dest='clip', **clipkwargs)
 
-    draw.add_argument('-l', '--inline-css', action=cssaction,
-                      help="Inline CSS. Slightly slower, but required by some clients (Adobe Illustrator)"+csshelp)
+    draw.add_argument('-l', '--inline-css', **csskwargs)
 
     draw.add_argument('--id-field', type=str, dest='id_field', help='Geodata field to use as ID')
     draw.add_argument('--class-fields', type=str, dest='class_fields',
