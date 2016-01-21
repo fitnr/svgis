@@ -4,7 +4,7 @@ from __future__ import division, print_function
 import svgwrite
 import fionautil.measure
 import fionautil.round
-from . import clip 
+from . import clip
 from .errors import SvgisError
 
 

@@ -2,7 +2,10 @@ import unittest
 from svgis import draw, errors, svgis
 import svgwrite.shapes
 import svgwrite.container
-
+try:
+    import numpy as np
+except ImportError:
+    pass
 
 class DrawTestCase(unittest.TestCase):
 
@@ -30,10 +33,10 @@ class DrawTestCase(unittest.TestCase):
         }
         self.multilinestring = {
             'type': 'MultiLineString',
-            'coordinates': [[(0, 0), (1, 1)], [(3, 2), (5, 1)]]
+            'coordinates': [lis2, lis2]
         }
         self.linestring = {
-            'coordinates': [(0.0, 0), (1, 1)],
+            'coordinates': lis2,
             'type': 'LineString'
         }
         self.point = {
@@ -97,7 +100,7 @@ class DrawTestCase(unittest.TestCase):
         self.assertSequenceEqual(p0, c0)
         self.assertSequenceEqual(p1, c1)
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             draw.linestring(self.multilinestring['coordinates'])
 
         grp = svgis._draw_feature(self.multilinestring, self.properties, classes=self.classes)
@@ -177,6 +180,26 @@ class DrawTestCase(unittest.TestCase):
         assert any([isinstance(x, svgwrite.shapes.Polygon) for x in a.elements])
         assert any([isinstance(x, svgwrite.shapes.Circle) for x in a.elements])
         assert any([isinstance(x, svgwrite.shapes.Polyline) for x in a.elements])
+
+    def testDrawAndConvertToString(self):
+        draw.geometry(self.point).tostring()
+
+        try:
+            arr = np.array(self.lis1)
+            pl = svgwrite.shapes.Polyline(arr)
+
+            for y, k in zip(pl.points, arr.tolist()):
+                for z, m in zip(y, k):
+                    self.assertAlmostEqual(z, m)
+
+        except NameError:
+            pass
+
+        draw.geometry(self.linestring).tostring()
+        draw.geometry(self.multilinestring).tostring()
+        draw.geometry(self.polygon).tostring()
+        draw.geometry(self.multipolygon).tostring()
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -60,7 +60,7 @@ class SvgisTestCase(unittest.TestCase):
     def testDrawGeometry(self):
         geom = {
             'type': 'LineString',
-            'coordinates': [(1, 2), (4, 5), (6, 7), (9, 10)]
+            'coordinates': [[-110.8, 35.3], [-110.9, 35.8], [-110.5, 35.1], [-110.8, 35.3]]
         }
         props = {
             'foo': 'bar',
