@@ -28,20 +28,24 @@ def sanitize(x):
 
 
 def path(coordinates, **kwargs):
+    '''
+    Write an svg path element as a string.
+    :coordinates Sequence A sequence of coordinates and string instructions
+    '''
     attribs = toattribs(**kwargs)
     coords = []
     for i in coordinates:
-        if isinstance(i, str):
+        if isinstance(i, basestring):
             coords.append(i)
         else:
-            coords.append('{},{}'.format(*i))
+            coords.append('{0[0]},{0[1]}'.format(i))
 
     return '<path d="M ' + ' '.join(coords) + '"' + attribs + '>'
 
 def element(tag, coordinates, **kwargs):
     return (
         '<' + tag + ' points="' +
-        ' '.join('{},{}'.format(*c) for c in coordinates) +
+        ' '.join('{0[0]},{0[1]}'.format(c) for c in coordinates) +
         '"' + toattribs(**kwargs) + '/>'
     )
 

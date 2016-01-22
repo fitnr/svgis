@@ -67,5 +67,18 @@ class SvgTestCase(unittest.TestCase):
         assert 'transform="translate(10, 10)"' in svg.toattribs(**args)
         assert 'fill="black"' in svg.toattribs(**args)
 
+    def testDrawPath(self):
+        coordinates = [
+            (0.0, 0.0), (10.0, 0.0), (10.0, 10.0), (0.0, 10.0), (0.0, 0.0), 'M',
+            (4.0, 4.0), (4.0, 5.0), (5.0, 5.0), (5.0, 4.0), (4.0, 4.0), 'Z'
+        ]
+
+        path = svg.path(coordinates)
+        assert isinstance(path, basestring)
+        assert ' M ' in path
+        assert 'Z"' in path
+        assert '10.0,0.0' in path
+        
+
 if __name__ == '__main__':
     unittest.main()

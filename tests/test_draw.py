@@ -111,10 +111,6 @@ class DrawTestCase(unittest.TestCase):
         point = draw.points(geom, **kwargs)
         assert isinstance(point, basestring)
 
-    def testDrawPath(self):
-        path = draw.path(self.lis1)
-        assert isinstance(path, basestring)
-
     def testDrawPolygonComplicated(self):
         coordinates = [
             [(0.0, 0.0), (10.0, 0.0), (10.0, 10.0), (0.0, 10.0), (0.0, 0.0)],
