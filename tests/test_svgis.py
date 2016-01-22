@@ -88,5 +88,17 @@ class SvgisTestCase(unittest.TestCase):
         self.assertSequenceEqual(a, (10, 10, 0, 10))
         self.assertSequenceEqual(b, (5, 5, 0, 5))
 
+    def testSvgisComposeType(self):
+        a = self.svgis_obj.compose(inline_css=True)
+        b = self.svgis_obj.compose(inline_css=False)
+        try:
+            assert isinstance(a, unicode)
+            assert isinstance(b, unicode)
+        except NameError:
+            assert isinstance(a, str)
+            assert isinstance(b, str)
+
+        self.assertEqual(type(a), type(b))
+
 if __name__ == '__main__':
     unittest.main()
