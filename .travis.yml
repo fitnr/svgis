@@ -57,7 +57,7 @@ install:
     - if [[ $NUMPY == "yes" ]]; then pip install -e .[simplify]; fi
 
 script:
-    - make test QUIET= -W svgis/test_data/cb_2014_us_nation_20m.zip
+    - make test QUIET= -W tests/test_data/cb_2014_us_nation_20m.zip
 
 after_script:
   - svgis -h

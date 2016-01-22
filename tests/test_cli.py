@@ -145,7 +145,7 @@ class CliTestCase(unittest.TestCase):
         self.assertIn('scale(1.37)', result)
 
     def testCliDraw(self):
-        io = StringIO()
+        io = BytesIO()
 
         cli._draw(self.shp, io, scale=1000, project=PROJECTION, bounds=BOUNDS, clip=False)
         io.seek(0)
@@ -160,7 +160,7 @@ class CliTestCase(unittest.TestCase):
             self.assertAlmostEqual(r, f, 5)
 
     def testCliDrawProjFile(self):
-        io = StringIO()
+        io = BytesIO()
 
         cli._draw(self.shp, io, scale=1000, project='tests/test_data/test.proj4', bounds=BOUNDS, clip=False)
         io.seek(0)

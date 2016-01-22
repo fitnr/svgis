@@ -149,6 +149,9 @@ def _group(elements, **kwargs):
     return g
 
 
-def group(features, **kwargs):
-    '''Return a group with features drawn into it.'''
-    return _group([feature(f, **kwargs) for f in features])
+def group(geometries, **kwargs):
+    '''
+    Return a group with geometries drawn into it.
+    :geometries Sequence GeoJSON-like geometry dicts.
+    '''
+    return _group([geometries(g, **kwargs) for g in geometries])
