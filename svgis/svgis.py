@@ -179,9 +179,6 @@ class SVGIS(object):
                 # clip to bounds
                 geom = clipper(geom)
 
-                # limit to 2 dimensions
-                geom = clip.d2_geom(geom)
-
                 # Simplify
                 geom = simplifier(geom)
 
