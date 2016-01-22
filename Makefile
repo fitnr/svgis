@@ -18,7 +18,7 @@ README.rst: README.md
 .PHONY: all test cov deploy clean
 
 cov:
-	- coverage run --include='svgis/*' setup.py $(QUIET) test
+	- coverage run --include='svgis/*','build/lib/svgis/*' setup.py $(QUIET) test
 	coverage report
 	coverage html
 
