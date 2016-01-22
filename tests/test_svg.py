@@ -47,11 +47,6 @@ class SvgTestCase(unittest.TestCase):
         g = svg.group(transform="scale(10)")
         assert 'transform="scale(10)"' in g
 
-    def testDims(self):
-        boundary = (0, 0), (10, 0), (10, 10), (0, 10), (0, 0)
-        self.assertSequenceEqual(svg.dims(boundary), (10, 10, 0, 10))
-        self.assertSequenceEqual(svg.dims(boundary, 10), (30, 30, 10, 20))
-
     def testSanitize(self):
         assert svg.sanitize(None) == ''
         assert svg.sanitize('') == ''

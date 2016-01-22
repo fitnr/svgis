@@ -250,23 +250,20 @@ class SVGIS(object):
 
     def dims(self, scalar, bounds=None):
         '''
-        Calculate the width, height, origin X and max Y of the document
-        :scalar int map scale
-        :bounds list/tuple input bounds to calculate with instead
+        Calculate the width, height, origin X and max Y of the document.
+        By default, uses self's minimum bounding rectangle.
+        :scalar int Map scale
+        :bounds Sequence Optional bounds to calculate with (in output coordinates)
         '''
-        if bounds and len(bounds) == 4:
-            mbr_ring = convert.mbr_to_bounds(*bounds)
-        else:
-            mbr_ring = convert.mbr_to_bounds(self.mbr[0], self.mbr[1], self.mbr[2], self.mbr[3])
-
-        boundary = scale.scale(mbr_ring, scalar)
+        bounds = bounds or self.mbr
+        scalar = float(scalar)
 
         try:
-            x0, y0, x1, y1 = coords.bounds(list(boundary))
+            x0, y0, x1, y1 = [i / scalar for i in bounds]
+            w = x1 - x0 + (self.padding * 2)
+            h = y1 - y0 + (self.padding * 2)
+
+            return w, h, x0, y1
+
         except ValueError:
-            raise ValueError('Problem calculating bounds. Check that coordinates are in x, y order.')
-
-        w = x1 - x0 + (self.padding * 2)
-        h = y1 - y0 + (self.padding * 2)
-
-        return w, h, x0, y1
+            raise ValueError('Problem calculating bounds. Check that bounds are in minx, miny, maxx, maxy order.')

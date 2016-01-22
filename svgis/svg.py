@@ -1,21 +1,9 @@
 # -*- coding: utf-8 -*-
 from string import ascii_letters
-import fionautil.coords
 
 '''
 Create string versions of SVG elements.
 '''
-
-
-def dims(boundary, padding=0):
-    '''Return width and height based on an boundary ring and an optional padding'''
-    x0, y0, x1, y1 = fionautil.coords.bounds(boundary)
-
-    w = x1 - x0 + (padding * 2)
-    h = y1 - y0 + (padding * 2)
-
-    return w, h
-
 
 def sanitize(x):
     '''Make input safe of use in an svg ID or class field'''

@@ -80,5 +80,13 @@ class SvgisTestCase(unittest.TestCase):
 
         self.assertEqual(svgis._construct_classes(['foo'], {'foo': None}), 'foo_None')
 
+    def testDims(self):
+        bbox = 0, 0, 10, 10
+        a = self.svgis_obj.dims(1, bbox)
+        b = self.svgis_obj.dims(2, bbox)
+
+        self.assertSequenceEqual(a, (10, 10, 0, 10))
+        self.assertSequenceEqual(b, (5, 5, 0, 5))
+
 if __name__ == '__main__':
     unittest.main()
