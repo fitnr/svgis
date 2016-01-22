@@ -53,9 +53,6 @@ from . import css, projection, svg
 from . import __version__ as version
 from .svgis import SVGIS
 
-sys.tracebacklimit = 0
-
-
 def _echo(content, output):
     '''Print something to either a file-like object or a file name.'''
     if hasattr(output, 'write'):
@@ -201,6 +198,8 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
 
 def main():
+    sys.tracebacklimit = 0
+
     log = logging.getLogger('svgis')
     log.setLevel(logging.WARN)
     ch = logging.StreamHandler()
