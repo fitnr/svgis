@@ -56,7 +56,6 @@ setup(
     install_requires=[
         'pyproj>=1.9.5,<1.10',
         'fiona>=1.6.0,<2.0',
-        'svgwrite>=1.1.6,<1.2',
         'fionautil >=0.4.6, <1.0',
         'utm>=0.4.0,<1'
     ],

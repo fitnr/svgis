@@ -1,11 +1,14 @@
 import unittest
 from svgis import draw, errors, svgis
-import svgwrite.shapes
-import svgwrite.container
 try:
     import numpy as np
 except ImportError:
     pass
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 class DrawTestCase(unittest.TestCase):
 
@@ -50,108 +53,67 @@ class DrawTestCase(unittest.TestCase):
         }
 
     def testDrawPoint(self):
-        drawn = draw.point((0.0, 0.0), r=2)
-        self.assertEqual((drawn.attribs['cx'], drawn.attribs['cy']), (0.0, 0))
-        self.assertEqual(drawn.attribs['r'], 2)
-
-        point = draw.points(self.point)
-        assert isinstance(point, svgwrite.shapes.Circle)
-
-        self.assertEqual((point.attribs['cx'], point.attribs['cy']), (0.0, 0))
-
-        assert draw.geometry(self.point).attribs['cy'] == 0
-        assert draw.geometry(self.point).attribs['cx'] == 0
+        point = draw.point((0.0, 0.0), r=2)
+        assert isinstance(point, basestring)
+        assert 'r="2"' in point
+        assert 'cy="0.0"' in point
+        assert 'cx="0.0"' in point
 
         feat = svgis._draw_feature(self.point, self.properties, classes=self.classes)
 
-        assert isinstance(feat, svgwrite.shapes.Circle)
-        assert 'cat_meow' in feat.attribs['class']
+        assert isinstance(feat, basestring)
+        self.assertIn('cat_meow', feat)
 
     def testDrawLine(self):
-        assert draw.linestring(self.linestring['coordinates']).points == self.linestring['coordinates']
-
         line = draw.lines(self.linestring)
-        assert isinstance(line, svgwrite.shapes.Polyline)
-        assert line.points == self.linestring['coordinates']
+        assert isinstance(line, basestring)
 
         feat = svgis._draw_feature(self.linestring, self.properties, classes=self.classes)
 
-        assert isinstance(feat, svgwrite.shapes.Polyline)
-        assert 'cat_meow' in feat.attribs['class']
+        assert isinstance(feat, basestring)
+        assert 'cat_meow' in feat
 
     def testDrawMultiLine(self):
         mls1 = draw.multilinestring(self.multilinestring['coordinates'])
         mls2 = draw.lines(self.multilinestring)
 
-        assert isinstance(mls1, svgwrite.container.Group)
-        assert isinstance(mls2, svgwrite.container.Group)
-
-        self.assertSequenceEqual(mls1.elements.pop(0).points, self.multilinestring['coordinates'][0])
-        self.assertSequenceEqual(mls2.elements.pop(1).points, self.multilinestring['coordinates'][1])
-
-        points = draw.geometry(self.multilinestring).elements.pop(1).points
-
-        try:
-            c0 = self.multilinestring['coordinates'][1][0].tolist()
-            c1 = self.multilinestring['coordinates'][1][1].tolist()
-            p0 = points[0].tolist()
-            p1 = points[1].tolist()
-        except AttributeError:
-            c0 = self.multilinestring['coordinates'][1][0]
-            c1 = self.multilinestring['coordinates'][1][1]
-            p0 = points[0]
-            p1 = points[1]
-
-        for z in zip(p0, c0):
-            self.assertEqual(*z)
-
-        for z in zip(p1, c1):
-            self.assertEqual(*z)
-
-        with self.assertRaises(ValueError):
-            draw.linestring(self.multilinestring['coordinates'])
+        assert isinstance(mls1, basestring)
+        assert isinstance(mls2, basestring)
 
         grp = svgis._draw_feature(self.multilinestring, self.properties, classes=self.classes)
 
-        assert isinstance(grp, svgwrite.container.Group)
-        assert 'cat_meow' in grp.elements[0].attribs['class']
+        assert isinstance(grp, basestring)
+        assert 'cat_meow' in grp
 
     def testDrawPolygon(self):
         drawn = draw.polygon(self.polygon['coordinates'])
-
-        assert len(drawn.points) == len(self.polygon['coordinates'][0])
-
-        for (px, py), (nx, ny) in zip(drawn.points, self.polygon['coordinates'][0]):
-            self.assertAlmostEqual(px, nx, 3)
-            self.assertAlmostEqual(py, ny, 3)
-
+        assert "{},{}".format(*self.lis1[0]) in drawn
         feat = svgis._draw_feature(self.polygon, self.properties, classes=self.classes)
-        assert 'cat_meow' in feat.attribs['class']
+        assert 'cat_meow' in feat
 
     def testDrawMultiPolygon(self):
         drawn = draw.multipolygon(self.multipolygon['coordinates'])
 
-        assert isinstance(drawn, svgwrite.container.Group)
-        assert len(drawn.elements[0].points) == len(self.multipolygon['coordinates'][0][0])
+        assert isinstance(drawn, basestring)
 
-        for (px, py), (nx, ny) in zip(drawn.elements[1].points, self.multipolygon['coordinates'][1][0]):
-            self.assertAlmostEqual(px, nx, 3)
-            self.assertAlmostEqual(py, ny, 3)
 
     def testAddClass(self):
         geom = {
             'coordinates': (0, 0),
             'type': 'Point'
         }
-        point = draw.points(geom, class_=u'boston')
-        self.assertIsInstance(point, svgwrite.shapes.Circle)
+        kwargs = {
+            "class": "boston"
+        }
+        point = draw.points(geom, **kwargs)
+        self.assertIsInstance(point, basestring)
 
-        point = draw.points(geom, class_='boston')
-        assert isinstance(point, svgwrite.shapes.Circle)
+        point = draw.points(geom, **kwargs)
+        assert isinstance(point, basestring)
 
     def testDrawPath(self):
         path = draw.path(self.lis1)
-        assert isinstance(path, svgwrite.path.Path)
+        assert isinstance(path, basestring)
 
     def testDrawPolygonComplicated(self):
         coordinates = [
@@ -160,11 +122,11 @@ class DrawTestCase(unittest.TestCase):
         ]
 
         polygon = draw.polygon(coordinates)
-        self.assertIsInstance(polygon, svgwrite.path.Path)
-        assert polygon.attribs['class'] == 'polygon'
+        self.assertIsInstance(polygon, basestring)
+        assert 'class="polygon"' in polygon
 
-        polygon = draw.polygon(coordinates, class_='a')
-        assert polygon.attribs['class'] == 'polygon a'
+        kw = {'class': 'a'}
+        assert 'polygon a' in draw.polygon(coordinates, **kw)
 
     def testUnkownGeometry(self):
         with self.assertRaises(errors.SvgisError):
@@ -183,31 +145,14 @@ class DrawTestCase(unittest.TestCase):
             ],
         }
         a = draw.geometry(gc, id='cats')
-        assert isinstance(a, svgwrite.container.Group)
-        assert a.attribs['id'] == 'cats'
-
-        assert any([isinstance(x, svgwrite.shapes.Polygon) for x in a.elements])
-        assert any([isinstance(x, svgwrite.shapes.Circle) for x in a.elements])
-        assert any([isinstance(x, svgwrite.shapes.Polyline) for x in a.elements])
+        assert isinstance(a, basestring)
+        assert 'id="cats"' in a
 
     def testDrawAndConvertToString(self):
-        draw.geometry(self.point).tostring()
-
-        try:
-            arr = np.array(self.lis1)
-            pl = svgwrite.shapes.Polyline(arr)
-
-            for y, k in zip(pl.points, arr.tolist()):
-                for z, m in zip(y, k):
-                    self.assertAlmostEqual(z, m)
-
-        except NameError:
-            pass
-
-        draw.geometry(self.linestring).tostring()
-        draw.geometry(self.multilinestring).tostring()
-        draw.geometry(self.polygon).tostring()
-        draw.geometry(self.multipolygon).tostring()
+        draw.geometry(self.linestring)
+        draw.geometry(self.multilinestring)
+        draw.geometry(self.polygon)
+        draw.geometry(self.multipolygon)
 
 
 if __name__ == '__main__':

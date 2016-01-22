@@ -2,8 +2,12 @@
 from __future__ import unicode_literals
 import unittest
 from xml.dom import minidom
-from svgis import svg
-import svgwrite
+from svgis import css, svg
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 
 class SvgTestCase(unittest.TestCase):
@@ -13,36 +17,35 @@ class SvgTestCase(unittest.TestCase):
         self.newstyle = 'stroke {color:red;}'
 
     def test_rescale(self):
-        new = svg.rescale(self.file, 100)
+        new = css.rescale(self.file, 100)
 
         g = minidom.parseString(new).getElementsByTagName('g')[0]
         assert 'scale(100)' in g.attributes.get('transform').value
 
     def test_create(self):
-        s = svg.create((100, 100), [])
-        assert isinstance(s, svgwrite.drawing.Drawing)
+        s = svg.drawing((100, 100), [])
+        assert isinstance(s, basestring)
 
-        s = svg.create(100, [])
-        assert isinstance(s, svgwrite.drawing.Drawing)
+        s = svg.drawing((100, 100), [])
+        assert isinstance(s, basestring)
 
-        s = svg.create(100, [], style=self.newstyle)
-        assert isinstance(s, svgwrite.drawing.Drawing)
-        assert len(s.defs.elements) > 0
-        assert self.newstyle in s.defs.elements[0].tostring()
+        s = svg.drawing((100, 100), [], style=self.newstyle)
+
+        assert self.newstyle in s
+
+    def testviewbox(self):
+        vb = svg.setviewbox([1, 1, 1, 1])
+        assert 'viewBox' in vb
 
     def testSetGroup(self):
-        g = svg.set_group()
-        self.assertIsInstance(g, svgwrite.container.Group)
+        g = svg.group()
+        self.assertIsInstance(g, basestring)
 
-        g = svg.set_group(translate=(10, 10))
-        assert g.attribs.get('transform') == "translate(10,10)"
+        g = svg.group(transform="translate(10,10)")
+        self.assertIn('transform="translate(10,10)"', g)
 
-        g = svg.set_group(scale=(10,))
-        assert g.attribs.get('transform') == "scale(10)"
-
-        pt = svgwrite.shapes.Circle((0, 0))
-        g = svg.set_group(members=[pt])
-        self.assertIn('<circle ', g.tostring())
+        g = svg.group(transform="scale(10)")
+        assert 'transform="scale(10)"' in g
 
     def testDims(self):
         boundary = (0, 0), (10, 0), (10, 10), (0, 10), (0, 0)
@@ -55,3 +58,14 @@ class SvgTestCase(unittest.TestCase):
         self.assertEqual(svg.sanitize('ü'), '_ü')
         self.assertEqual(svg.sanitize('!foo'), '_!foo')
         assert svg.sanitize('müller') == 'müller'
+
+    def testAttribs(self):
+        args = {
+            'transform': 'translate(10, 10)',
+            'fill': 'black'
+        }
+        assert 'transform="translate(10, 10)"' in svg.toattribs(**args)
+        assert 'fill="black"' in svg.toattribs(**args)
+
+if __name__ == '__main__':
+    unittest.main()

@@ -1,6 +1,5 @@
 import unittest
 import re
-import svgwrite.shapes
 from svgis import svgis, errors
 try:
     basestring
@@ -70,10 +69,10 @@ class SvgisTestCase(unittest.TestCase):
             'cat': 'meow'
         }
         drawn = svgis._draw_feature(geom, properties=props, classes=['foo'], id_field='cat')
-        assert isinstance(drawn, svgwrite.shapes.Polyline)
-        stringed = drawn.tostring()
-        self.assertIn('id="meow"', stringed)
-        assert 'class="foo_bar"' in stringed
+        assert isinstance(drawn, basestring)
+
+        self.assertIn('id="meow"', drawn)
+        self.assertIn('class="foo_bar"', drawn)
 
     def testConstructClasses(self):
         self.assertEqual(svgis._construct_classes('foo', {'foo': 'bar'}), 'foo_bar')

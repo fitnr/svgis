@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
-import sys
-from xml.dom import minidom
-from collections import Sequence
 from string import ascii_letters
 import fionautil.coords
-import svgwrite.container
 
 '''
-Edit SVGs.
+Create string versions of SVG elements.
 '''
+
 
 def dims(boundary, padding=0):
     '''Return width and height based on an boundary ring and an optional padding'''
@@ -30,70 +27,73 @@ def sanitize(x):
         return ''
 
 
-def set_group(members=None, scale=None, translate=None, **kwargs):
-    '''Create a group with the given scale and translation'''
-
-    groupargs = {
-        'fill': 'none',
-        'stroke': 'black',
-    }
-    groupargs.update(kwargs)
-    g = svgwrite.container.Group(**groupargs)
-
-    members = members or []
-
-    for m in members:
-        g.add(m)
-
-    if scale:
-        g.scale(*scale)
-
-    if translate:
-        g.translate(*translate)
-
-    return g
-
-
-def save(filename, diameter, groups, profile=None):
-    dwg = create(diameter, groups, profile)
-    dwg.filename = filename
-    dwg.save()
-
-
-def create(size, groups, profile=None, style=None):
-    profile = profile or 'full'
-
-    if not isinstance(size, Sequence):
-        size = (int(size), int(size))
-
-    dwg = svgwrite.Drawing(profile=profile, size=size)
-
-    if style:
-        dwg.defs.add(dwg.style(style))
-
-    for g in groups:
-        dwg.add(g)
-
-    return dwg
-
-
-def write(filename, drawing):
-
-    try:
-        if filename == '-':
-            f = sys.stdout
-
+def path(coordinates, **kwargs):
+    attribs = toattribs(**kwargs)
+    coords = []
+    for i in coordinates:
+        if isinstance(i, str):
+            coords.append(i)
         else:
-            f = open(filename, 'w')
+            coords.append('{},{}'.format(*i))
 
-        f.write(drawing.tostring())
+    return '<path d="M ' + ' '.join(coords) + '"' + attribs + '>'
 
-    except IOError:
-        raise
+def element(tag, coordinates, **kwargs):
+    return (
+        '<' + tag + ' points="' +
+        ' '.join('{},{}'.format(*c) for c in coordinates) +
+        '"' + toattribs(**kwargs) + '/>'
+    )
 
-    finally:
-        try:
-            if f != sys.stdout:
-                f.close()
-        except UnboundLocalError:
-            pass
+
+def toattribs(**kwargs):
+    fmt = '{}="{}"'
+    attribs = ' '.join(fmt.format(k, v) for k, v in kwargs.items() if v)
+
+    if len(attribs) > 0:
+        attribs = ' ' + attribs
+
+    return attribs
+
+
+def defstyle(style=None):
+    '''Create a defs element with a css style'''
+    if style:
+        return '<defs><style type="text/css"><![CDATA[{}]]></style></defs>'.format(style)
+    else:
+        return '<defs />'
+
+
+def group(members=None, **kwargs):
+    '''Create a group with the given scale and translation'''
+    attribs = toattribs(**kwargs)
+
+    if members is None or len(members) == 0:
+        return '<g' + attribs + ' />'
+
+    return '<g' + attribs + '>' + ''.join(members) + '</g>'
+
+
+def setviewbox(viewbox=None):
+    if viewbox is None:
+        return ''
+    else:
+        return ' viewBox="{},{},{},{}"'.format(*viewbox)
+
+
+def drawing(size, members, viewbox=None, style=None):
+    '''
+    Create an SVG element.
+    :size tuple width, height
+    :members list Strings to add to output.
+    :viewbox Sequence Four coordinates that describe a bounding box.
+    :style string CSS string.
+    '''
+    svg = ('<svg baseProfile="full" version="1.1"'
+           ' xmlns="http://www.w3.org/2000/svg"'
+          )
+    dimension = ' width="{}" height="{}"'.format(*size)
+    vb = setviewbox(viewbox)
+    defs = defstyle(style)
+
+    return svg + dimension + vb + '>' + defs + ''.join(members) + '</svg>'

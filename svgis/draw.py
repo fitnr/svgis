@@ -1,10 +1,9 @@
 """Draw a geometries elements as SVG"""
 # -*- coding: utf-8 -*-
 from __future__ import division, print_function
-import svgwrite
 import fionautil.measure
 import fionautil.round
-from . import clip
+from . import clip, svg
 from .errors import SvgisError
 
 
@@ -23,7 +22,7 @@ def applyid(multifunc):
 
 
 def linestring(coordinates, **kwargs):
-    return svgwrite.shapes.Polyline(coordinates, **kwargs)
+    return svg.element('polyline', coordinates, **kwargs)
 
 
 @applyid
@@ -37,10 +36,6 @@ def lines(geom, **kwargs):
 
     elif geom['type'] == 'MultiLineString':
         return multilinestring(geom['coordinates'], **kwargs)
-
-
-def path(coordinates, **kwargs):
-    return svgwrite.path.Path(['M'] + coordinates, **kwargs)
 
 
 def polygons(geom, **kwargs):
@@ -57,26 +52,28 @@ def polygons(geom, **kwargs):
 def polygon(coordinates, **kwargs):
     '''Draw an svg polygon based on coordinates.'''
     if len(coordinates) == 1:
-        return svgwrite.shapes.Polygon(coordinates[0], **kwargs)
+        return svg.element('polygon', coordinates[0], **kwargs)
 
     # This is trickier because drawing holes in SVG.
     # We go clockwise on the first ring, then counterclockwise
     if fionautil.measure.counterclockwise(coordinates[0]):
         coordinates[0] = coordinates[0][::-1]
 
-    if 'class_' in kwargs:
-        class_ = 'polygon ' + kwargs.pop('class_')
+    if 'class' in kwargs:
+        kwargs['class'] = 'polygon ' + kwargs.pop('class')
     else:
-        class_ = 'polygon'
+        kwargs['class'] = 'polygon'
 
-    pth = path(list(coordinates[0]) + ['z'], fill_rule='evenodd', class_=class_, **kwargs)
+    instructions = list(coordinates[0]) + ['z']
 
     for ring in coordinates[1:]:
         # make all interior run the counter-clockwise
         if fionautil.measure.clockwise(ring):
             ring = ring[::-1]
 
-        pth.push(['M'] + list(ring) + ['z'])
+        instructions.extend(['M'] + list(ring) + ['z'])
+
+    pth = svg.path(instructions, fill_rule='evenodd', **kwargs)
 
     return pth
 
@@ -102,7 +99,7 @@ def point(coordinates, **kwargs):
     except (AttributeError, TypeError):
         pt = coordinates
 
-    return svgwrite.shapes.Circle(center=pt, **kwargs)
+    return '<circle cx="{}" cy="{}"{}>'.format(pt[0], pt[1], svg.toattribs(**kwargs))
 
 
 @applyid
@@ -122,7 +119,7 @@ def geometry(geom, bbox=None, precision=3, **kwargs):
     :geom object A GeoJSON-like geometry object. Coordinates must be 2-dimensional.
     :bbox tuple An optional bounding minimum bounding box
     :precision int Rounding precision. precision=None disables rounding.
-    :kwargs object keyword args to be passed onto svgwrite. Things like class_, id, style, etc.
+    :kwargs object keyword args to be passed onto the created elements. (Things like class, id, style, etc).
     '''
     if bbox:
         geom = clip.clip(geom, bbox)
@@ -152,14 +149,11 @@ def feature(feat, **kwargs):
 
 
 def _group(elements, **kwargs):
-    '''Group a list of svgwrite elements. Won't group one element.'''
+    '''Group a list of elements. Won't group one element.'''
     if len(elements) == 1:
         return elements[0]
 
-    g = svgwrite.container.Group(fill_rule="evenodd", **kwargs)
-
-    for e in elements:
-        g.add(e)
+    g = svg.group(elements, fill_rule="evenodd", **kwargs)
 
     return g
 

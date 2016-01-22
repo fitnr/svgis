@@ -12,3 +12,4 @@ from . import test_convert
 from . import test_draw
 from . import test_projection
 from . import test_svg
+from . import test_svgis

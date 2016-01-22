@@ -5,7 +5,6 @@ from collections import Iterable
 import logging
 import fiona
 import fiona.transform
-import svgwrite
 from fionautil import scale, coords
 from . import convert, clip, css, draw, errors, projection, svg
 
@@ -46,16 +45,10 @@ def _draw_feature(geom, properties=None, classes=None, id_field=None, **kwargs):
     properties = properties or {}
     classes = classes or []
 
-    try:
-        kwargs['class_'] = _construct_classes(classes, properties)
-    except TypeError:
-        pass
+    kwargs['class'] = _construct_classes(classes, properties)
 
     if id_field:
-        try:
-            kwargs['id'] = svg.sanitize(properties.get(id_field))
-        except AttributeError:
-            pass
+        kwargs['id'] = svg.sanitize(properties.get(id_field))
 
     return draw.geometry(geom, **kwargs)
 
@@ -148,7 +141,7 @@ class SVGIS(object):
 
     def compose_file(self, filename, scalar, bounds=None, **kwargs):
         '''
-        Draw fiona file to svgwrite Group object.
+        Draw fiona file to string.
         :filename string path to a fiona-readable file
         :scalar int map scale
         :bounds tuple (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
@@ -178,8 +171,7 @@ class SVGIS(object):
                 if kwargs['id_field'] not in layer.schema['properties'].keys():
                     del kwargs['id_field']
 
-            group = svgwrite.container.Group(id=layer.name)
-
+            group = []
             for _, f in layer.items(bbox=bounds):
                 # Project and scale
                 geom = scale.geometry(reproject(f['geometry']), scalar)
@@ -195,12 +187,12 @@ class SVGIS(object):
 
                 try:
                     target = _draw_feature(geom, f['properties'], **kwargs)
-                    group.add(target)
+                    group.append(target)
 
                 except errors.SvgisError as e:
                     self.log.error("Error drawing %s: %s", filename, e.message)
 
-        return group
+        return svg.group(group)
 
     def compose(self, style=None, scalar=None, bounds=None, **kwargs):
         '''
@@ -213,6 +205,7 @@ class SVGIS(object):
         :simplify float Must be between 0 and 1. Fraction of removable coordinates to keep.
         :inline_css bool If True, try to run CSS into each element.
         '''
+        # Set up arguments
         scalar = scalar or self.scalar
         style = self.style + (style or '')
 
@@ -226,30 +219,34 @@ class SVGIS(object):
 
         kwargs['precision'] = kwargs.get('precision', 0)
 
-        container = svgwrite.container.Group(transform='scale(1, -1)', fill_rule='evenodd')
-        container.translate(self.padding, -self.padding)
+        groupargs = {
+            'transform': 'scale(1, -1) translate({},{})'.format(self.padding, -self.padding),
+            'fill_rule': 'evenodd'
+        }
+        svgargs = {
+            'style': style
+        }
 
+        # Draw files
         with fiona.drivers():
-            for filename in self.files:
-                container.add(self.compose_file(filename, scalar, bounds=bounds, **kwargs))
+            members = [self.compose_file(f, scalar, bounds=bounds, **kwargs) for f in self.files]
 
         w, h, x0, y1 = self.dims(scalar, bounds=bounds)
 
-        if not viewbox:
-            container.translate(-x0, -y1)
-
-        drawing = svg.create((w, h), [container], style=style)
-
         if viewbox:
-            drawing.viewbox(x0, -y1, w, h)
+            svgargs['viewbox'] = (x0, -y1, w, h)
+        else:
+            groupargs['transform'] += ' translate({}, {})'.format(-x0, -y1)
 
-        result = drawing.tostring()
+        # Create container and then SVG
+        container = svg.group(members, **groupargs)
+        drawing = svg.drawing((w, h), [container], **svgargs)
 
         if inline_css:
-            return css.inline(result, style)
+            return css.inline(drawing, style)
 
         else:
-            return result
+            return drawing
 
     def dims(self, scalar, bounds=None):
         '''
@@ -263,6 +260,7 @@ class SVGIS(object):
             mbr_ring = convert.mbr_to_bounds(self.mbr[0], self.mbr[1], self.mbr[2], self.mbr[3])
 
         boundary = scale.scale(mbr_ring, scalar)
+
         try:
             x0, y0, x1, y1 = coords.bounds(list(boundary))
         except ValueError:
