@@ -7,6 +7,23 @@ except ImportError:
     pass
 
 
+def rescale(svgfile, factor):
+    svg = minidom.parse(svgfile)
+
+    scalar = 'scale({})'.format(factor)
+
+    gs = svg.getElementsByTagName('g')[0]
+
+    transform = gs.attributes.get('transform')
+
+    if transform:
+        transform.value = transform.value + ' ' + scalar
+    else:
+        gs.setAttribute('transform', scalar)
+
+    return svg.toxml()
+
+
 def add_style(svgfile, newstyle, replace=False):
     '''Add to the CSS style in an SVG file.
     svgfile -- Path to an SVG file or an SVG string

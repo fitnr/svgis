@@ -10,24 +10,6 @@ import svgwrite.container
 Edit SVGs.
 '''
 
-
-def rescale(svgfile, factor):
-    svg = minidom.parse(svgfile)
-
-    scalar = 'scale({})'.format(factor)
-
-    gs = svg.getElementsByTagName('g')[0]
-
-    transform = gs.attributes.get('transform')
-
-    if transform:
-        transform.value = transform.value + ' ' + scalar
-    else:
-        gs.setAttribute('transform', scalar)
-
-    return svg.toxml()
-
-
 def dims(boundary, padding=0):
     '''Return width and height based on an boundary ring and an optional padding'''
     x0, y0, x1, y1 = fionautil.coords.bounds(boundary)

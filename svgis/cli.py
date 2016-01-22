@@ -68,7 +68,7 @@ def _echo(content, output):
 
 def _scale(layer, output, scale, **_):
     '''Rescale an SVG by a factor'''
-    result = svg.rescale(layer, scale)
+    result = css.rescale(layer, scale)
     _echo(result, output)
 
 
