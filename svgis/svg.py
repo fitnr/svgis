@@ -27,6 +27,14 @@ def sanitize(x):
         return ''
 
 
+def circle(point, **kwargs):
+    '''
+    Write a svg circle element. Keyword arguments are mapped to attributes.
+    :point tuple The center of the circle
+    '''
+    return '<circle cx="{0[0]}" cy="{0[1]}"'.format(point) + toattribs(**kwargs) + '/>'
+
+
 def path(coordinates, **kwargs):
     '''
     Write an svg path element as a string.
@@ -40,7 +48,8 @@ def path(coordinates, **kwargs):
         else:
             coords.append('{0[0]},{0[1]}'.format(i))
 
-    return '<path d="M ' + ' '.join(coords) + '"' + attribs + '>'
+    return '<path d="M ' + ' '.join(coords) + '"' + attribs + '/>'
+
 
 def element(tag, coordinates, **kwargs):
     return (

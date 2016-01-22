@@ -87,24 +87,15 @@ def points(geom, **kwargs):
     kwargs['r'] = kwargs.get('r', 1)
 
     if geom['type'] == 'Point':
-        return point(geom['coordinates'], **kwargs)
+        return svg.circle(geom['coordinates'], **kwargs)
 
     elif geom['type'] == 'MultiPoint':
         return multipoint(geom['coordinates'], **kwargs)
 
 
-def point(coordinates, **kwargs):
-    try:
-        pt = coordinates.pop()
-    except (AttributeError, TypeError):
-        pt = coordinates
-
-    return '<circle cx="{}" cy="{}"{}>'.format(pt[0], pt[1], svg.toattribs(**kwargs))
-
-
 @applyid
 def multipoint(coordinates, **kwargs):
-    return [point((pt[0], pt[1]), **kwargs) for pt in coordinates]
+    return [svg.circle((pt[0], pt[1]), **kwargs) for pt in coordinates]
 
 
 def geometrycollection(collection, bbox, precision, **kwargs):

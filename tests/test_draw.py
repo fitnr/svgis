@@ -53,12 +53,6 @@ class DrawTestCase(unittest.TestCase):
         }
 
     def testDrawPoint(self):
-        point = draw.point((0.0, 0.0), r=2)
-        assert isinstance(point, basestring)
-        assert 'r="2"' in point
-        assert 'cy="0.0"' in point
-        assert 'cx="0.0"' in point
-
         feat = svgis._draw_feature(self.point, self.properties, classes=self.classes)
 
         assert isinstance(feat, basestring)

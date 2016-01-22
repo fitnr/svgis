@@ -49,8 +49,8 @@ class SvgTestCase(unittest.TestCase):
 
     def testDims(self):
         boundary = (0, 0), (10, 0), (10, 10), (0, 10), (0, 0)
-        assert svg.dims(boundary) == (10, 10)
-        assert svg.dims(boundary, 10) == (30, 30)
+        self.assertSequenceEqual(svg.dims(boundary), (10, 10, 0, 10))
+        self.assertSequenceEqual(svg.dims(boundary, 10), (30, 30, 10, 20))
 
     def testSanitize(self):
         assert svg.sanitize(None) == ''
@@ -66,6 +66,13 @@ class SvgTestCase(unittest.TestCase):
         }
         assert 'transform="translate(10, 10)"' in svg.toattribs(**args)
         assert 'fill="black"' in svg.toattribs(**args)
+
+    def testDrawCircle(self):
+        point = svg.circle((0.0, 0.0), r=2)
+        assert isinstance(point, basestring)
+        assert 'r="2"' in point
+        assert 'cy="0.0"' in point
+        assert 'cx="0.0"' in point
 
     def testDrawPath(self):
         coordinates = [
