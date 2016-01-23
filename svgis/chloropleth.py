@@ -5,7 +5,7 @@ try:
 except ImportError:
     pass
 
-def databins(features, prop, n, method):
+def databins(features, prop, bins, method):
     '''
     :features Sequence A sequence of GeoJSON-like features.
     :property property to examine.
@@ -17,15 +17,17 @@ def databins(features, prop, n, method):
     if not any(values):
         raise SvgisError("No values found for field: %s" % prop)
 
-    return _databins(values, n, method)
+    bins = min(50, bins)
 
-def _databins(values, n, method):
+    return _databins(values, bins, method)
+
+def _databins(values, bins, method):
     '''
     :values Sequence Values to base bins upon.
     :n int Number of bins to return
     :method string "quantile", "interval" (for equal interval).
     '''
-    x = 100 / float(n)
+    x = 100 / float(bins)
     breaks = list(range(x, 101, x))
 
     if method == "quantile":
@@ -33,12 +35,12 @@ def _databins(values, n, method):
         try:
             bins = np.percentile(values, breaks)
         except NameError:
-            return _databins(values, n, "interval")
+            return _databins(values, bins, "interval")
 
     else:
         values.sort()
         l = len(values)
-        bins = [values[int(i * l * 0.01)-1] for i in breaks]
+        bins = tuple(values[int(i * l * 0.01)-1] for i in breaks)
 
     return bins
 
@@ -53,7 +55,7 @@ def binner(bins, binformat=None):
     L = len(bins)
 
     def func(value):
-        B = len([b for b in bins if b <= value])
+        B = len(tuple(b for b in bins if b <= value))
 
         return binformat.format(B, L)
 
