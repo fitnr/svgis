@@ -1,9 +1,10 @@
-0.3.0
+0.3.1
 -----
 
 * Add option to clip files, requires Shapely
 * Add option to inline files, requires lxml
 * Add line simplification option using Visivalingam algorithm, requires numpy
+* Remove svgwrite as a dependency for faster file writing
 * Tests expanded and code refactored, crushing lots of bugs
 * --proj option can now read a file containing a proj4 string
 * Allow unicode in class and id fields

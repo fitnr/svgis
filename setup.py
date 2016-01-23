@@ -18,7 +18,7 @@ except IOError:
 setup(
     name='svgis',
 
-    version='0.3.0',
+    version='0.3.1',
 
     description='Draw geodata in SVG',
 
