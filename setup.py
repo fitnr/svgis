@@ -47,7 +47,7 @@ setup(
         'Operating System :: OS Independent',
     ],
 
-    packages=['svgis'],
+    packages=['svgis', 'svgis.cli'],
 
     package_data={
         'svgis': ['test_data/test.*']

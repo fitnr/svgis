@@ -7,15 +7,18 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
+
 from __future__ import unicode_literals
 import unittest
+import argparse
 import sys
 import os
 import subprocess
 from xml.dom import minidom
 from io import BytesIO, StringIO
 from svgis import cli
-
+from svgis.cli import actions, formatter
+from svgis.cli.main import echo
 
 PROJECTION = '+proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'
 BOUNDS = (-124.0, 20.5, -64.0, 49.0)
@@ -89,72 +92,50 @@ class CliTestCase(unittest.TestCase):
     def testCliEcho(self):
         io = StringIO()
         content = 'my content'
-        cli._echo(content, io)
+        echo(content, io)
         io.seek(0)
 
         self.assertEqual(io.read(), content)
 
     def testCliStyle(self):
-        io = StringIO()
-        cli._style(self.fixture, io, self.css)
-        io.seek(0)
-
-        self.assertIn(self.css, io.read())
+        result = actions.add_style(self.fixture, self.css)
+        self.assertIn(self.css, result)
 
         style = 'tmp.css'
+
         with open(style, 'w') as w:
             w.write(self.css)
 
-        io = StringIO()
-
         try:
-            cli._style(self.fixture, io, style)
-            io.seek(0)
-            self.assertIn(self.css, io.read())
+            result = actions.add_style(self.fixture, style)
+            self.assertIn(self.css, result)
 
         finally:
             os.remove('tmp.css')
 
     def CliDrawWithStyle(self):
-        io = StringIO()
-        cli._draw(self.shp, io, style=self.css, scale=1000, project=PROJECTION, bounds=BOUNDS, clip=None)
-        io.seek(0)
-
-        self.assertIn(self.css, io.read())
+        result = actions.draw(self.shp, style=self.css, scale=1000, project=PROJECTION, bounds=BOUNDS, clip=None)
+        self.assertIn(self.css, result)
 
         style = 'tmp.css'
         with open(style, 'w') as w:
             w.write(self.css)
 
-        io = StringIO()
-
         try:
-            cli._draw(self.shp, io, style=style, scale=1000, project=PROJECTION, bounds=BOUNDS, clip=None)
-            io.seek(0)
-            self.assertIn(self.css, io.read())
+            result = actions.draw(self.shp, style=style, scale=1000, project=PROJECTION, bounds=BOUNDS, clip=None)
+            self.assertIn(self.css, result)
 
         finally:
             os.remove('tmp.css')
 
     def testCliScale(self):
-        io = StringIO()
-
-        cli._scale(self.fixture, io, 1.37)
-        io.seek(0)
-        result = io.read()
+        result = actions.scale(self.fixture, 1.37)
         self.assertIn('scale(1.37)', result)
 
     def testCliDraw(self):
-        try:
-            io = BytesIO()
-            cli._draw(self.shp, io, scale=1000, project=PROJECTION, bounds=BOUNDS, clip=False)
-        except TypeError:
-            io = StringIO()
-            cli._draw(self.shp, io, scale=1000, project=PROJECTION, bounds=BOUNDS, clip=False)
+        a = actions.draw(self.shp, scale=1000, project=PROJECTION, bounds=BOUNDS, clip=False)
 
-        io.seek(0)
-
-        result = minidom.parseString(io.read()).getElementsByTagName('svg').item(0)
+        result = minidom.parseString(a).getElementsByTagName('svg').item(0)
         fixture = minidom.parse(self.fixture).getElementsByTagName('svg').item(0)
 
         result_vb = [float(x) for x in result.attributes.get('viewBox').value.split(',')]
@@ -164,16 +145,9 @@ class CliTestCase(unittest.TestCase):
             self.assertAlmostEqual(r, f, 5)
 
     def testCliDrawProjFile(self):
-        try:
-            io = BytesIO()
-            cli._draw(self.shp, io, scale=1000, project='tests/test_data/test.proj4', bounds=BOUNDS, clip=False)
-        except TypeError:
-            io = StringIO()
-            cli._draw(self.shp, io, scale=1000, project='tests/test_data/test.proj4', bounds=BOUNDS, clip=False)
+        a = actions.draw(self.shp, scale=1000, project='tests/test_data/test.proj4', bounds=BOUNDS, clip=False)
 
-        io.seek(0)
-
-        result = minidom.parseString(io.read()).getElementsByTagName('svg').item(0)
+        result = minidom.parseString(a).getElementsByTagName('svg').item(0)
         fixture = minidom.parse(self.fixture).getElementsByTagName('svg').item(0)
 
         result_vb = [float(x) for x in result.attributes.get('viewBox').value.split(',')]
@@ -232,6 +206,29 @@ class CliTestCase(unittest.TestCase):
 
         with self.assertRaises(IOError):
             cli.main()
+
+    def testCliFormatter(self):
+        assert issubclass(formatter.CommandHelpFormatter, argparse.HelpFormatter)
+        assert issubclass(formatter.SubcommandHelpFormatter, argparse.HelpFormatter)
+
+    def testPickStyle(self):
+        stylefile = 'tmp.css'
+
+        with open(stylefile, 'w') as w:
+            w.write(self.css)
+
+        try:
+            result = actions.pick_style(stylefile)
+            self.assertEqual(self.css, result)
+
+        finally:
+            os.remove('tmp.css')
+
+        result = actions.pick_style(self.css)
+        self.assertEqual(self.css, result)
+
+        assert actions.pick_style(None) is None
+
 
 if __name__ == '__main__':
     unittest.main()

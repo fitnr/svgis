@@ -1,11 +1,18 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# This file is part of svgis.
+# https://github.com/fitnr/svgis
+
+# Licensed under the GNU General Public License v3 (GPLv3) license:
+# http://www.opensource.org/licenses/GNU General Public License v3 (GPLv3)-license
+# Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
+
 from __future__ import print_function, division
-import os.path
 import sys
 from signal import signal, SIGPIPE, SIG_DFL
 import argparse
 import logging
-import fiona.crs
 
 try:
     import shapely
@@ -36,7 +43,7 @@ except ImportError:
     }
 
 try:
-    import visvalingamwyatt as vw
+    import visvalingamwyatt
     simplifykwargs = {
         'type': float,
         'metavar': 'FACTOR',
@@ -49,11 +56,11 @@ except ImportError:
         'help': argparse.SUPPRESS,
     }
 
-from . import css, projection, svg
-from . import __version__ as version
-from .svgis import SVGIS
+from . import actions
+from .formatter import CommandHelpFormatter, SubcommandHelpFormatter
+from .. import __version__ as version
 
-def _echo(content, output):
+def echo(content, output):
     '''Print something to either a file-like object or a file name.'''
     if hasattr(output, 'write'):
         signal(SIGPIPE, SIG_DFL)
@@ -61,141 +68,6 @@ def _echo(content, output):
     else:
         with open(output, 'w') as w:
             w.write(content)
-
-
-def _scale(layer, output, scale, **_):
-    '''Rescale an SVG by a factor'''
-    result = css.rescale(layer, scale)
-    _echo(result, output)
-
-
-def _style(layer, output, style, replace=None, **_):
-    '''Add a CSS string to an SVG's style attribute.
-    :layer string Input svg file location
-    :output mixed Either a file handle or filename
-    :style string The input CSS, css file or '-'. Strings ending in ".css" are treated as files, "-" reads from stdin.
-    '''
-    if style == '-':
-        style = sys.stdin.read()
-
-    elif style[-4:] == '.css' or style == '/dev/stdin':
-        with open(style) as f:
-            style = f.read()
-
-    result = css.add_style(layer, style, replace=replace)
-    _echo(result, output)
-
-
-def _draw(layers, output, bounds=None, scale=1, padding=0, **kwargs):
-    '''
-    Draw a geodata layer to a simple SVG.
-    :layers sequence Input geodata files.
-    :output path Output file name
-    :bounds sequence (minx, miny, maxx, maxy)
-    :scale int Map scale. Larger numbers -> smaller maps
-    :padding int Pad around bounds by this much. In projection units.
-    :project string EPSG code, PROJ.4 string, or file containing a PROJ.4 string
-    '''
-    scalar = (1 / scale) if scale else 1
-    style = None
-    out_crs = None
-    use_proj = None
-
-    if kwargs.get('project', 'local').lower() in ('local', 'utm'):
-        use_proj = kwargs.pop('project', 'local').lower()
-
-    elif os.path.exists(kwargs['project']):
-        # Is a file
-        with open(kwargs.pop('project')) as f:
-            out_crs = fiona.crs.from_string(f.read())
-
-    elif kwargs['project'][:5].lower() == 'epsg:':
-        # Is an epsg code
-        _, epsg = kwargs.pop('project').split(':')
-        out_crs = fiona.crs.from_epsg(int(epsg))
-
-    else:
-        # Assume it's a proj4 string.
-        # fiona.crs.from_string returns {} if it isn't.
-        out_crs = fiona.crs.from_string(kwargs.pop('project'))
-
-    # Try to read style file
-    if kwargs.get('style'):
-        if kwargs['style'][-3:] == 'css':
-            try:
-                with open(kwargs['style']) as f:
-                    style = f.read()
-
-            except IOError:
-                print("Couldn't read {}, proceeding with default style".format(kwargs['style']), file=sys.stderr)
-
-            finally:
-                del kwargs['style']
-
-        else:
-            style = kwargs.pop('style')
-
-    if kwargs.get('class_fields'):
-        kwargs['classes'] = kwargs.pop('class_fields').split(',')
-
-    kwargs.pop('class_fields', None)
-
-    drawing = SVGIS(
-        layers,
-        bounds=bounds,
-        scalar=scalar,
-        use_proj=use_proj,
-        out_crs=out_crs,
-        padding=padding,
-        style=style,
-        clip=kwargs.pop('clip', True)
-    ).compose(**kwargs)
-
-    _echo(drawing, output)
-
-
-def _proj(_, output, minx, miny, maxx, maxy, project=None):
-    '''Return a transverse mercator projection for the given bounds'''
-    prj = projection.generatecrs(minx, miny, maxx, maxy, project)
-    _echo(prj + '\n', output)
-
-
-class CommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
-
-    def _format_action(self, action):
-        parts = super(CommandHelpFormatter, self)._format_action(action)
-        if action.nargs == argparse.PARSER:
-            parts = "\n".join(parts.split("\n")[1:])
-        return parts
-
-
-class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
-
-    def _format_action_invocation(self, action):
-        sup = super(SubcommandHelpFormatter, self)
-
-        if not action.option_strings:
-            default = action.dest
-            metavar, = sup._metavar_formatter(action, default)(1)
-            return metavar
-
-        else:
-            parts = []
-            # if the Optional doesn't take a value, format is:
-            #    -s, --long
-            if action.nargs == 0:
-                parts.extend(action.option_strings)
-            # if the Optional takes a value, format is:
-            #    -s ARGS, --long ARGS
-            else:
-                default = action.dest
-                args_string = self._format_args(action, default)
-                for option_string in action.option_strings[:-1]:
-                    parts.append('%s' % (option_string))
-                parts.append('%s %s' % (action.option_strings[-1], args_string))
-
-            return ', '.join(parts)
-
 
 def main():
     sys.tracebacklimit = 0
@@ -225,11 +97,11 @@ def main():
                              "Use '-' for stdin."))
 
     style.add_argument('-r', '--replace', action='store_true', help="Replace the SVG's style")
-    style.set_defaults(function=_style)
+    style.set_defaults(function=actions.add_style)
 
     scale = sp.add_parser('scale', parents=[parent], help='Scale all coordinates in an SVG by a factor')
-    scale.add_argument('-f', '--scale', type=int)
-    scale.set_defaults(function=_scale)
+    scale.add_argument('-f', '--scale', dest='factor', type=int)
+    scale.set_defaults(function=actions.scale)
 
     # Draw
 
@@ -272,7 +144,7 @@ def main():
 
     draw.add_argument('-l', '--inline-css', **csskwargs)
 
-    draw.set_defaults(function=_draw)
+    draw.set_defaults(function=actions.draw)
 
     # Proj
 
@@ -283,12 +155,12 @@ def main():
     proj.add_argument('maxx', type=float, help='east')
     proj.add_argument('maxy', type=float, help='north')
     proj.add_argument('-j', '--project', dest='project', choices=('utm', 'local'), type=str,)
-    proj.set_defaults(function=_proj, input=None, output='/dev/stdout')
+    proj.set_defaults(function=actions.proj, input=None, output='/dev/stdout')
 
     args = parser.parse_args()
 
-    non_keywords = ('function', 'layer', 'output', 'input')
-    kwargs = {k: v for k, v in vars(args).items() if k not in non_keywords}
+    reserved = ('function', 'layer', 'output', 'input')
+    kwargs = {k: v for k, v in vars(args).items() if k not in reserved}
 
     if args.input in ('-', '/dev/stdin'):
         args.input = sys.stdin
@@ -296,8 +168,5 @@ def main():
     if args.output in ('-', '/dev/stdout'):
         args.output = sys.stdout
 
-    args.function(args.input, args.output, **kwargs)
-
-
-if __name__ == '__main__':
-    main()
+    result = args.function(args.input, **kwargs)
+    echo(result, args.output)
