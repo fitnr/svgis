@@ -1,6 +1,5 @@
 from __future__ import division
-import math
-from itertools import tee, izip as zip
+from itertools import izip as zip
 try:
     import visvalingamwyatt as vw
 except ImportError:

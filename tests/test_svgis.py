@@ -6,6 +6,7 @@ try:
 except NameError:
     basestring = str
 
+
 class SvgisTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -83,10 +84,17 @@ class SvgisTestCase(unittest.TestCase):
     def testDims(self):
         bbox = 0, 0, 10, 10
         a = self.svgis_obj.dims(1, bbox)
-        b = self.svgis_obj.dims(2, bbox)
-
         self.assertSequenceEqual(a, (10, 10, 0, 10))
+
+        b = self.svgis_obj.dims(0.5, bbox)
         self.assertSequenceEqual(b, (5, 5, 0, 5))
+
+        self.svgis_obj.padding = 10
+        c = self.svgis_obj.dims(0.25, bbox)
+        self.assertSequenceEqual(c, (22.5, 22.5, 0., 2.5))
+
+        with self.assertRaises(ValueError):
+            self.svgis_obj.dims(0.5, (1, 2, 3))
 
     def testSvgisComposeType(self):
         a = self.svgis_obj.compose(inline_css=True)

@@ -36,4 +36,3 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 parts.append('%s %s' % (action.option_strings[-1], args_string))
 
             return ', '.join(parts)
-

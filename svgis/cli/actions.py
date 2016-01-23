@@ -8,9 +8,10 @@
 # http://www.opensource.org/licenses/GNU General Public License v3 (GPLv3)-license
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
-from __future__ import print_function, division
+from __future__ import division
 import sys
 import os.path
+import logging
 import fiona.crs
 from .. import css, projection
 from ..svgis import SVGIS
@@ -71,11 +72,11 @@ def pick_style(style):
                 return f.read()
 
     except AttributeError:
-        # Probably style=None
+        # Probably style is None.
         return None
 
     except IOError:
-        print("Couldn't read {}, proceeding with default style".format(style), file=sys.stderr)
+        logging.getLogger('svg').warn("Couldn't read %s, proceeding with default style", style)
 
     return style
 

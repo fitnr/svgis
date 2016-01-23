@@ -89,13 +89,13 @@ class SVGIS(object):
 
         self.use_proj = kwargs.pop('use_proj', None)
 
-        self.scalar = kwargs.pop('scalar', None) or 1
+        self.scalar = kwargs.pop('scalar', 1) or 1
 
         self.style = STYLE + (kwargs.pop('style', '') or '')
 
-        self.padding = kwargs.pop('padding', None) or 0
+        self.padding = kwargs.pop('padding', 0) or 0
 
-        self.clip = kwargs.get('clip', True)
+        self.clip = kwargs.pop('clip', True)
 
         self.log = logging.getLogger('svgis')
 
@@ -118,16 +118,19 @@ class SVGIS(object):
         if self.clip and out_bounds != in_bounds:
             clipper = clip.prepare([c * scalar for c in convert.extend_bbox(projected_mbr)])
         else:
-            clipper = lambda g: g
+            def clipper(g):
+                return g
 
         return clipper
 
     def reprojector(self, in_crs):
         '''Return a reprojection transform from in_crs to self.out_crs.'''
         if self.out_crs != in_crs:
-            reproject = lambda geom: fiona.transform.transform_geom(in_crs, self.out_crs, geom)
+            def reproject(geom):
+                return fiona.transform.transform_geom(in_crs, self.out_crs, geom)
         else:
-            reproject = lambda f: f
+            def reproject(f):
+                return f
 
         return reproject
 

@@ -10,6 +10,7 @@ try:
 except NameError:
     basestring = str
 
+
 class DrawTestCase(unittest.TestCase):
 
     def setUp(self):

@@ -39,7 +39,8 @@ def lines(geom, **kwargs):
 
 
 def polygons(geom, **kwargs):
-    '''Draw polygon(s) in a feature. transform is a function to operate on coords.
+    '''
+    Draw polygon(s) in a feature. transform is a function to operate on coords.
     Draws first ring clockwise, and subsequent ones counter-clockwise.
     '''
     if geom['type'] == 'Polygon':

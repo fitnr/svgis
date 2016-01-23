@@ -6,6 +6,7 @@ from string import ascii_letters
 Create string versions of SVG elements.
 '''
 
+
 def sanitize(x):
     '''Make input safe of use in an svg ID or class field'''
     try:
@@ -24,14 +25,17 @@ def circle(point, **kwargs):
     return '<circle cx="{0[0]}" cy="{0[1]}"'.format(point) + toattribs(**kwargs) + '/>'
 
 
+def _isstr(x):
+    return isinstance(x, basestring)
+
+
 def path(coordinates, **kwargs):
     '''
     Write an svg path element as a string.
     :coordinates Sequence A sequence of coordinates and string instructions
     '''
     attribs = toattribs(**kwargs)
-    isstr = lambda x: isinstance(x, basestring)
-    coords = [i if isstr(i) else '{0[0]},{0[1]}'.format(i) for i in coordinates]
+    coords = [i if _isstr(i) else '{0[0]},{0[1]}'.format(i) for i in coordinates]
 
     return '<path d="M ' + ' '.join(coords) + '"' + attribs + '/>'
 
@@ -89,7 +93,7 @@ def drawing(size, members, viewbox=None, style=None):
     '''
     svg = ('<svg baseProfile="full" version="1.1"'
            ' xmlns="http://www.w3.org/2000/svg"'
-          )
+           )
     dimension = ' width="{}" height="{}"'.format(*size)
     vb = setviewbox(viewbox)
     defs = defstyle(style)

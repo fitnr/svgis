@@ -60,6 +60,7 @@ from . import actions
 from .formatter import CommandHelpFormatter, SubcommandHelpFormatter
 from .. import __version__ as version
 
+
 def echo(content, output):
     '''Print something to either a file-like object or a file name.'''
     if hasattr(output, 'write'):
@@ -68,6 +69,7 @@ def echo(content, output):
     else:
         with open(output, 'w') as w:
             w.write(content)
+
 
 def main():
     sys.tracebacklimit = 0

@@ -85,7 +85,8 @@ def prepare(bbox):
             return mapping(clipped)
 
     except NameError:
-        func = lambda geometry: geometry
+        def func(geometry):
+            return geometry
 
     return func
 

@@ -9,7 +9,6 @@
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
 
 import unittest
-from collections import Iterable
 from svgis import convert
 
 
