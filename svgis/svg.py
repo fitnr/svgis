@@ -30,12 +30,8 @@ def path(coordinates, **kwargs):
     :coordinates Sequence A sequence of coordinates and string instructions
     '''
     attribs = toattribs(**kwargs)
-    coords = []
-    for i in coordinates:
-        if isinstance(i, basestring):
-            coords.append(i)
-        else:
-            coords.append('{0[0]},{0[1]}'.format(i))
+    isstr = lambda x: isinstance(x, basestring)
+    coords = [i if isstr(i) else '{0[0]},{0[1]}'.format(i) for i in coordinates]
 
     return '<path d="M ' + ' '.join(coords) + '"' + attribs + '/>'
 
@@ -70,14 +66,14 @@ def group(members=None, **kwargs):
     '''Create a group with the given scale and translation'''
     attribs = toattribs(**kwargs)
 
-    if members is None or len(members) == 0:
+    if not members:
         return '<g' + attribs + ' />'
 
     return '<g' + attribs + '>' + ''.join(members) + '</g>'
 
 
 def setviewbox(viewbox=None):
-    if viewbox is None:
+    if not viewbox:
         return ''
     else:
         return ' viewBox="{},{},{},{}"'.format(*viewbox)
