@@ -1,4 +1,5 @@
 from __future__ import division
+from functools import partial
 from itertools import izip as zip
 try:
     import visvalingamwyatt as vw
@@ -43,7 +44,10 @@ def extend_bbox(bbox, ext=100):
 
 def simplifier(ratio):
     try:
-        vw
-        return lambda g: vw.simplify_geometry(g, ratio=ratio)
-    except NameError:
+        if ratio == 1. or ratio is None:
+            raise ValueError
+
+        return partial(vw.simplify_geometry, ratio=ratio)
+
+    except (ValueError, NameError):
         return lambda g: g

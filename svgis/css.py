@@ -71,10 +71,10 @@ def inline(svg, css):
 
         document = etree.fromstring(svg)
         stylesheet = tinycss.make_parser().parse_stylesheet(css)
-        to_xpath = cssselect.GenericTranslator().css_to_xpath
+        translator = cssselect.GenericTranslator()
 
         def xpath(selector):
-            return document.xpath(to_xpath(selector))
+            return document.xpath(translator.css_to_xpath(selector))
 
         pattern = "{}:{};"
         for rule in stylesheet.rules:

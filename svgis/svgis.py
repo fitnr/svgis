@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from collections import Iterable
+from functools import partial
 import logging
 import fiona
 import fiona.transform
@@ -116,23 +117,18 @@ class SVGIS(object):
         self.mbr = convert.updatebounds(self.mbr, projected_mbr)
 
         if self.clip and out_bounds != in_bounds:
-            clipper = clip.prepare([c * scalar for c in convert.extend_bbox(projected_mbr)])
-        else:
-            def clipper(g):
-                return g
+            return clip.prepare([c * scalar for c in convert.extend_bbox(projected_mbr)])
 
-        return clipper
+        else:
+            return lambda x: x
 
     def reprojector(self, in_crs):
         '''Return a reprojection transform from in_crs to self.out_crs.'''
         if self.out_crs != in_crs:
-            def reproject(geom):
-                return fiona.transform.transform_geom(in_crs, self.out_crs, geom)
-        else:
-            def reproject(f):
-                return f
+            return partial(fiona.transform.transform_geom, in_crs, self.out_crs)
 
-        return reproject
+        else:
+            return lambda geom: geom
 
     def set_out_crs(self, layer_crs, bounds):
         '''Set the out CRS, if not yet set.'''
