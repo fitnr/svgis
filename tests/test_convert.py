@@ -9,6 +9,8 @@
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
 
 import unittest
+import functools
+import collections
 from svgis import convert
 
 
@@ -30,3 +32,20 @@ class ConvertTestCase(unittest.TestCase):
 
         assert convert.extend_bbox(bounds, ext=100) == (-200, -200, 200, 200)
         assert convert.extend_bbox(bounds, ext=10) == (-110, -110, 110, 110)
+
+    def testSimplify(self):
+        a = convert.simplifier(None)
+        assert a.__name__ == '<lambda>'
+        assert isinstance(a, collections.Callable)
+
+        b = convert.simplifier(1.)
+        assert b.__name__ == '<lambda>'
+        assert isinstance(b, collections.Callable)
+
+        c = convert.simplifier(0.5)
+
+        try:
+            import visvalingamwyatt
+            assert isinstance(c, functools.partial)
+        except ImportError:
+            assert c.__name__ == '<lambda>'
