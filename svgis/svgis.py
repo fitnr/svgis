@@ -5,7 +5,7 @@ from collections import Iterable
 import logging
 import fiona
 import fiona.transform
-from fionautil import scale, coords
+import fionautil.scale
 from . import convert, clip, css, draw, errors, projection, svg
 
 
@@ -174,7 +174,7 @@ class SVGIS(object):
             group = []
             for _, f in layer.items(bbox=bounds):
                 # Project and scale
-                geom = scale.geometry(reproject(f['geometry']), scalar)
+                geom = fionautil.scale.geometry(reproject(f['geometry']), scalar)
 
                 # clip to bounds
                 geom = clipper(geom)

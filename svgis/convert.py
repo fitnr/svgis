@@ -7,11 +7,6 @@ except ImportError:
     pass
 
 
-def rect(length, angle):
-    '''polar to cartesian coordinates'''
-    return length * math.cos(angle), length * math.sin(angle)
-
-
 def updatebounds(old, new):
     '''
     Extend old with any more distant values from newpoints.
@@ -45,38 +40,6 @@ def extend_bbox(bbox, ext=100):
     Widen the bounding box just a little bit. Assumes the bbox is in feet or meters or something.
     '''
     return bbox[0] - ext, bbox[1] - ext, bbox[2] + ext, bbox[3] + ext
-
-
-def _frange(a, b, count=None):
-    """Yield <count> points between two floats"""
-    jump = (b - a) / (count or 5)
-
-    while a < b:
-        yield a
-        a += jump
-
-
-def mbr_to_bounds(minx, miny, maxx, maxy):
-    """Convert min, max points to a boundary ring."""
-
-    xs, ys = list(_frange(minx, maxx)), list(_frange(miny, maxy))
-
-    left_top = [(minx, y) for y in ys] + [(x, maxy) for x in xs][1:]
-
-    ys.reverse()
-    xs.reverse()
-
-    return left_top + [(maxx, y) for y in ys] + [(x, miny) for x in xs]
-
-
-def pairwise(iterable):
-    '''
-    Iterate in repeating chunks of two.
-    s -> (s0, s1), (s1, s2), (s2, s3), ...
-    '''
-    a, b = tee(iterable, 2)
-    next(b, None)
-    return zip(a, b)
 
 
 def simplifier(ratio):

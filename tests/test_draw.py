@@ -90,7 +90,6 @@ class DrawTestCase(unittest.TestCase):
 
         assert isinstance(drawn, basestring)
 
-
     def testAddClass(self):
         geom = {
             'coordinates': (0, 0),
@@ -143,7 +142,6 @@ class DrawTestCase(unittest.TestCase):
         draw.geometry(self.multilinestring)
         draw.geometry(self.polygon)
         draw.geometry(self.multipolygon)
-
 
 if __name__ == '__main__':
     unittest.main()

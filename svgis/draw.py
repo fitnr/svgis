@@ -134,11 +134,6 @@ def geometry(geom, bbox=None, precision=3, **kwargs):
         raise SvgisError("Can't draw features of type: {}".format(geom['type']))
 
 
-def feature(feat, **kwargs):
-    '''Draw a feature.'''
-    return geometry(feat['geometry'], **kwargs)
-
-
 def _group(elements, **kwargs):
     '''Group a list of elements. Won't group one element.'''
     if len(elements) == 1:

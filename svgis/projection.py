@@ -13,12 +13,6 @@ def tm_proj4(x0, y0, y1):
             '+units=m +no_defs').format(x0=x0, y0=y0, y1=y1)
 
 
-def tm(x0, y0, y1):
-    '''Generate a local transverse mercator projection.'''
-    proj4 = tm_proj4(x0, y0, y1)
-    return pyproj.Proj(proj4)
-
-
 def utm_proj4(x, y):
     '''Generate the proj4 string for a given (lon, lat) coordinate.'''
     try:
@@ -71,19 +65,6 @@ def choosecrs(in_crs, bounds, use_proj=None):
 
     else:
         return fiona.crs.from_string(generatecrs(*bounds, use_proj=use_proj))
-
-
-def project_scale(in_crs, out_crs, ring, scalar=None):
-    '''Project and apply a scale to a ring'''
-    xs, ys = transform.transform(in_crs, out_crs, *zip(*ring))
-
-    projected = zip(xs, ys)
-
-    # then scale
-    if scalar:
-        return scale.scale(projected, scalar)
-    else:
-        return projected
 
 
 def project_mbr(in_crs, out_crs, minx, miny, maxx, maxy):
