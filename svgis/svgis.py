@@ -194,7 +194,7 @@ class SVGIS(object):
     def compose(self, style=None, scalar=None, bounds=None, **kwargs):
         '''
         Draw files to svg. Returns unicode.
-        :scalar int factor by which to scale the data.
+        :scalar int factor by which to scale the data, generally a small number (1/map scale).
         :style string CSS to append to parent object CSS
         :bounds list/tuple Map bounding box in input units. Defaults to map data bounds.
         :viewbox bool If True, draw SVG with a viewbox. If False, translate coordinates to the frame. Defaults to True.
@@ -256,7 +256,7 @@ class SVGIS(object):
         scalar = float(scalar)
 
         try:
-            x0, y0, x1, y1 = [i / scalar for i in bounds]
+            x0, y0, x1, y1 = [i * scalar for i in bounds]
             w = x1 - x0 + (self.padding * 2)
             h = y1 - y0 + (self.padding * 2)
 
