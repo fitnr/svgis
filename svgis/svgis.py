@@ -66,6 +66,8 @@ class SVGIS(object):
     # MBR is the bounding box in output coordinates, to be determined as we draw.
     mbr = (None, None, None, None)
 
+    in_crs = None
+
     def __init__(self, files, bounds=None, out_crs=None, **kwargs):
         '''
         An SVGIS object, which will stand ready to generate some maps.
@@ -131,8 +133,11 @@ class SVGIS(object):
         else:
             return lambda geom: geom
 
-    def set_out_crs(self, layer_crs, bounds):
+    def set_crs(self, layer_crs, bounds):
         '''Set the out CRS, if not yet set.'''
+        if not self.in_crs:
+            self.in_crs = layer_crs
+
         if not self.out_crs:
             # Determine projection transformation:
             # either use something passed in, a non latlong layer projection,
@@ -155,7 +160,7 @@ class SVGIS(object):
             simplifier = kwargs.pop('simplifier', lambda x: x)
 
             # Set the output CRS, if not yet set.
-            self.set_out_crs(layer.crs, bounds)
+            self.set_crs(layer.crs, bounds)
 
             # Get clipping function based on a slightly extended version of projected_mbr.
             clipper = self.get_clipper(layer.crs, layer.bounds, bounds, scalar=scalar)
