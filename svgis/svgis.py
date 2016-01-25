@@ -1,6 +1,7 @@
 """Draw geodata layers into svg"""
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import os.path
 from collections import Iterable
 from functools import partial
 import logging
@@ -161,6 +162,10 @@ class SVGIS(object):
 
             # feature reprojection function (could be no op).
             reproject = self.reprojector(layer.crs)
+
+            # Correct for OGR's lack of creativity for GeoJSONs
+            if layer.name == 'OGRGeoJSON':
+                layer.name, _ = os.path.splitext(os.path.basename(filename))
 
             # A list of class names to get from layer properties.
             kwargs['classes'] = _get_classes(kwargs.get('classes', []), layer.schema['properties'], layer.name)
