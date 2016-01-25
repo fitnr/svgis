@@ -62,7 +62,8 @@ class SVGIS(object):
     # pylint: disable=too-many-instance-attributes
 
     # bounds is the bounding box in input coordinates
-    bounds = tuple()
+    bounds = None
+
     # MBR is the bounding box in output coordinates, to be determined as we draw.
     mbr = (None, None, None, None)
 
@@ -106,9 +107,7 @@ class SVGIS(object):
         self.simplifier = convert.simplifier(kwargs.pop('simplify', 0.75))
 
     def __repr__(self):
-        return ('SVGIS(files={0.files}, out_crs={0.out_crs}, '
-                'bounds={0.bounds}, padding={0.padding}, '
-                'scalar={0.scalar})').format(self)
+        return ('SVGIS(files={0.files}, out_crs={0.out_crs})').format(self)
 
     def get_clipper(self, in_crs, in_bounds, out_bounds, scalar=None):
         '''
@@ -218,6 +217,7 @@ class SVGIS(object):
         # Set up arguments
         scalar = scalar or self.scalar
         style = self.style + (style or '')
+        bounds = bounds or self.bounds
 
         viewbox = kwargs.pop('viewbox', True)
         inline_css = kwargs.pop('inline_css', False)
@@ -265,7 +265,11 @@ class SVGIS(object):
         :scalar int Map scale
         :bounds Sequence Optional bounds to calculate with (in output coordinates)
         '''
-        bounds = bounds or self.mbr
+        if bounds is not None:
+            bounds = projection.reproject_bounds(self.in_crs, self.out_crs, convert.bounds_to_ring(*bounds))
+        else:
+            bounds = self.mbr
+
         scalar = float(scalar)
 
         try:

@@ -4,7 +4,6 @@ import pyproj
 import utm
 from fiona import transform
 import fiona.crs
-from fionautil import scale
 
 
 def tm_proj4(x0, y0, y1):
@@ -70,3 +69,17 @@ def choosecrs(in_crs, bounds, use_proj=None):
 def project_mbr(in_crs, out_crs, minx, miny, maxx, maxy):
     minpt, maxpt = zip(*transform.transform(in_crs, out_crs, (minx, maxx), (miny, maxy)))
     return minpt + maxpt
+
+
+def reproject_bounds(in_crs, out_crs, boundaryring):
+    xs, ys = zip(*boundaryring)
+
+    if in_crs is None:
+        raise TypeError('Need input CRS, not None')
+
+    if out_crs is None:
+        raise TypeError('Need output CRS, not None')
+
+    xbounds, ybounds = transform.transform(in_crs, out_crs, xs, ys)
+
+    return min(xbounds), min(ybounds), max(xbounds), max(ybounds)
