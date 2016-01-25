@@ -173,7 +173,11 @@ class SVGIS(object):
             group = []
             for _, f in layer.items(bbox=bounds):
                 # Project and scale
-                geom = fionautil.scale.geometry(reproject(f['geometry']), scalar)
+                try:
+                    geom = fionautil.scale.geometry(reproject(f['geometry']), scalar)
+                except ValueError as e:
+                    self.log.error("Error drawing feature %s of %s: %s", filename, f.get('id'), e.message)
+                    continue
 
                 # clip to bounds
                 geom = clipper(geom)
@@ -188,7 +192,7 @@ class SVGIS(object):
                 except errors.SvgisError as e:
                     self.log.error("Error drawing %s: %s", filename, e.message)
 
-        return svg.group(group)
+        return svg.group(group, id=layer.name)
 
     def compose(self, style=None, scalar=None, bounds=None, **kwargs):
         '''
