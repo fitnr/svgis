@@ -49,8 +49,7 @@ def element(tag, coordinates, **kwargs):
 
 
 def toattribs(**kwargs):
-    fmt = '{}="{}"'
-    attribs = ' '.join(fmt.format(k, v) for k, v in kwargs.items() if v)
+    attribs = ' '.join('{}="{}"'.format(k, v) for k, v in kwargs.items() if v)
 
     if len(attribs) > 0:
         attribs = ' ' + attribs
