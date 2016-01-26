@@ -72,10 +72,7 @@ def polygon(coordinates, **kwargs):
     if fionautil.measure.counterclockwise(coordinates[0]):
         coordinates[0] = coordinates[0][::-1]
 
-    if 'class' in kwargs:
-        kwargs['class'] = 'polygon ' + kwargs.pop('class')
-    else:
-        kwargs['class'] = 'polygon'
+    kwargs['class'] = ('polygon ' + kwargs.pop('class', '')).strip()
 
     instructions = list(coordinates[0]) + ['z']
 
