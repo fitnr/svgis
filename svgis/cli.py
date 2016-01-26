@@ -60,6 +60,8 @@ CLICKARGS = {
 inp = click.argument('input', default=sys.stdin, type=click.File('rb'))
 outp = click.argument('output', default=sys.stdout, type=click.File('wb'))
 
+
+# Base
 @click.group(**CLICKARGS)
 @click.version_option(version=__version__)
 @click.pass_context
@@ -71,13 +73,11 @@ def main(context):
     context.log.addHandler(ch)
 
 # Style
-
 style_help = ("Style to append to SVG. "
               "Either a valid CSS string, a file path (must end in '.css'). "
               "Use '-' for stdin.")
 
 
-# @inp
 @main.command()
 @inp
 @outp
@@ -85,7 +85,7 @@ style_help = ("Style to append to SVG. "
 @click.option('-r', '--replace', default=False)
 def style(input, output, style, replace):
     """Add a CSS style to an SVG"""
-    click.echo(add_style(input, style, replace), file=output)
+    click.echo(add_style(input, style, replace).encode('utf-8'), file=output)
 
 
 @main.command()
@@ -94,7 +94,7 @@ def style(input, output, style, replace):
 @click.option('-f', '--scale', type=int)
 def scale(input, output, scale):
     '''Scale all coordinates in an SVG by a factor'''
-    click.echo(rescale(input, factor=scale), file=output)
+    click.echo(rescale(input, factor=scale).encode('utf-8'), file=output)
 
 
 project_help = ('Specify a map projection. '
@@ -104,6 +104,7 @@ project_help = ('Specify a map projection. '
                 '"utm", '
                 '"file" (use existing), '
                 '"local" (generate a local projection)')
+
 
 # Draw
 @main.command()
@@ -122,7 +123,7 @@ project_help = ('Specify a map projection. '
 @click.option('-l', '--inline-css', **csskwargs)
 def draw(input, output, **kwargs):
     '''Draw SVGs from input geodata'''
-    click.echo(svgis.map(input, **kwargs), file=output)
+    click.echo(svgis.map(input, **kwargs).encode('utf-8'), file=output)
 
 
 # Proj
@@ -131,4 +132,4 @@ def draw(input, output, **kwargs):
 @click.option('-j', '--proj', default='local', type=click.Choice(('utm', 'local')), help='Defaults to local.')
 def project(bounds, proj):
     '''Get a local Transverse Mercator or UTM projection for a bounding box. Expects WGS84 coordinates.'''
-    click.echo(generatecrs(*bounds, use_proj=proj))
+    click.echo(generatecrs(*bounds, use_proj=proj).encode('utf-8'))
