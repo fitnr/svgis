@@ -80,7 +80,7 @@ def choosecrs(in_crs, bounds, use_proj=None):
 
 
 def project_mbr(in_crs, out_crs, minx, miny, maxx, maxy):
-    minpt, maxpt = zip(*transform.transform(in_crs, out_crs, (minx, maxx), (miny, maxy)))
+    minpt, maxpt = list(zip(*transform.transform(in_crs, out_crs, (minx, maxx), (miny, maxy))))
     return minpt + maxpt
 
 
