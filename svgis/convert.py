@@ -74,8 +74,15 @@ def bounds_to_ring(minx, miny, maxx, maxy):
 
 
 def simplifier(ratio):
+    '''
+    Create a simplification function, if visvalingamwyatt is available.
+    Otherwise, return a noop function.
+
+    Args:
+        ratio (int): Between 1 and 99
+    '''
     try:
-        if ratio == 1. or ratio is None:
+        if ratio >= 100 or ratio < 1 or ratio is None:
             raise ValueError
 
         return partial(vw.simplify_geometry, ratio=ratio)

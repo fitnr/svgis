@@ -17,8 +17,9 @@ from . import svgis, __version__
 
 
 none = {
-    'default': None,
-    'expose_value': False
+    'flag_value': None,
+    'expose_value': False,
+    'help': '(not enabled)'
 }
 
 try:
@@ -46,9 +47,9 @@ except ImportError:
 try:
     import visvalingamwyatt
     simplifykwargs = {
-        'type': float,
+        'type': click.IntRange(1, 100, clamp=True),
         'metavar': 'FACTOR',
-        'help': 'Simplify geometries. Accepts a float, which it the ratio of points to keep in each geometry',
+        'help': 'Simplify geometries. Accepts an integer between 1 and 100, the percentage points in each geometry to retain',
     }
 except ImportError:
     simplifykwargs = none

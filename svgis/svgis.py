@@ -150,7 +150,7 @@ class SVGIS(object):
 
         self.log = logging.getLogger('svgis')
 
-        self.simplifier = convert.simplifier(kwargs.pop('simplify', 0.75))
+        self.simplifier = convert.simplifier(kwargs.pop('simplify', None))
 
     def __repr__(self):
         return ('SVGIS(files={0.files}, out_crs={0.out_crs})').format(self)

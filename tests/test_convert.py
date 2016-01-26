@@ -38,11 +38,11 @@ class ConvertTestCase(unittest.TestCase):
         assert a.__name__ == '<lambda>'
         assert isinstance(a, collections.Callable)
 
-        b = convert.simplifier(1.)
+        b = convert.simplifier(100)
         assert b.__name__ == '<lambda>'
         assert isinstance(b, collections.Callable)
 
-        c = convert.simplifier(0.5)
+        c = convert.simplifier(50)
 
         try:
             import visvalingamwyatt
