@@ -8,12 +8,12 @@
 # http://www.opensource.org/licenses/GNU General Public License v3 (GPLv3)-license
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
+import sys
 import logging
 import click
-from ..css import rescale, add_style
-from ..projection import generatecrs
-from .. import svgis
-from .. import __version__
+from .css import rescale, add_style
+from .projection import generatecrs
+from . import svgis, __version__
 
 
 none = {
@@ -53,11 +53,14 @@ try:
 except ImportError:
     simplifykwargs = none
 
+CLICKARGS = {
+    'context_settings': dict(help_option_names=['-h', '--help'])
+}
 
-inp = click.argument('input', default='/dev/stdin')
-outp = click.argument('output', default=None)
+inp = click.argument('input', default=sys.stdin, type=click.File('rb'))
+outp = click.argument('output', default=sys.stdout, type=click.File('wb'))
 
-@click.group()
+@click.group(**CLICKARGS)
 @click.version_option(version=__version__)
 @click.pass_context
 def main(context):
@@ -89,7 +92,7 @@ def style(input, output, style, replace):
 @inp
 @outp
 @click.option('-f', '--scale', type=int)
-def scale(input, output, factor):
+def scale(input, output, scale):
     '''Scale all coordinates in an SVG by a factor'''
     click.echo(rescale(input, factor=scale), file=output)
 
@@ -104,8 +107,8 @@ project_help = ('Specify a map projection. '
 
 # Draw
 @main.command()
-@click.argument('input', nargs=-1)
-@click.option('-o', '--output', default='/dev/stdout', help="defaults to stdout")
+@click.argument('input', nargs=-1, type=str, required=True)
+@click.option('-o', '--output', default=sys.stdout, type=click.File('wb'), help="defaults to stdout")
 @click.option('--bounds', nargs=4, type=float, metavar="minx, miny, maxx, maxy", help='In the same coordinate system as the input layers', default=None)
 @click.option('-c', '--style', type=str, metavar='CSS', help="CSS file or string")
 @click.option('-f', '--scale', type=int, default=None, help='Scale for the map (units are divided by this number)')
@@ -124,12 +127,8 @@ def draw(input, output, **kwargs):
 
 # Proj
 @main.command()
-@click.option('minx', type=float, help='west')
-@click.option('miny', type=float, help='south')
-@click.option('maxx', type=float, help='east')
-@click.option('maxy', type=float, help='north')
-@click.option('-j', '--project', default='local', type=click.Choice(('utm', 'local')))
-def proj(minx, miny, maxx, maxy, project):
-    '''Get a local Transverse Mercator projection for a bounding box. Expects WGS 84 coordinates.'''
-    prj = generatecrs(minx, miny, maxx, maxy, project)
-    click.echo(prj + '\n')
+@click.argument('bounds', nargs=4, type=float, metavar="minx, miny, maxx, maxy", default=None)
+@click.option('-j', '--proj', default='local', type=click.Choice(('utm', 'local')), help='Defaults to local.')
+def project(bounds, proj):
+    '''Get a local Transverse Mercator or UTM projection for a bounding box. Expects WGS84 coordinates.'''
+    click.echo(generatecrs(*bounds, use_proj=proj))
