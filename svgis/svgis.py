@@ -155,7 +155,7 @@ class SVGIS(object):
     def __repr__(self):
         return ('SVGIS(files={0.files}, out_crs={0.out_crs})').format(self)
 
-    def get_clipper(self, in_crs, in_bounds, out_bounds, scalar=None):
+    def _get_clipper(self, in_crs, in_bounds, out_bounds, scalar=None):
         '''
         Get a clipping function for the given input crs and bounds.
         Returns None if in_bounds == out_bounds or clipping is off.
@@ -170,7 +170,7 @@ class SVGIS(object):
         else:
             return lambda x: x
 
-    def reprojector(self, in_crs):
+    def _reprojector(self, in_crs):
         '''Return a reprojection transform from in_crs to self.out_crs.'''
         if self.out_crs != in_crs:
             return partial(fiona.transform.transform_geom, in_crs, self.out_crs)
@@ -178,18 +178,18 @@ class SVGIS(object):
         else:
             return lambda geom: geom
 
-    def set_crs(self, layer_crs, bounds):
-        '''Set the out CRS, if not yet set.'''
+    def set_crs(self, crs, bounds):
+        '''Set the output CRS, if not yet set.'''
         if not self.in_crs:
-            self.in_crs = layer_crs
+            self.in_crs = crs
 
         if not self.out_crs:
             # Determine projection transformation:
             # either use something passed in, a non latlong layer projection,
             # the local UTM, or customize local TM
-            self.out_crs = projection.choosecrs(layer_crs, bounds, use_proj=self.use_proj)
+            self.out_crs = projection.choosecrs(crs, bounds, use_proj=self.use_proj)
 
-    def compose_file(self, filename, scalar, bounds=None, **kwargs):
+    def _compose_file(self, filename, scalar, bounds=None, **kwargs):
         '''
         Draw fiona file to string.
         :filename string path to a fiona-readable file
@@ -208,10 +208,10 @@ class SVGIS(object):
             self.set_crs(layer.crs, bounds)
 
             # Get clipping function based on a slightly extended version of projected_mbr.
-            clipper = self.get_clipper(layer.crs, layer.bounds, bounds, scalar=scalar)
+            clipper = self._get_clipper(layer.crs, layer.bounds, bounds, scalar=scalar)
 
             # feature reprojection function (could be no op).
-            reproject = self.reprojector(layer.crs)
+            reproject = self._reprojector(layer.crs)
 
             # Correct for OGR's lack of creativity for GeoJSONs
             if layer.name == 'OGRGeoJSON':
@@ -222,7 +222,7 @@ class SVGIS(object):
 
             # Remove the id field if it doesn't appear in the properties.
             if 'id_field' in kwargs:
-                if kwargs['id_field'] not in layer.schema['properties'].keys():
+                if kwargs['id_field'] not in list(layer.schema['properties'].keys()):
                     del kwargs['id_field']
 
             group = []
@@ -285,9 +285,9 @@ class SVGIS(object):
 
         # Draw files
         with fiona.drivers():
-            members = [self.compose_file(f, scalar, bounds=bounds, **kwargs) for f in self.files]
+            members = [self._compose_file(f, scalar, bounds=bounds, **kwargs) for f in self.files]
 
-        w, h, x0, y1 = self.dims(scalar, bounds=bounds)
+        w, h, x0, y1 = self._dims(scalar, bounds=bounds)
 
         if viewbox:
             svgargs['viewbox'] = (x0, -y1, w, h)
@@ -304,7 +304,7 @@ class SVGIS(object):
         else:
             return drawing
 
-    def dims(self, scalar, bounds=None):
+    def _dims(self, scalar, bounds=None):
         '''
         Calculate the width, height, origin X and max Y of the document.
         By default, uses self's minimum bounding rectangle.

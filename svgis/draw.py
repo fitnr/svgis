@@ -19,7 +19,7 @@ Draw a geometries elements as SVG
 """
 
 
-def applyid(multifunc):
+def _applyid(multifunc):
     '''
     This decorator applies the ID attribute to the group that
     contains multi-part geometries, rather than the elements of the group.
@@ -37,12 +37,13 @@ def linestring(coordinates, **kwargs):
     return svg.element('polyline', coordinates, **kwargs)
 
 
-@applyid
+@_applyid
 def multilinestring(coordinates, **kwargs):
     return [linestring(coords, **kwargs) for coords in coordinates]
 
 
 def lines(geom, **kwargs):
+    '''Draw a LineString or MultiLineString geometry.'''
     if geom['type'] == 'LineString':
         return linestring(geom['coordinates'], **kwargs)
 
@@ -63,7 +64,6 @@ def polygons(geom, **kwargs):
 
 
 def polygon(coordinates, **kwargs):
-    '''Draw an svg polygon based on coordinates.'''
     if len(coordinates) == 1:
         return svg.element('polygon', coordinates[0], **kwargs)
 
@@ -91,12 +91,13 @@ def polygon(coordinates, **kwargs):
     return pth
 
 
-@applyid
+@_applyid
 def multipolygon(coordinates, **kwargs):
     return [polygon(coords, **kwargs) for coords in coordinates]
 
 
 def points(geom, **kwargs):
+    '''Draw a Point or MultiPoint geometry'''
     kwargs['r'] = kwargs.get('r', 1)
 
     if geom['type'] == 'Point':
@@ -106,7 +107,7 @@ def points(geom, **kwargs):
         return multipoint(geom['coordinates'], **kwargs)
 
 
-@applyid
+@_applyid
 def multipoint(coordinates, **kwargs):
     return [svg.circle((pt[0], pt[1]), **kwargs) for pt in coordinates]
 
