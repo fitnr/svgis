@@ -43,7 +43,12 @@ def multilinestring(coordinates, **kwargs):
 
 
 def lines(geom, **kwargs):
-    '''Draw a LineString or MultiLineString geometry.'''
+    '''
+    Draw a LineString or MultiLineString geometry.
+
+    Args:
+        geom (object): A GeoJSON-like geometry object. Coordinates must be 2-dimensional.
+    '''
     if geom['type'] == 'LineString':
         return linestring(geom['coordinates'], **kwargs)
 
@@ -55,6 +60,9 @@ def polygons(geom, **kwargs):
     '''
     Draw polygon(s) in a feature. transform is a function to operate on coords.
     Draws first ring clockwise, and subsequent ones counter-clockwise.
+
+    Args:
+        geom (object): A GeoJSON-like geometry object. Coordinates must be 2-dimensional.
     '''
     if geom['type'] == 'Polygon':
         return polygon(geom['coordinates'], **kwargs)
@@ -94,7 +102,12 @@ def multipolygon(coordinates, **kwargs):
 
 
 def points(geom, **kwargs):
-    '''Draw a Point or MultiPoint geometry'''
+    '''
+    Draw a Point or MultiPoint geometry
+
+    Args:
+        geom (object): A GeoJSON-like geometry object. Coordinates must be 2-dimensional.
+    '''
     kwargs['r'] = kwargs.get('r', 1)
 
     if geom['type'] == 'Point':
@@ -118,10 +131,12 @@ def geometrycollection(collection, bbox, precision, **kwargs):
 def geometry(geom, bbox=None, precision=3, **kwargs):
     '''
     Draw a geometry. Will return either a single geometry or a group.
-    :geom object A GeoJSON-like geometry object. Coordinates must be 2-dimensional.
-    :bbox tuple An optional bounding minimum bounding box
-    :precision int Rounding precision. precision=None disables rounding.
-    :kwargs object keyword args to be passed onto the created elements. (Things like class, id, style, etc).
+
+    Args:
+        geom (object): A GeoJSON-like geometry object. Coordinates must be 2-dimensional.
+        bbox (tuple): An optional bounding minimum bounding box
+        precision (int): Rounding precision. precision=None disables rounding.
+        kwargs (object): keyword args to be passed onto the created elements. (Things like class, id, style, etc).
     '''
     if bbox:
         geom = clip.clip(geom, bbox)
@@ -146,7 +161,12 @@ def geometry(geom, bbox=None, precision=3, **kwargs):
 
 
 def _group(elements, **kwargs):
-    '''Group a list of elements. Won't group one element.'''
+    '''
+    Group a list of elements. Won't group one element.
+
+    Args:
+        elements (Sequence): Strings representing SVG elements to wrap in a group tag.
+    '''
     if len(elements) == 1:
         return elements[0]
 
@@ -157,7 +177,9 @@ def _group(elements, **kwargs):
 
 def group(geometries, **kwargs):
     '''
-    Return a group with geometries drawn into it.
-    :geometries Sequence GeoJSON-like geometry dicts.
+    Add a list of geometries to a group
+
+    Args:
+        geometries (Sequence): GeoJSON-like geometry dicts.
     '''
     return _group([geometries(g, **kwargs) for g in geometries])

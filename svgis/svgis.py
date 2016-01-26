@@ -30,13 +30,19 @@ STYLE = ('polyline, line, rect, path, polygon, .polygon {'
 
 def map(layers, bounds=None, scale=1, padding=0, **kwargs):
     '''
-    Draw a geodata layer to a simple SVG.
-    :layers sequence Input geodata files.
-    :output path Output file name
-    :bounds sequence (minx, miny, maxx, maxy)
-    :scale int Map scale. Larger numbers -> smaller maps
-    :padding int Pad around bounds by this much. In projection units.
-    :project string EPSG code, PROJ.4 string, or file containing a PROJ.4 string
+    Draw a geodata layer to SVG. This is shorthand for creating a :class:`SVGIS` instance
+    and immediately runnning :class:`SVGIS.compose`.
+
+    Args:
+        layers (sequence): Input geodata files.
+        output (path): Output file name
+        bounds (sequence): (minx, miny, maxx, maxy)
+        scale (int): Map scale. Larger numbers -> smaller maps
+        padding (int): Pad around bounds by this much. In projection units.
+        project (string): EPSG code, PROJ.4 string, or file containing a PROJ.4 string
+
+    Returns:
+        String (unicode in Python 2) containing an entire SVG document.
     '''
     scale = (1 / scale) if scale else 1
     bounds = bounds if bounds and len(bounds) == 4 else None
@@ -103,7 +109,19 @@ def _draw_feature(geom, properties=None, classes=None, id_field=None, **kwargs):
 
 class SVGIS(object):
 
-    """Draw geodata files to SVG"""
+    """
+    Draw geodata files to SVG.
+
+    Args:
+        files (list): A list of files to draw.
+        bounds (Sequence): An iterable with four float coordinates in (minx, miny, maxx, maxy) format
+        out_crs (dict): A proj-4 like mapping
+        use_proj (string): A keyword for picking a projection (file, utm or local)
+        style (string): CSS to add to output file
+        scalar (int): Map scale to use (output coordinate are divided by this)
+        padding (number): Buffer each edge by this many map units
+
+    """
 
     # pylint: disable=too-many-instance-attributes
 
@@ -116,16 +134,6 @@ class SVGIS(object):
     in_crs = None
 
     def __init__(self, files, bounds=None, out_crs=None, **kwargs):
-        '''
-        An SVGIS object, which will stand ready to generate some maps.
-        :files list/str A list of files to map
-        :bounds list/tuple An iterable with four float coordinates in (minx, miny, maxx, maxy) format
-        :out_crs dict A proj-4 like mapping
-        :use_proj string A keyword for picking a projection (file, utm or local)
-        :style string CSS to add to output file
-        :scalar int Map scale to use (output coordinate are divided by this)
-        :padding number Buffer each edge by this many map units
-        '''
         if isinstance(files, basestring):
             self.files = [files]
         elif isinstance(files, Iterable):
@@ -158,7 +166,9 @@ class SVGIS(object):
     def _get_clipper(self, in_crs, in_bounds, out_bounds, scalar=None):
         '''
         Get a clipping function for the given input crs and bounds.
-        Returns None if in_bounds == out_bounds or clipping is off.
+
+        Returns:
+            None if in_bounds == out_bounds or clipping is off.
         '''
         scalar = scalar or self.scalar
         projected_mbr = projection.project_mbr(in_crs, self.out_crs, *out_bounds)
@@ -192,12 +202,14 @@ class SVGIS(object):
     def _compose_file(self, filename, scalar, bounds=None, **kwargs):
         '''
         Draw fiona file to string.
-        :filename string path to a fiona-readable file
-        :scalar int map scale
-        :bounds tuple (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
-        :simplifier function Simplification function. Defaults to self.simplify.
-        :classes list Fields to turn in the element classes
-        :id_field string Field to use as element ID
+
+        Args:
+            filename (string): path to a fiona-readable file
+            scalar (int): map scale
+            bounds (tuple): (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
+            simplifier (function): Simplification function. Defaults to self.simplify.
+            classes (list): Fields to turn in the element classes
+            id_field (string): Field to use as element ID
         '''
         with fiona.open(filename, "r") as layer:
             bounds = bounds or self.bounds or layer.bounds
@@ -251,14 +263,19 @@ class SVGIS(object):
 
     def compose(self, style=None, scalar=None, bounds=None, **kwargs):
         '''
-        Draw files to svg. Returns unicode.
-        :scalar int factor by which to scale the data, generally a small number (1/map scale).
-        :style string CSS to append to parent object CSS
-        :bounds list/tuple Map bounding box in input units. Defaults to map data bounds.
-        :viewbox bool If True, draw SVG with a viewbox. If False, translate coordinates to the frame. Defaults to True.
-        :precision float Round coordinates to this precision [default: 0].
-        :simplify float Must be between 0 and 1. Fraction of removable coordinates to keep.
-        :inline_css bool If True, try to run CSS into each element.
+        Draw files to svg.
+
+        Args:
+            scalar (int): factor by which to scale the data, generally a small number (1/map scale).
+            style (string): CSS to append to parent object CSS
+            bounds (list):/tuple Map bounding box in input units. Defaults to map data bounds.
+            viewbox (bool): If True, draw SVG with a viewbox. If False, translate coordinates to the frame. Defaults to True.
+            precision (float): Round coordinates to this precision [default: 0].
+            simplify (float): Must be between 0 and 1. Fraction of removable coordinates to keep.
+            inline_css (bool): If True, try to run CSS into each element.
+
+        Returns:
+            String (unicode in Python 2) containing an entire SVG document.
         '''
         # Set up arguments
         scalar = scalar or self.scalar
@@ -308,8 +325,10 @@ class SVGIS(object):
         '''
         Calculate the width, height, origin X and max Y of the document.
         By default, uses self's minimum bounding rectangle.
-        :scalar int Map scale
-        :bounds Sequence Optional bounds to calculate with (in output coordinates)
+
+        Args:
+            scalar (int): Map scale
+            bounds (Sequence): Optional bounds to calculate with (in output coordinates)
         '''
         if bounds is not None:
             bounds = projection.reproject_bounds(self.in_crs, self.out_crs, convert.bounds_to_ring(*bounds))

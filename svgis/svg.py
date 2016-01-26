@@ -28,7 +28,9 @@ def sanitize(x):
 def circle(point, **kwargs):
     '''
     Write a svg circle element. Keyword arguments are mapped to attributes.
-    :point tuple The center of the circle
+
+    Args:
+        point (tuple): The center of the circle
     '''
     return u'<circle cx="{0[0]}" cy="{0[1]}"'.format(point) + toattribs(**kwargs) + '/>'
 
@@ -40,7 +42,9 @@ def _isstr(x):
 def path(coordinates, **kwargs):
     '''
     Write an svg path element as a string.
-    :coordinates Sequence A sequence of coordinates and string instructions
+
+    Args:
+        coordinates (Sequence): A sequence of coordinates and string instructions
     '''
     attribs = toattribs(**kwargs)
     coords = [i if _isstr(i) else u'{0[0]},{0[1]}'.format(i) for i in coordinates]
@@ -93,14 +97,16 @@ def setviewbox(viewbox=None):
 def drawing(size, members, viewbox=None, style=None):
     '''
     Create an SVG element.
-    :size tuple width, height
-    :members list Strings to add to output.
-    :viewbox Sequence Four coordinates that describe a bounding box.
-    :style string CSS string.
+
+    Args:
+        size (tuple): width, height
+        members (list): Strings to add to output.
+        viewbox (Sequence): Four coordinates that describe a bounding box.
+        style (string): CSS string.
     '''
     svg = (u'<svg baseProfile="full" version="1.1"'
            ' xmlns="http://www.w3.org/2000/svg"'
-           )
+          )
     dimension = u' width="{}" height="{}"'.format(*size)
     vb = setviewbox(viewbox)
     defs = defstyle(style)

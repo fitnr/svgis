@@ -48,7 +48,9 @@ def zonetoproj4(zonenumber, zoneletter):
 def generatecrs(minx, miny, maxx, maxy, use_proj=None):
     '''Choose a projection, either the local UTM zone or
     create a custom transverse mercator.
-    Returns a proj4 string
+
+    Returns:
+        proj4 string
     '''
     if use_proj == 'utm':
         midx = (minx + maxx) / 2
@@ -66,10 +68,14 @@ def generatecrs(minx, miny, maxx, maxy, use_proj=None):
 def choosecrs(in_crs, bounds, use_proj=None):
     '''Choose a projection. If the layer is projected, use that.
     Otherwise, create use a passed projection or create a custom transverse mercator.
-    :in_crs dict A fiona-type proj4 dictionary
-    :bounds tuple (minx, miny, maxx, maxy)
-    :use_proj string wither 'utm' or 'local'
-    :returns dict fiona-type proj4 dictionary
+
+    Args:
+        in_crs (dict): A fiona-type proj4 dictionary
+        bounds (tuple): (minx, miny, maxx, maxy)
+        use_proj (string): wither 'utm' or 'local'
+    
+    Returns:
+        fiona-type proj4 dict.
     '''
     if (use_proj is None or use_proj == 'file') and not pyproj.Proj(**in_crs).is_latlong():
         # it's projected already, so noop.

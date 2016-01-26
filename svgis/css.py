@@ -37,9 +37,11 @@ def rescale(svgfile, factor):
 
 def add_style(svgfile, style, replace=False):
     '''Add to the CSS style in an SVG file.
-    svgfile -- Path to an SVG file or an SVG string.
-    newstyle -- CSS string, or path to CSS file.
-    replace -- (boolean) If true, replace the existing CSS with newstyle (default: False)
+
+    Args:
+        svgfile (string): Path to an SVG file or an SVG string.
+        newstyle (string): CSS string, or path to CSS file.
+        replace (bool): If true, replace the existing CSS with newstyle (default: False)
     '''
     if style == '-':
         style = '/dev/stdin'
@@ -115,7 +117,9 @@ def inline(svg, css):
 def pick(style):
     '''
     Fetch a CSS string.
-    :style str Either a CSS string or the path of a css file.
+
+    Args:
+        style (str): Either a CSS string or the path of a css file.
     '''
     try:
         _, ext = os.path.splitext(style)
