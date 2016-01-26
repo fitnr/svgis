@@ -40,6 +40,7 @@ def map(layers, bounds=None, scale=1, padding=0, **kwargs):
     :project string EPSG code, PROJ.4 string, or file containing a PROJ.4 string
     '''
     scale = (1 / scale) if scale else 1
+    bounds = bounds if bounds and len(bounds) == 4 else None
 
     # Try to read style file
     styles = css.pick(kwargs.pop('style', None))
