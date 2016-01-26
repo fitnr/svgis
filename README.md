@@ -13,7 +13,7 @@ svgis draw south_dakota.shp south_dakota.geojson -o dakota.svg
 Requires [fiona](http://pypi.python.org/pypi/fiona), which in turn requires GDAL.
 
 Before installing, run the following on OS X: `brew install gdal`.
-On Linux: `sudo apt-get -qq install -y libgdal1-dev`.
+On Linux: `sudo apt-get -qq install libgdal1-dev`.
 
 Then:
 ```
