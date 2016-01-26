@@ -8,6 +8,7 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
+import os.path
 import pyproj
 import utm
 from fiona import transform
@@ -95,3 +96,28 @@ def reproject_bounds(in_crs, out_crs, boundaryring):
     xbounds, ybounds = transform.transform(in_crs, out_crs, xs, ys)
 
     return min(xbounds), min(ybounds), max(xbounds), max(ybounds)
+
+
+def pick(project):
+    use_proj, out_crs = None, None
+
+    if project.lower() in ('local', 'utm'):
+        use_proj = project.lower()
+
+    elif os.path.exists(project):
+        # Is a file
+        with open(project) as f:
+            out_crs = fiona.crs.from_string(f.read())
+
+    elif project[:5].lower() == 'epsg:':
+        # Is an epsg code
+        _, epsg = project.split(':')
+        out_crs = fiona.crs.from_epsg(int(epsg))
+
+    else:
+        # Assume it's a proj4 string.
+        # fiona.crs.from_string returns {} if it isn't.
+        out_crs = fiona.crs.from_string(project)
+
+    return use_proj, out_crs
+

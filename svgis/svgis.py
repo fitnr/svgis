@@ -29,6 +29,42 @@ STYLE = ('polyline, line, rect, path, polygon, .polygon {'
          '}')
 
 
+def map(layers, bounds=None, scale=1, padding=0, **kwargs):
+    '''
+    Draw a geodata layer to a simple SVG.
+    :layers sequence Input geodata files.
+    :output path Output file name
+    :bounds sequence (minx, miny, maxx, maxy)
+    :scale int Map scale. Larger numbers -> smaller maps
+    :padding int Pad around bounds by this much. In projection units.
+    :project string EPSG code, PROJ.4 string, or file containing a PROJ.4 string
+    '''
+    scale = (1 / scale) if scale else 1
+
+    # Try to read style file
+    styles = css.pick(kwargs.pop('style', None))
+
+    use_proj, out_crs = projection.pick(kwargs.pop('project'))
+
+    if kwargs.get('class_fields'):
+        kwargs['classes'] = kwargs.pop('class_fields').split(',')
+
+    kwargs.pop('class_fields', None)
+
+    drawing = SVGIS(
+        layers,
+        bounds=bounds,
+        scalar=scale,
+        use_proj=use_proj,
+        out_crs=out_crs,
+        padding=padding,
+        style=styles,
+        clip=kwargs.pop('clip', True)
+    ).compose(**kwargs)
+
+    return drawing
+
+
 def _property(prop, properties):
     if prop in properties:
         return prop + '_' + str(properties[prop])

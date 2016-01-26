@@ -11,9 +11,11 @@
 from __future__ import unicode_literals
 import unittest
 import re
+import os
 from io import BytesIO, StringIO
 from xml.dom import minidom
 from svgis import css
+
 
 class CssTestCase(unittest.TestCase):
 
@@ -73,6 +75,45 @@ class CssTestCase(unittest.TestCase):
         new = css.add_style(io_svg, self.css)
         result = minidom.parseString(new).getElementsByTagName('defs').item(0).getElementsByTagName('style').item(0)
         assert self.css in result.toxml()
+
+    def testReScale(self):
+        result = css.rescale('tests/test_data/test.svg', 1.37)
+        self.assertIn('scale(1.37)', result)
+
+    def testPickStyle(self):
+        stylefile = 'tmp.css'
+
+        with open(stylefile, 'w') as w:
+            w.write(self.css)
+
+        try:
+            result = css.pick(stylefile)
+            self.assertEqual(self.css, result)
+
+        finally:
+            os.remove('tmp.css')
+
+        result = css.pick(self.css)
+        self.assertEqual(self.css, result)
+
+        assert css.pick(None) is None
+
+    def testAddCli(self):
+        result = css.add_style(self.file, self.css)
+        self.assertIn(self.css, result)
+
+        style = 'tmp.css'
+
+        with open(style, 'w') as w:
+            w.write(self.css)
+
+        try:
+            result = css.add_style(self.file, style)
+            self.assertIn(self.css, result)
+
+        finally:
+            os.remove('tmp.css')
+
 
 if __name__ == '__main__':
     unittest.main()

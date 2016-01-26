@@ -17,8 +17,8 @@ import subprocess
 from xml.dom import minidom
 from io import BytesIO, StringIO
 from svgis import cli
-from svgis.cli import actions, formatter
-from svgis.cli.main import echo
+from svgis.cli import formatter
+from svgis.cli.main import _echo
 
 PROJECTION = '+proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'
 BOUNDS = (-124.0, 20.5, -64.0, 49.0)
@@ -28,6 +28,7 @@ class CliTestCase(unittest.TestCase):
 
     def setUp(self):
         self.fixture = 'tests/test_data/test.svg'
+
         self.shp = 'tests/test_data/cb_2014_us_nation_20m.shp'
         self.css = 'polygon{fill:green}'
         sys.tracebacklimit = 99
@@ -41,7 +42,7 @@ class CliTestCase(unittest.TestCase):
         self.assertIsNotNone(out, 'out is None')
 
         try:
-            self.assertIn(self.css, out)
+            self.assertIn(self.css, out, ' '.join(args))
         except TypeError:
             self.assertIn(self.css, out.decode())
 
@@ -92,69 +93,11 @@ class CliTestCase(unittest.TestCase):
     def testCliEcho(self):
         io = StringIO()
         content = 'my content'
-        echo(content, io)
+        _echo(content, io)
         io.seek(0)
 
         self.assertEqual(io.read(), content)
 
-    def testCliStyle(self):
-        result = actions.add_style(self.fixture, self.css)
-        self.assertIn(self.css, result)
-
-        style = 'tmp.css'
-
-        with open(style, 'w') as w:
-            w.write(self.css)
-
-        try:
-            result = actions.add_style(self.fixture, style)
-            self.assertIn(self.css, result)
-
-        finally:
-            os.remove('tmp.css')
-
-    def CliDrawWithStyle(self):
-        result = actions.draw(self.shp, style=self.css, scale=1000, project=PROJECTION, bounds=BOUNDS, clip=None)
-        self.assertIn(self.css, result)
-
-        style = 'tmp.css'
-        with open(style, 'w') as w:
-            w.write(self.css)
-
-        try:
-            result = actions.draw(self.shp, style=style, scale=1000, project=PROJECTION, bounds=BOUNDS, clip=None)
-            self.assertIn(self.css, result)
-
-        finally:
-            os.remove('tmp.css')
-
-    def testCliScale(self):
-        result = actions.scale(self.fixture, 1.37)
-        self.assertIn('scale(1.37)', result)
-
-    def testCliDraw(self):
-        a = actions.draw(self.shp, scale=1000, project=PROJECTION, bounds=BOUNDS, clip=False)
-
-        result = minidom.parseString(a).getElementsByTagName('svg').item(0)
-        fixture = minidom.parse(self.fixture).getElementsByTagName('svg').item(0)
-
-        result_vb = [float(x) for x in result.attributes.get('viewBox').value.split(',')]
-        fixture_vb = [float(x) for x in fixture.attributes.get('viewBox').value.split(',')]
-
-        for r, f in zip(result_vb, fixture_vb):
-            self.assertAlmostEqual(r, f, 5)
-
-    def testCliDrawProjFile(self):
-        a = actions.draw(self.shp, scale=1000, project='tests/test_data/test.proj4', bounds=BOUNDS, clip=False)
-
-        result = minidom.parseString(a).getElementsByTagName('svg').item(0)
-        fixture = minidom.parse(self.fixture).getElementsByTagName('svg').item(0)
-
-        result_vb = [float(x) for x in result.attributes.get('viewBox').value.split(',')]
-        fixture_vb = [float(x) for x in fixture.attributes.get('viewBox').value.split(',')]
-
-        for r, f in zip(result_vb, fixture_vb):
-            self.assertAlmostEqual(r, f, 5)
 
     def testCli(self):
         sys.argv = (['svgis', 'draw', '-j', PROJECTION, '-f', '1000', self.shp,
@@ -210,24 +153,6 @@ class CliTestCase(unittest.TestCase):
     def testCliFormatter(self):
         assert issubclass(formatter.CommandHelpFormatter, argparse.HelpFormatter)
         assert issubclass(formatter.SubcommandHelpFormatter, argparse.HelpFormatter)
-
-    def testPickStyle(self):
-        stylefile = 'tmp.css'
-
-        with open(stylefile, 'w') as w:
-            w.write(self.css)
-
-        try:
-            result = actions.pick_style(stylefile)
-            self.assertEqual(self.css, result)
-
-        finally:
-            os.remove('tmp.css')
-
-        result = actions.pick_style(self.css)
-        self.assertEqual(self.css, result)
-
-        assert actions.pick_style(None) is None
 
 
 if __name__ == '__main__':

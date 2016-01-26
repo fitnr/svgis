@@ -7,7 +7,8 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
-
+import os.path
+import logging
 from xml.dom import minidom
 try:
     from lxml import etree
@@ -34,12 +35,21 @@ def rescale(svgfile, factor):
     return svg.toxml()
 
 
-def add_style(svgfile, newstyle, replace=False):
+def add_style(svgfile, style, replace=False):
     '''Add to the CSS style in an SVG file.
-    svgfile -- Path to an SVG file or an SVG string
-    newstyle -- CSS string
+    svgfile -- Path to an SVG file or an SVG string.
+    newstyle -- CSS string, or path to CSS file.
     replace -- (boolean) If true, replace the existing CSS with newstyle (default: False)
     '''
+    if style == '-':
+        style = '/dev/stdin'
+
+    root, ext = os.path.splitext(style)
+
+    if ext == '.css' or root == '/dev/stdin':
+        with open(style) as f:
+            style = f.read()
+
     try:
         svg = minidom.parse(svgfile)
     except IOError:
@@ -58,18 +68,18 @@ def add_style(svgfile, newstyle, replace=False):
             svg.insertBefore(defs, svg.firstChild)
 
     if defs.getElementsByTagName('style'):
-        style = defs.getElementsByTagName('style').item(0)
+        style_element = defs.getElementsByTagName('style').item(0)
 
         if replace:
-            style.firstChild.replaceWholeText(newstyle)
+            style_element.firstChild.replaceWholeText(style)
         else:
-            style.firstChild.nodeValue += ' ' + newstyle
+            style_element.firstChild.nodeValue += ' ' + style
 
     else:
-        style = svg.createElement('style')
-        css = svg.createTextNode(newstyle)
-        style.appendChild(css)
-        defs.appendChild(style)
+        style_element = svg.createElement('style')
+        css = svg.createTextNode(style)
+        style_element.appendChild(css)
+        defs.appendChild(style_element)
 
     return svg.toxml()
 
@@ -100,3 +110,24 @@ def inline(svg, css):
     # Return plain old SVG.
     except NameError:
         return svg
+
+
+def pick(style):
+    '''
+    Fetch a CSS string.
+    :style str Either a CSS string or the path of a css file.
+    '''
+    try:
+        _, ext = os.path.splitext(style)
+        if ext == '.css':
+            with open(style) as f:
+                return f.read()
+
+    except AttributeError:
+        # Probably style is None.
+        return None
+
+    except IOError:
+        logging.getLogger('svg').warn("Couldn't read %s, proceeding with default style", style)
+
+    return style

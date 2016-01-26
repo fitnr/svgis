@@ -56,12 +56,14 @@ except ImportError:
         'help': argparse.SUPPRESS,
     }
 
-from . import actions
 from .formatter import CommandHelpFormatter, SubcommandHelpFormatter
+from ..css import rescale, add_style
+from ..projection import generatecrs
+from .. import svgis
 from .. import __version__ as version
 
 
-def echo(content, output):
+def _echo(content, output):
     '''Print something to either a file-like object or a file name.'''
     if hasattr(output, 'write'):
         signal(SIGPIPE, SIG_DFL)
@@ -69,6 +71,12 @@ def echo(content, output):
     else:
         with open(output, 'w') as w:
             w.write(content)
+
+
+def _project(_, minx, miny, maxx, maxy, project=None):
+    '''Return a transverse mercator projection for the given bounds'''
+    prj = generatecrs(minx, miny, maxx, maxy, project)
+    return prj + '\n'
 
 
 def main():
@@ -99,11 +107,11 @@ def main():
                              "Use '-' for stdin."))
 
     style.add_argument('-r', '--replace', action='store_true', help="Replace the SVG's style")
-    style.set_defaults(function=actions.add_style)
+    style.set_defaults(function=add_style)
 
     scale = sp.add_parser('scale', parents=[parent], help='Scale all coordinates in an SVG by a factor')
     scale.add_argument('-f', '--scale', dest='factor', type=int)
-    scale.set_defaults(function=actions.scale)
+    scale.set_defaults(function=rescale)
 
     # Draw
 
@@ -146,7 +154,7 @@ def main():
 
     draw.add_argument('-l', '--inline-css', **csskwargs)
 
-    draw.set_defaults(function=actions.draw)
+    draw.set_defaults(function=svgis.map)
 
     # Proj
 
@@ -157,7 +165,7 @@ def main():
     proj.add_argument('maxx', type=float, help='east')
     proj.add_argument('maxy', type=float, help='north')
     proj.add_argument('-j', '--project', dest='project', choices=('utm', 'local'), type=str,)
-    proj.set_defaults(function=actions.proj, input=None, output='/dev/stdout')
+    proj.set_defaults(function=_project, input=None, output='/dev/stdout')
 
     args = parser.parse_args()
 
@@ -171,4 +179,4 @@ def main():
         args.output = sys.stdout
 
     result = args.function(args.input, **kwargs)
-    echo(result, args.output)
+    _echo(result, args.output)
