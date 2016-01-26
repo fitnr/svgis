@@ -1,3 +1,9 @@
+0.3.2
+-----
+
+* Fix bug introduced in 0.3.1, caused improper bounds in output SVGs.
+* Add `svgis.map` function as a shorthand for working with the API
+
 0.3.1
 -----
 

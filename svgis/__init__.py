@@ -15,7 +15,7 @@ from . import projection
 from . import svg
 from .svgis import map, SVGIS
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
 __all__ = [
     'convert',
