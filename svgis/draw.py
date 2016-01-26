@@ -1,10 +1,22 @@
-"""Draw a geometries elements as SVG"""
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+# This file is part of svgis.
+# https://github.com/fitnr/svgis
+
+# Licensed under the GNU General Public License v3 (GPLv3) license:
+# http://opensource.org/licenses/GPL-3.0
+# Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
+
 from __future__ import division, print_function, unicode_literals
 import fionautil.measure
 import fionautil.round
 from . import clip, svg
 from .errors import SvgisError
+
+"""
+Draw a geometries elements as SVG
+"""
 
 
 def applyid(multifunc):

@@ -1,5 +1,11 @@
-"""Draw geodata layers into svg"""
 # -*- coding: utf-8 -*-
+# This file is part of svgis.
+# https://github.com/fitnr/svgis
+
+# Licensed under the GNU General Public License v3 (GPLv3) license:
+# http://opensource.org/licenses/GPL-3.0
+# Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
+
 from __future__ import unicode_literals
 import os.path
 from collections import Iterable
@@ -9,6 +15,10 @@ import fiona
 import fiona.transform
 import fionautil.scale
 from . import convert, clip, css, draw, errors, projection, svg
+
+"""
+Draw geodata layers into svg
+"""
 
 
 STYLE = ('polyline, line, rect, path, polygon, .polygon {'
