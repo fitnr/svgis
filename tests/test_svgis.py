@@ -119,12 +119,16 @@ class SvgisTestCase(unittest.TestCase):
     def testSvgisComposeType(self):
         a = self.svgis_obj.compose(inline_css=True)
         b = self.svgis_obj.compose(inline_css=False)
+
         try:
-            assert isinstance(a, unicode)
-            assert isinstance(b, unicode)
-        except NameError:
-            assert isinstance(a, str)
-            assert isinstance(b, str)
+            self.assertIsInstance(a, unicode)
+        except AssertionError:
+            raise AssertionError(type(a))
+
+        try:
+            self.assertIsInstance(b, unicode)
+        except AssertionError:
+            raise AssertionError(type(b))
 
         self.assertEqual(type(a), type(b))
 

@@ -8,7 +8,6 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
-from __future__ import unicode_literals
 from string import ascii_letters
 
 '''
@@ -23,7 +22,7 @@ def sanitize(x):
         return string if string[0] in ('_-' + ascii_letters) else '_' + string
 
     except (AttributeError, IndexError):
-        return ''
+        return u''
 
 
 def circle(point, **kwargs):
@@ -31,7 +30,7 @@ def circle(point, **kwargs):
     Write a svg circle element. Keyword arguments are mapped to attributes.
     :point tuple The center of the circle
     '''
-    return '<circle cx="{0[0]}" cy="{0[1]}"'.format(point) + toattribs(**kwargs) + '/>'
+    return u'<circle cx="{0[0]}" cy="{0[1]}"'.format(point) + toattribs(**kwargs) + '/>'
 
 
 def _isstr(x):
@@ -44,21 +43,21 @@ def path(coordinates, **kwargs):
     :coordinates Sequence A sequence of coordinates and string instructions
     '''
     attribs = toattribs(**kwargs)
-    coords = [i if _isstr(i) else '{0[0]},{0[1]}'.format(i) for i in coordinates]
+    coords = [i if _isstr(i) else u'{0[0]},{0[1]}'.format(i) for i in coordinates]
 
-    return '<path d="M ' + ' '.join(coords) + '"' + attribs + '/>'
+    return u'<path d="M ' + ' '.join(coords) + '"' + attribs + '/>'
 
 
 def element(tag, coordinates, **kwargs):
     return (
-        '<' + tag + ' points="' +
+        u'<' + tag + ' points="' +
         ' '.join('{0[0]},{0[1]}'.format(c) for c in coordinates) +
         '"' + toattribs(**kwargs) + '/>'
     )
 
 
 def toattribs(**kwargs):
-    attribs = ' '.join('{}="{}"'.format(k, v) for k, v in kwargs.items() if v)
+    attribs = u' '.join('{}="{}"'.format(k, v) for k, v in kwargs.items() if v)
 
     if len(attribs) > 0:
         attribs = ' ' + attribs
@@ -69,9 +68,9 @@ def toattribs(**kwargs):
 def defstyle(style=None):
     '''Create a defs element with a css style'''
     if style:
-        return '<defs><style type="text/css"><![CDATA[{}]]></style></defs>'.format(style)
+        return u'<defs><style type="text/css"><![CDATA[{}]]></style></defs>'.format(style)
     else:
-        return '<defs />'
+        return u'<defs />'
 
 
 def group(members=None, **kwargs):
@@ -79,16 +78,16 @@ def group(members=None, **kwargs):
     attribs = toattribs(**kwargs)
 
     if not members:
-        return '<g' + attribs + ' />'
+        return u'<g' + attribs + ' />'
 
-    return '<g' + attribs + '>' + ''.join(members) + '</g>'
+    return u'<g' + attribs + '>' + ''.join(members) + '</g>'
 
 
 def setviewbox(viewbox=None):
     if not viewbox:
         return ''
     else:
-        return ' viewBox="{},{},{},{}"'.format(*viewbox)
+        return u' viewBox="{},{},{},{}"'.format(*viewbox)
 
 
 def drawing(size, members, viewbox=None, style=None):
@@ -99,10 +98,10 @@ def drawing(size, members, viewbox=None, style=None):
     :viewbox Sequence Four coordinates that describe a bounding box.
     :style string CSS string.
     '''
-    svg = ('<svg baseProfile="full" version="1.1"'
+    svg = (u'<svg baseProfile="full" version="1.1"'
            ' xmlns="http://www.w3.org/2000/svg"'
            )
-    dimension = ' width="{}" height="{}"'.format(*size)
+    dimension = u' width="{}" height="{}"'.format(*size)
     vb = setviewbox(viewbox)
     defs = defstyle(style)
 

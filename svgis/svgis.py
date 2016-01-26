@@ -6,7 +6,6 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
 
-from __future__ import unicode_literals
 import os.path
 from collections import Iterable
 from functools import partial
