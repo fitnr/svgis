@@ -40,6 +40,11 @@ def map(layers, bounds=None, scale=1, padding=0, **kwargs):
         scale (int): Map scale. Larger numbers -> smaller maps
         padding (int): Pad around bounds by this much. In projection units.
         project (string): EPSG code, PROJ.4 string, or file containing a PROJ.4 string
+        clip (bool): If true, clip features output to bounds.
+        style (string): Path to a css file or a css string.
+        class_fields (Sequence): A comma-separated string or list of class names to
+                                 use the SVG drawing.
+        id_field (string): Field to use to determine id of each element in the drawing.
 
     Returns:
         String (unicode in Python 2) containing an entire SVG document.
@@ -50,18 +55,19 @@ def map(layers, bounds=None, scale=1, padding=0, **kwargs):
     # Try to read style file
     styles = css.pick(kwargs.pop('style', None))
 
-    use_proj, out_crs = projection.pick(kwargs.pop('project'))
+    project, out_crs = projection.pick(kwargs.pop('project', None))
 
-    if kwargs.get('class_fields'):
-        kwargs['classes'] = kwargs.pop('class_fields').split(',')
-
-    kwargs.pop('class_fields', None)
+    class_fields = kwargs.pop('class_fields', None)
+    try:
+        class_fields = class_fields.split(',')
+    except AttributeError:
+        pass
 
     drawing = SVGIS(
         layers,
         bounds=bounds,
         scalar=scale,
-        use_proj=use_proj,
+        project=project,
         out_crs=out_crs,
         padding=padding,
         style=styles,
@@ -115,8 +121,8 @@ class SVGIS(object):
     Args:
         files (list): A list of files to draw.
         bounds (Sequence): An iterable with four float coordinates in (minx, miny, maxx, maxy) format
-        out_crs (dict): A proj-4 like mapping
-        use_proj (string): A keyword for picking a projection (file, utm or local)
+        out_crs (dict): A proj-4 like mapping. Overrides proj.
+        project (string): A keyword for picking a projection (file, utm or local).
         style (string): CSS to add to output file
         scalar (int): Map scale to use (output coordinate are divided by this)
         padding (number): Buffer each edge by this many map units
@@ -146,7 +152,7 @@ class SVGIS(object):
 
         self.out_crs = out_crs
 
-        self.use_proj = kwargs.pop('use_proj', None)
+        self.proj_method = kwargs.pop('project', None)
 
         self.scalar = kwargs.pop('scalar', 1) or 1
 
@@ -159,6 +165,10 @@ class SVGIS(object):
         self.log = logging.getLogger('svgis')
 
         self.simplifier = convert.simplifier(kwargs.pop('simplify', None))
+
+        self.id_field = kwargs.pop('id_field', None)
+
+        self.class_fields = kwargs.pop('class_fields', None)
 
     def __repr__(self):
         return ('SVGIS(files={0.files}, out_crs={0.out_crs})').format(self)
@@ -197,7 +207,7 @@ class SVGIS(object):
             # Determine projection transformation:
             # either use something passed in, a non latlong layer projection,
             # the local UTM, or customize local TM
-            self.out_crs = projection.choosecrs(crs, bounds, use_proj=self.use_proj)
+            self.out_crs = projection.choosecrs(crs, bounds, proj_method=self.proj_method)
 
     def _compose_file(self, filename, scalar, bounds=None, **kwargs):
         '''
@@ -208,8 +218,8 @@ class SVGIS(object):
             scalar (int): map scale
             bounds (tuple): (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
             simplifier (function): Simplification function. Defaults to self.simplify.
-            classes (list): Fields to turn in the element classes
-            id_field (string): Field to use as element ID
+            class_fields (list): Fields to turn in the element classes (default: self.class_fields).
+            id_field (string): Field to use as element ID (default: self.id_field).
         '''
         with fiona.open(filename, "r") as layer:
             bounds = bounds or self.bounds or layer.bounds
@@ -230,12 +240,12 @@ class SVGIS(object):
                 layer.name, _ = os.path.splitext(os.path.basename(filename))
 
             # A list of class names to get from layer properties.
-            kwargs['classes'] = _get_classes(kwargs.get('classes', []), layer.schema['properties'], layer.name)
+            kwargs['classes'] = _get_classes(kwargs.pop('class_fields', []), layer.schema['properties'], layer.name)
 
             # Remove the id field if it doesn't appear in the properties.
-            if 'id_field' in kwargs:
-                if kwargs['id_field'] not in list(layer.schema['properties'].keys()):
-                    del kwargs['id_field']
+            id_field = kwargs.pop('id_field', self.id_field)
+            if id_field in list(layer.schema['properties'].keys()):
+                kwargs['id_field'] = id_field
 
             group = []
             for _, f in layer.items(bbox=bounds):

@@ -46,7 +46,7 @@ class ProjectionTestCase(unittest.TestCase):
 
     def testGenerateCRS(self):
         bounds = -82.2, 40.1, -78.9, 45.8
-        a = projection.generatecrs(*bounds, use_proj='utm')
+        a = projection.generatecrs(*bounds, proj_method='utm')
         self.assertEqual(a, '+proj=utm +zone=17 +north +datum=WGS84 +units=m +no_defs')
 
 if __name__ == '__main__':

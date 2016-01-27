@@ -45,14 +45,14 @@ def zonetoproj4(zonenumber, zoneletter):
     return '+proj=utm +zone={} +{} +datum=WGS84 +units=m +no_defs'.format(zonenumber, hemisphere)
 
 
-def generatecrs(minx, miny, maxx, maxy, use_proj=None):
+def generatecrs(minx, miny, maxx, maxy, proj_method=None):
     '''Choose a projection, either the local UTM zone or
     create a custom transverse mercator.
 
     Returns:
         proj4 string
     '''
-    if use_proj == 'utm':
+    if proj_method == 'utm':
         midx = (minx + maxx) / 2
         midy = (miny + maxy) / 2
 
@@ -65,24 +65,24 @@ def generatecrs(minx, miny, maxx, maxy, use_proj=None):
         return tm_proj4(x0, miny, maxy)
 
 
-def choosecrs(in_crs, bounds, use_proj=None):
+def choosecrs(in_crs, bounds, proj_method=None):
     '''Choose a projection. If the layer is projected, use that.
     Otherwise, create use a passed projection or create a custom transverse mercator.
 
     Args:
         in_crs (dict): A fiona-type proj4 dictionary
         bounds (tuple): (minx, miny, maxx, maxy)
-        use_proj (string): wither 'utm' or 'local'
+        proj_method (string): wither 'utm' or 'local'
     
     Returns:
         fiona-type proj4 dict.
     '''
-    if (use_proj is None or use_proj == 'file') and not pyproj.Proj(**in_crs).is_latlong():
+    if (proj_method is None or proj_method == 'file') and not pyproj.Proj(**in_crs).is_latlong():
         # it's projected already, so noop.
         return in_crs
 
     else:
-        return fiona.crs.from_string(generatecrs(*bounds, use_proj=use_proj))
+        return fiona.crs.from_string(generatecrs(*bounds, proj_method=proj_method))
 
 
 def project_mbr(in_crs, out_crs, minx, miny, maxx, maxy):
@@ -106,6 +106,9 @@ def reproject_bounds(in_crs, out_crs, boundaryring):
 
 def pick(project):
     use_proj, out_crs = None, None
+
+    if project is None:
+        project = 'local'
 
     if project.lower() in ('local', 'utm'):
         use_proj = project.lower()

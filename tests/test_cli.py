@@ -52,7 +52,7 @@ class CliTestCase(unittest.TestCase):
             os.remove('tmp.svg')
 
     def testSvgProjectUtm(self):
-        p = self.invoke(['project', '-j', 'utm', '--', '-110.277906', '35.450777', '-110.000477', '35.649030'])
+        p = self.invoke(['project', '-m', 'utm', '--', '-110.277906', '35.450777', '-110.000477', '35.649030'])
         expected = '+proj=utm +zone=12 +north +datum=WGS84 +units=m +no_defs\n'
         self.assertEqual(p.output, expected)
 

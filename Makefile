@@ -32,7 +32,7 @@ test: tests/test_data/cb_2014_us_nation_20m.shp tests/test_data/test.svg
 
 	svgis style -s 'polygon{fill:green}' $(lastword $^) > /dev/null
 	svgis scale -f 10 $(lastword $^) > /dev/null
-	svgis project -j utm -- -110.277906 35.450777 -110.000477 35.649030
+	svgis project -m utm -- -110.277906 35.450777 -110.000477 35.649030
 	svgis project -- -110.277906 35.450777 -110.000477 35.649030
 
 	svgis draw -j '$(PROJECTION)' -f 1000 $< | \

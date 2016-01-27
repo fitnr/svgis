@@ -135,7 +135,7 @@ def draw(input, output, **kwargs):
 # Proj
 @main.command()
 @click.argument('bounds', nargs=4, type=float, metavar="minx, miny, maxx, maxy", default=None)
-@click.option('-j', '--proj', default='local', type=click.Choice(('utm', 'local')), help='Defaults to local.')
-def project(bounds, proj):
+@click.option('-m', '--method', default='local', type=click.Choice(('utm', 'local')), help='Defaults to local.')
+def project(bounds, method):
     '''Get a local Transverse Mercator or UTM projection for a bounding box. Expects WGS84 coordinates.'''
-    click.echo(generatecrs(*bounds, use_proj=proj).encode('utf-8'))
+    click.echo(generatecrs(*bounds, proj_method=method).encode('utf-8'))
