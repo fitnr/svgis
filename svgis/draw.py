@@ -47,7 +47,10 @@ def lines(geom, **kwargs):
     Draw a LineString or MultiLineString geometry.
 
     Args:
-        geom (object): A GeoJSON-like geometry object. Coordinates must be 2-dimensional.
+        geom (object): A GeoJSON-like LineString or MultiLineString geometry object.
+
+    Returns:
+        unicode representation of the SVG group or polyline element(s).
     '''
     if geom['type'] == 'LineString':
         return linestring(geom['coordinates'], **kwargs)
@@ -62,7 +65,10 @@ def polygons(geom, **kwargs):
     Draws first ring clockwise, and subsequent ones counter-clockwise.
 
     Args:
-        geom (object): A GeoJSON-like geometry object. Coordinates must be 2-dimensional.
+        geom (object): A GeoJSON-like Polygon or MultiPolygon geometry object.
+
+    Returns:
+        unicode representation of the SVG group, path or polygon element.
     '''
     if geom['type'] == 'Polygon':
         return polygon(geom['coordinates'], **kwargs)
@@ -82,7 +88,7 @@ def polygon(coordinates, **kwargs):
 
     kwargs['class'] = ('polygon ' + kwargs.pop('class', '')).strip()
 
-    instructions = list(coordinates[0]) + ['z']
+    instructions = [coordinates[0], 'z']
 
     for ring in coordinates[1:]:
         # make all interior run the counter-clockwise
@@ -106,7 +112,10 @@ def points(geom, **kwargs):
     Draw a Point or MultiPoint geometry
 
     Args:
-        geom (object): A GeoJSON-like geometry object. Coordinates must be 2-dimensional.
+        geom (object): A GeoJSON-like Point or MultiPoint geometry object.
+
+    Returns:
+        unicode representation of the SVG group, or circle element
     '''
     kwargs['r'] = kwargs.get('r', 1)
 
@@ -136,7 +145,10 @@ def geometry(geom, bbox=None, precision=3, **kwargs):
         geom (object): A GeoJSON-like geometry object. Coordinates must be 2-dimensional.
         bbox (tuple): An optional bounding minimum bounding box
         precision (int): Rounding precision. precision=None disables rounding.
-        kwargs (object): keyword args to be passed onto the created elements. (Things like class, id, style, etc).
+        kwargs (object): keyword args to be passed onto the created elements (e.g. class, id, style).
+
+    Returns:
+        unicode representation of SVG element(s) of the given geometry
     '''
     if bbox:
         geom = clip.clip(geom, bbox)
@@ -181,5 +193,8 @@ def group(geometries, **kwargs):
 
     Args:
         geometries (Sequence): GeoJSON-like geometry dicts.
+
+    Returns:
+        unicode representation of the SVG group
     '''
     return _group([geometries(g, **kwargs) for g in geometries])
