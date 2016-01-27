@@ -76,7 +76,15 @@ def toattribs(**kwargs):
 
 
 def defstyle(style=None):
-    '''Create a defs element with a css style'''
+    '''
+    Create a defs element that wraps a CSS style.
+
+    Args:
+        style (string): A CSS string.
+
+    Returns:
+        unicode
+    '''
     if style:
         return u'<defs><style type="text/css"><![CDATA[{}]]></style></defs>'.format(style)
     else:
@@ -84,7 +92,17 @@ def defstyle(style=None):
 
 
 def group(members=None, **kwargs):
-    '''Create a group with the given scale and translation'''
+    '''
+    Create a group with the given scale and translation.
+
+    Args:
+        members (Sequence): unicode SVG elements
+        kwargs (dict): elements of this dictionary will be converted to
+                        attributes of the group, i.e. key="value".
+
+    Returns:
+        unicode
+    '''
     attribs = toattribs(**kwargs)
 
     if not members:
