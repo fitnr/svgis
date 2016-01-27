@@ -54,7 +54,7 @@ setup(
     },
 
     install_requires=[
-        'click==6.2',
+        'click>=6.2,<6.3',
         'pyproj>=1.9.5,<1.10',
         'fiona>=1.6.0,<2.0',
         'fionautil >=0.4.6, <1.0',

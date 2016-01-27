@@ -69,7 +69,7 @@ outp = click.argument('output', default=sys.stdout, type=click.File('wb'))
 
 # Base
 @click.group(**CLICKARGS)
-@click.version_option(version=__version__)
+@click.version_option(version=__version__, message='%(prog)s %(version)s')
 @click.pass_context
 def main(context):
     context.log = logging.getLogger('svgis')
