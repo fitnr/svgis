@@ -12,9 +12,7 @@ Create SVG drawings from vector geodata files (SHP, geoJSON, etc).
    :maxdepth: 2
 
    cli
-   svgis
-   draw
-   svg
+   api/index
 
 
 

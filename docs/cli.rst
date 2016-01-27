@@ -264,8 +264,15 @@ shapes to just outside of the bounding box. Use this option to disable
 that behavior.
 
 ::
-    svgis draw --no-clip in.shp --o out.shp
-    svgis draw -n in.shp --o out.shp
+    svgis draw --bounds -170 40 -160 30 --no-clip in.shp --o out.shp
+    svgis draw -b 125 30 150 50 -n in.shp --o out.shp
+
+SVGIS always omits features that fall completely outside the bounding 
+box, clipping edits the shapes so that the parts that lie outside of
+the bounding box are omitted.
+
+Clipping won't occur when no bounding box is given.
+
 
 Helpers
 =======
