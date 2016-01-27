@@ -13,8 +13,8 @@ Draw SVGs from input geodata.
     Usage: svgis draw [OPTIONS] INPUT...
 
     Options:
-      -o, --output FILENAME           defaults to stdout
-      --bounds minx, miny, maxx, maxy
+      -o, --output FILENAME           Defaults to stdout.
+      -b, --bounds minx, miny, maxx, maxy
                                       In the same coordinate system as the input
                                       layers
       -c, --style CSS                 CSS file or string
@@ -28,16 +28,17 @@ Draw SVGs from input geodata.
                                       valid EPSG code (e.g. epsg:4456), a valid
                                       proj4 string, a file containing a proj4,
                                       "utm", "file" (use existing), "local"
-                                      (generate a local projection)
-      -s, --simplify FACTOR           Simplify geometries. Accepts a float, which
-                                      it the ratio of points to keep in each
-                                      geometry
-      -n, --no-clip                   Don't clip shapes to bounds. Faster, but
-                                      possibly larger files
+                                      (generate a local projection).
+      -s, --simplify FACTOR           Simplify geometries. Accepts an integer
+                                      between 1 and 100, the percentage points in
+                                      each geometry to retain
+      --clip / -n, --no-clip          Clip shapes to bounds. Slower, produces
+                                      smaller files (default: clip).
       -x, --no-viewbox                Draw SVG without a ViewBox. May improve
                                       compatibility.
-      -l, --inline-css                Inline CSS. Slightly slower, but required by
-                                      some clients (Adobe Illustrator)
+      -l, --inline / --no-inline      Inline CSS. Slightly slower, but required by
+                                      some clients (e.g. Adobe) (default: do not
+                                      inline).
       -h, --help                      Show this message and exit.
 
 
@@ -233,15 +234,23 @@ few visible changes.
     svgis draw --simplify 75 in.shp -o out.svg
     svgis draw -s 25 in.shp -o out.svg
 
-inline-css
-^^^^^^^^^^
+inline
+^^^^^^
 
 Install with ``pip install svgis[inline]`` to make this available. This
 requires additional libraries, see `lxml installation
 notes <http://lxml.de/installation.html>`__.
 
-Some SVG clients (Adobe Illustrator) prefer inline style information.
 Run with this option to add style information onto each element.
+Some SVG clients (Adobe Illustrator) prefer inline styles.
+
+When ``--inline`` is given, SVG elements will look like::
+
+    <polyline class="layer_name" style="stroke: green; ..." points="0,0 1,1">
+
+::
+    svgis draw --inline in.geojson -o out.svg
+    svgis draw -l in.geojson -o out.svg
 
 no-clip
 ^^^^^^^

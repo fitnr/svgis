@@ -25,9 +25,9 @@ none = {
 try:
     import shapely
     clipkwargs = {
-        'default': False,
+        'default': True,
         'flag_value': True,
-        'help': "Don't clip shapes to bounds. Faster, but possibly larger files"
+        'help': "Clip shapes to bounds. Slightly slower, produces smaller files (default: clip)."
     }
 except ImportError:
     clipkwargs = none
@@ -39,7 +39,10 @@ try:
     csskwargs = {
         'flag_value': True,
         'default': False,
-        'help': 'Inline CSS. Slightly slower, but required by some clients (Adobe Illustrator)',
+        'help': ('Inline CSS styles to each element. '
+                 'Slightly slower, but required by some clients (e.g. Adobe) '
+                 '(default: do not inline).'
+                ),
     }
 except ImportError:
     csskwargs = none
@@ -49,7 +52,9 @@ try:
     simplifykwargs = {
         'type': click.IntRange(1, 100, clamp=True),
         'metavar': 'FACTOR',
-        'help': 'Simplify geometries. Accepts an integer between 1 and 100, the percentage points in each geometry to retain',
+        'help': ('Simplify geometries, '
+                 'accepts an integer between 1 and 100, '
+                 'the percentage of each geometry to retain.'),
     }
 except ImportError:
     simplifykwargs = none
@@ -104,14 +109,14 @@ project_help = ('Specify a map projection. '
                 'a file containing a proj4, '
                 '"utm", '
                 '"file" (use existing), '
-                '"local" (generate a local projection)')
+                '"local" (generate a local projection).')
 
 
 # Draw
 @main.command()
 @click.argument('input', nargs=-1, type=str, required=True)
-@click.option('-o', '--output', default=sys.stdout, type=click.File('wb'), help="defaults to stdout")
-@click.option('--bounds', nargs=4, type=float, metavar="minx, miny, maxx, maxy", help='In the same coordinate system as the input layers', default=None)
+@click.option('-o', '--output', default=sys.stdout, type=click.File('wb'), help="Defaults to stdout.")
+@click.option('-b', '--bounds', nargs=4, type=float, metavar="minx, miny, maxx, maxy", help='In the same coordinate system as the input layers', default=None)
 @click.option('-c', '--style', type=str, metavar='CSS', help="CSS file or string")
 @click.option('-f', '--scale', type=int, default=None, help='Scale for the map (units are divided by this number)')
 @click.option('-p', '--padding', type=int, default=None, required=None, help='Buffer the map (in projection units)')
@@ -119,9 +124,9 @@ project_help = ('Specify a map projection. '
 @click.option('-a', '--class-fields', type=str, metavar='FIELDS', help='Geodata fields to use as class (comma-separated)')
 @click.option('-j', '--project', default='local', metavar='KEYWORD', type=str, help=project_help)
 @click.option('-s', '--simplify', **simplifykwargs)
-@click.option('-n', '--no-clip', **clipkwargs)
+@click.option('--clip/--no-clip', ' /-n', **clipkwargs)
 @click.option('-x', '--no-viewbox', default=False, flag_value=True, help='Draw SVG without a ViewBox. May improve compatibility.')
-@click.option('-l', '--inline-css', **csskwargs)
+@click.option('--inline/--no-inline', '-l/ ', **csskwargs)
 def draw(input, output, **kwargs):
     '''Draw SVGs from input geodata'''
     click.echo(svgis.map(input, **kwargs).encode('utf-8'), file=output)
