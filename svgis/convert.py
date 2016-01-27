@@ -82,10 +82,13 @@ def simplifier(ratio):
         ratio (int): Between 1 and 99
     '''
     try:
-        if ratio >= 100 or ratio < 1 or ratio is None:
+        # put this first to get NameError out of the way
+        simplify = vw.simplify_geometry
+
+        if ratio is None or ratio >= 100 or ratio < 1:
             raise ValueError
 
-        return partial(vw.simplify_geometry, ratio=ratio)
+        return partial(simplify, ratio=ratio)
 
-    except (ValueError, NameError):
+    except (TypeError, ValueError, NameError):
         return lambda g: g
