@@ -27,7 +27,7 @@ def _applyid(multifunc):
 
     def func(coordinates, **kwargs):
         ID = kwargs.pop('id', None)
-        result = _group(multifunc(coordinates, **kwargs), id=ID)
+        result = svg.group(multifunc(coordinates, **kwargs), fill_rule="evenodd", id=ID)
         return result
 
     return func
@@ -134,7 +134,7 @@ def multipoint(coordinates, **kwargs):
 def geometrycollection(collection, bbox, precision, **kwargs):
     ID = kwargs.pop('id', None)
     geoms = [geometry(g, bbox=bbox, precision=precision, **kwargs) for g in collection['geometries']]
-    return _group(geoms, id=ID)
+    return svg.group(geoms, fill_rule="evenodd", id=ID)
 
 
 def geometry(geom, bbox=None, precision=3, **kwargs):
@@ -172,21 +172,6 @@ def geometry(geom, bbox=None, precision=3, **kwargs):
         raise SvgisError("Can't draw features of type: {}".format(geom['type']))
 
 
-def _group(elements, **kwargs):
-    '''
-    Group a list of elements. Won't group one element.
-
-    Args:
-        elements (Sequence): Strings representing SVG elements to wrap in a group tag.
-    '''
-    if len(elements) == 1:
-        return elements[0]
-
-    g = svg.group(elements, fill_rule="evenodd", **kwargs)
-
-    return g
-
-
 def group(geometries, **kwargs):
     '''
     Add a list of geometries to a group
@@ -197,4 +182,4 @@ def group(geometries, **kwargs):
     Returns:
         unicode representation of the SVG group
     '''
-    return _group([geometries(g, **kwargs) for g in geometries])
+    return svg.group([geometries(g, fill_rule="evenodd", **kwargs) for g in geometries])
