@@ -15,11 +15,17 @@ Create string versions of SVG elements.
 '''
 
 
-def sanitize(x):
-    '''Make input safe of use in an svg ID or class field'''
+def sanitize(string):
+    '''
+    Make input safe of use in an svg ID or class field.
+
+    Args:
+        string (unicode [py2]/str [py3]): String to sanitize.
+    '''
     try:
-        string = x.replace(' ', '_')
-        return string if string[0] in ('_-' + ascii_letters) else '_' + string
+        string = string.replace(u' ', u'_')
+        string = string if string[0] in ('_-' + ascii_letters) else '_' + string
+        return unicode(string)
 
     except (AttributeError, IndexError):
         return u''
@@ -111,4 +117,4 @@ def drawing(size, members, viewbox=None, style=None):
     vb = setviewbox(viewbox)
     defs = defstyle(style)
 
-    return svg + dimension + vb + '>' + defs + ''.join(members) + '</svg>'
+    return svg + dimension + vb + u'>' + defs + u''.join(members) + u'</svg>'

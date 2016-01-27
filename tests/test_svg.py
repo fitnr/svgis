@@ -55,11 +55,11 @@ class SvgTestCase(unittest.TestCase):
         assert 'transform="scale(10)"' in g
 
     def testSanitize(self):
-        assert svg.sanitize(None) == ''
-        assert svg.sanitize('') == ''
-        self.assertEqual(svg.sanitize('ü'), '_ü')
-        self.assertEqual(svg.sanitize('!foo'), '_!foo')
-        assert svg.sanitize('müller') == 'müller'
+        assert svg.sanitize(None) == u''
+        assert svg.sanitize(u'') == u''
+        self.assertEqual(svg.sanitize(u'ü'), u'_ü')
+        self.assertEqual(svg.sanitize(u'!foo'), u'_!foo')
+        assert svg.sanitize(u'müller') == u'müller'
 
     def testAttribs(self):
         args = {

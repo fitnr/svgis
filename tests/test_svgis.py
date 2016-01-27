@@ -18,9 +18,11 @@ except NameError:
 
 
 class SvgisTestCase(unittest.TestCase):
+    properties = {'apple': 'fruit', 'pear': 1}
+    classes = ('apple', 'potato')
+    file = 'tests/test_data/cb_2014_us_nation_20m.shp'
 
     def setUp(self):
-        self.file = 'tests/test_data/cb_2014_us_nation_20m.shp'
         self.svgis_obj = svgis.SVGIS(self.file)
 
     def testSvgisError(self):
@@ -43,26 +45,48 @@ class SvgisTestCase(unittest.TestCase):
         composed = self.svgis_obj.compose()
         assert isinstance(composed, basestring)
 
+    def testProperty(self):
+        result = svgis._property('apple', self.properties)
+        assert result == 'apple_fruit'
+
+        result = svgis._property('pear', self.properties)
+        assert result == 'pear_1'
+
+        result = svgis._property('apple', {'apple': u'früit'})
+        self.assertEqual(result, u'apple_früit')
+
+    def testGetClasses(self):
+        classes = svgis._get_classes(self.classes, self.properties, 'Name')
+        self.assertIn('apple', classes)
+        self.assertIn('Name', classes)
+
     def testSvgisClassFields(self):
-        composed = self.svgis_obj.compose(classes=('NAME', 'GEOID'))
-        match = re.search(r'class="(.+)"', composed)
+        composed = self.svgis_obj.compose(class_fields=('NAME', 'GEOID'))
+        match = re.search(r'class="(.+?)"', composed)
         self.assertIsNotNone(match)
         self.assertIn('NAME_United_States', match.groups()[0])
         self.assertIn('GEOID_US', match.groups()[0])
         self.assertIn('cb_2014_us_nation_20m', match.groups()[0])
 
     def testCreateClasses(self):
-        classes = svgis._construct_classes(('apple', 'potato'), {'apple': 'fruit'})
-        self.assertEqual(classes, 'apple_fruit potato')
+        classes = svgis._construct_classes(self.classes, self.properties)
+        self.assertEqual(classes, u'apple_fruit potato')
 
-        classes = svgis._construct_classes(('apple', 'potato'), {'apple': u'fruit'})
-        self.assertEqual(classes, 'apple_fruit potato')
+        classes = svgis._construct_classes(self.classes, {'apple': u'fruit'})
+        self.assertEqual(classes, u'apple_fruit potato')
+
+        classes = svgis._construct_classes(self.classes, {'apple': u'früit'})
+        self.assertEqual(classes, u'apple_früit potato')
+
+        classes = svgis._construct_classes(self.classes, {'apple': 1})
+        self.assertEqual(classes, u'apple_1 potato')
+
 
     def testCreateClassesMissing(self):
-        classes = svgis._construct_classes(('apple', 'potato'), {'apple': ''})
+        classes = svgis._construct_classes(self.classes, {'apple': ''})
         self.assertEqual(classes, 'apple_ potato')
 
-        classes = svgis._construct_classes(('apple', 'potato'), {'apple': None})
+        classes = svgis._construct_classes(self.classes, {'apple': None})
         self.assertEqual(classes, 'apple_None potato')
 
     def testRepr(self):

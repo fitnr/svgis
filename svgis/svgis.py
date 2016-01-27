@@ -16,7 +16,7 @@ import fionautil.scale
 from . import convert, clip, css, draw, errors, projection, svg
 
 """
-Draw geodata layers into svg
+Draw geodata layers into SVGs.
 """
 
 
@@ -71,25 +71,39 @@ def map(layers, bounds=None, scale=1, padding=0, **kwargs):
         out_crs=out_crs,
         padding=padding,
         style=styles,
-        clip=kwargs.pop('clip', True)
+        clip=kwargs.pop('clip', True),
+        id_field=kwargs.pop('id_field', None),
+        class_fields=class_fields
     ).compose(**kwargs)
 
     return drawing
 
 
 def _property(prop, properties):
+    '''
+    Map a prop name to either prop_value or prop.
+
+    Args:
+        prop (unicode): Unicode property name
+        properties (dict): Contains only unicode
+    '''
     if prop in properties:
-        return prop + '_' + str(properties[prop])
-    else:
-        return prop
+        try:
+            return u'' + prop + u'_' + properties[prop]
+        except TypeError:
+            return unicode(prop) + u'_' + unicode(properties[prop])
+
+    return prop
 
 
 def _construct_classes(classes, properties):
     if isinstance(classes, basestring):
         classes = [classes]
 
-    classes = [svg.sanitize(_property(x, properties)) for x in classes]
-    return (' '.join(classes)).strip()
+    props = {unicode(k): unicode(v) for k, v in properties.items()}
+
+    classes = [svg.sanitize(_property(unicode(x), props)) for x in classes]
+    return (u' '.join(classes)).strip()
 
 
 def _get_classes(classlist, properties, name=None):
