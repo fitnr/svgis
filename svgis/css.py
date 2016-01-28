@@ -7,25 +7,19 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
+
 import os.path
 import logging
-import xml.etree.ElementTree as ElementTree
-import cssselect
+try:
+    import xml.etree.cElementTree as ElementTree
+except ImportError:
+    import xml.etree.ElementTree as ElementTree
 import tinycss
-
-SVG_NS = 'http://www.w3.org/2000/svg'
+from . import dom
 
 
 def _register():
-    ElementTree.register_namespace('', SVG_NS)
-
-
-def _cdata(text):
-    return '<![CDATA[' + text + ']]>'
-
-
-def _ns(tag):
-    return '{' + SVG_NS + '}' + tag
+    ElementTree.register_namespace('', dom.SVG_NS)
 
 
 def rescale(svgfile, factor):
@@ -33,13 +27,13 @@ def rescale(svgfile, factor):
     try:
         svg = ElementTree.parse(svgfile)
         scalar = 'scale({})'.format(factor)
-        g = svg.getroot().find(_ns('g'))
+        g = svg.getroot().find(dom.ns('g'))
         g.attrib['transform'] = (g.attrib.get('transform') + ' ' + scalar).strip()
 
     except AttributeError:
         raise
 
-    return unicode(ElementTree.tostring(svg.getroot(), encoding='utf-8'))
+    return ElementTree.tostring(svg.getroot(), encoding='utf-8').decode('utf-8')
 
 
 def add_style(svgfile, style, replace=False):
@@ -66,33 +60,29 @@ def add_style(svgfile, style, replace=False):
     except IOError:
         svg = ElementTree.fromstring(svgfile)
 
-    if svg.find(_ns('defs')) is not None:
-        defs = svg.find(_ns('defs'))
+    if svg.find(dom.ns('defs')) is not None:
+        defs = svg.find(dom.ns('defs'))
 
     else:
-        defs = ElementTree.Element(_ns('defs'))
+        defs = ElementTree.Element(dom.ns('defs'))
         svg.insert(0, defs)
 
-    if defs.find(_ns('style')) is not None:
-        style_element = defs.find(_ns('style'))
+    if defs.find(dom.ns('style')) is not None:
+        style_element = defs.find(dom.ns('style'))
 
         if not replace:
             # Append CSS.
             existing = style_element.text or ''
-            style = _cdata(existing + ' ' + style)
+            style = dom.cdata(existing + ' ' + style)
             style_element.text = ''
 
     else:
-        style_element = ElementTree.Element(_ns('style'))
+        style_element = ElementTree.Element(dom.ns('style'))
         defs.append(style_element)
 
-    style_element.text = _cdata(style)
+    style_element.text = dom.cdata(style)
 
-    try:
-        return unicode(ElementTree.tostring(svg, encoding='utf-8'))
-    except AttributeError:
-        print(svg)
-        raise
+    return ElementTree.tostring(svg, encoding='utf-8').decode('utf-8')
 
 
 def inline(svg, css=None):
@@ -100,32 +90,34 @@ def inline(svg, css=None):
     Inline the CSS rules into the SVG. This is a very rough operation,
     and full css precedence rules won't be respected.
 
-def inline(svg, css):
-    '''Inline given css rules into SVG'''
+    Args:
+        svg (string): An SVG document.
+        css (string): CSS to use, instead of the CSS in the <defs> element of the SVG.
+    '''
+    _register()
     try:
-        etree.register_namespace('svg', 'http://www.w3.org/2000/svg')
+        doc = ElementTree.fromstring(svg)
 
-        document = etree.fromstring(svg)
+        if not css:
+            path = './' + dom.ns(defs) + '/' + dom.ns(style)
+            css = doc.findall(path).pop().text
+
         stylesheet = tinycss.make_parser().parse_stylesheet(css)
-        translator = cssselect.GenericTranslator()
-
-        def xpath(selector):
-            return document.xpath(translator.css_to_xpath(selector))
-
         pattern = "{}:{};"
+
         for rule in stylesheet.rules:
-
             declaration = ' '.join(pattern.format(d.name, d.value.as_css()) for d in rule.declarations)
-            selector = rule.selector.as_css()
+            expressions = dom.xpath(rule.selector)
 
-            for el in xpath(selector):
-                el.attrib['style'] = el.attrib.get('style', '') + declaration
+            for expression in expressions:
+                for el in doc.findall(expression):
+                    el.attrib['style'] = el.attrib.get('style', '') + declaration
 
-        return etree.tounicode(document)
+        return ElementTree.tostring(doc, encoding='utf-8').decode('utf-8')
 
     # Return plain old SVG.
-    except NameError:
-        return svg
+    except (AttributeError, NameError):
+        raise
 
 
 def pick(style):

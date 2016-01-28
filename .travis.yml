@@ -23,19 +23,19 @@ sudo: true
 
 env:
   - NUMPY=yes
-  - CLIP=yes INLINE=yes
-  - NUMPY= CLIP= INLINE=
+  - CLIP=yes
+  - NUMPY= CLIP=
 
 matrix:
   exclude:
     - python: 3.3
       env: NUMPY=yes
     - python: 3.3
-      env: CLIP=yes INLINE=yes
+      env: CLIP=yes
     - python: 3.4
       env: NUMPY=yes
     - python: 3.4
-      env: CLIP=yes INLINE=yes
+      env: CLIP=yes
 
 cache:
   directories:
@@ -44,7 +44,6 @@ cache:
 before_install:
     - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -qq update; fi
     - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -qq install -y libgdal1-dev; fi
-    - if [[ $TRAVIS_OS_NAME == "linux" && $INLINE == "yes" ]]; then sudo apt-get -qq install -y libxml2-dev libxslt-dev python-dev; fi
     - pip install docutils coverage
     - if [[ $NUMPY == "yes" ]]; then pip install numpy; fi
     - if [[ $NUMPY != "yes" ]]; then pip uninstall -y numpy; fi
@@ -53,7 +52,6 @@ install:
     - make
     - python setup.py install
     - if [[ $CLIP == "yes" ]]; then pip install -e .[clip]; fi
-    - if [[ $INLINE == "yes" ]]; then pip install -e .[inline]; fi
     - if [[ $NUMPY == "yes" ]]; then pip install -e .[simplify]; fi
 
 script:

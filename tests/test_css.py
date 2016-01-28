@@ -17,33 +17,24 @@ from svgis import css
 
 
 class CssTestCase(unittest.TestCase):
+    svg = """<svg baseProfile="full" height="1" version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <defs></defs>
+            <g id="test">
+                <polygon class="test" points="3,2 -2,6 8,-1 8,2 4,1 3,2" />
+            </g>
+            <g id="foo">
+                <polyline class="foo" points="3,2 -2,6 8,-1"></polyline>
+            </g>
+        </svg>"""
 
-    def setUp(self):
-        self.svg = """<svg baseProfile="full" height="1" version="1.1">
-                <defs></defs>
-                <g id="test">
-                    <polygon class="test" points="3,2 -2,6 8,-1 8,2 4,1 3,2" />
-                </g>
-                <g id="foo">
-                    <polyline class="foo" points="3,2 -2,6 8,-1"></polyline>
-                </g>
-            </svg>"""
+    css = """polygon {fill: orange;}
+                .test { stroke: green; }
+                polyline { stroke: blue}
+                #foo polyline { fill: red }"""
 
-        self.css = """polygon {fill: orange;}
-        .test { stroke: green; }
-        polyline { stroke: blue}
-        #foo polyline { fill: red }"""
-
-        self.file = 'tests/test_data/test.svg'
+    file = 'tests/test_data/test.svg'
 
     def testinlinecss(self):
-        try:
-            from lxml import etree
-            import cssselect
-            import tinycss
-        except ImportError:
-            return
-
         inlined = css.inline(self.svg, self.css)
         assert inlined != self.svg
 
@@ -51,11 +42,10 @@ class CssTestCase(unittest.TestCase):
         polyline = doc.getElementsByTagName('polyline').item(0).getAttribute('style')
         polygon = doc.getElementsByTagName('polygon').item(0).getAttribute('style')
 
-        assert 'stroke:blue' in polyline
-        assert 'fill:red' in polyline
-
-        assert 'fill:orange' in polygon
         assert 'stroke:green' in polygon
+        self.assertIn('fill:orange', polygon)
+        self.assertIn('fill:red', polyline)
+        self.assertIn('stroke:blue', polyline)
 
     def test_add_style(self):
         new = css.add_style(self.file, self.css)
@@ -99,7 +89,7 @@ class CssTestCase(unittest.TestCase):
 
     def testAddCli(self):
         result = css.add_style(self.file, self.css)
-        self.assertIn(self.css, result)
+        self.assertIn(self.css, result[0:2000])
 
         style = 'tmp.css'
 
@@ -108,7 +98,7 @@ class CssTestCase(unittest.TestCase):
 
         try:
             result = css.add_style(self.file, style)
-            self.assertIn(self.css, result)
+            self.assertIn(self.css, result[0:2000])
 
         finally:
             os.remove('tmp.css')

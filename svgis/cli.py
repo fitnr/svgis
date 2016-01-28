@@ -32,21 +32,6 @@ except ImportError:
     clipkwargs = none
 
 try:
-    import lxml
-    import cssselect
-    import tinycss
-    csskwargs = {
-        'flag_value': True,
-        'default': False,
-        'help': ('Inline CSS styles to each element. '
-                 'Slightly slower, but required by some clients (e.g. Adobe) '
-                 '(default: do not inline).'
-                ),
-    }
-except ImportError:
-    csskwargs = none
-
-try:
     import visvalingamwyatt
     simplifykwargs = {
         'type': click.IntRange(1, 100, clamp=True),
@@ -60,6 +45,15 @@ except ImportError:
 
 CLICKARGS = {
     'context_settings': dict(help_option_names=['-h', '--help'])
+}
+
+csskwargs = {
+    'flag_value': True,
+    'default': False,
+    'help': ('Inline CSS styles to each element. '
+             'Slightly slower, but required by some clients (e.g. Adobe) '
+             '(default: do not inline).'
+            ),
 }
 
 inp = click.argument('input', default=sys.stdin, type=click.File('rb'))

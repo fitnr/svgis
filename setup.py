@@ -58,17 +58,14 @@ setup(
         'pyproj>=1.9.5,<1.10',
         'fiona>=1.6.0,<2.0',
         'fionautil >=0.4.6, <1.0',
+        'tinycss>=0.3,<0.4',
         'utm>=0.4.0,<1'
     ],
 
     extras_require={
         'numpy': ['numpy'],
         'clip': ['shapely>=1.5.7'],
-        'inline': [
-            'cssselect>=0.9.1,<1',
-            'tinycss>=0.3,<0.4',
-            'lxml>=3.5.0,<4.0',
-        ],
+        'inline': [],
         'simplify': ['visvalingamwyatt>=0.1.1']
     },
 
