@@ -35,6 +35,25 @@ def rescale(svgfile, factor):
     return svg.toxml()
 
 
+def _CDATA(text=None):
+    element = ElementTree.Element('![CDATA[')
+    element.text = text
+    return element
+
+
+def _prepare_cdata():
+    ElementTree._original_serialize_xml = ElementTree._serialize_xml
+
+    def _serialize_xml(write, elem, *args):
+        if elem.tag == '![CDATA[':
+            write("\n<{}{}]]>\n".format(elem.tag, elem.text))
+            return
+
+        return ElementTree._original_serialize_xml(write, elem, *args)
+
+    ElementTree._serialize_xml = ElementTree._serialize['xml'] = _serialize_xml
+
+
 def add_style(svgfile, style, replace=False):
     '''Add to the CSS style in an SVG file.
 
@@ -43,6 +62,8 @@ def add_style(svgfile, style, replace=False):
         newstyle (string): CSS string, or path to CSS file.
         replace (bool): If true, replace the existing CSS with newstyle (default: False)
     '''
+    _prepare_cdata()
+
     if style == '-':
         style = '/dev/stdin'
 
@@ -53,37 +74,39 @@ def add_style(svgfile, style, replace=False):
             style = f.read()
 
     try:
-        svg = minidom.parse(svgfile)
+        svg = ElementTree.parse(svgfile)
     except IOError:
-        svg = minidom.parseString(svgfile)
+        svg = ElementTree.fromstring(svgfile)
 
-    defs = svg.getElementsByTagName('defs').item(0)
+    defs = svg.findall('defs').pop(0)
 
     if not defs:
-        defs = svg.createElement('defs')
+        defs = ElementTree.Element('defs')
+        svg.insert(0, defs)
 
-        if not hasattr(svg, 'tagName'):
-            elem = svg.getElementsByTagName('svg').item(0)
-            elem.insertBefore(defs, elem.firstChild)
-
-        else:
-            svg.insertBefore(defs, svg.firstChild)
-
-    if defs.getElementsByTagName('style'):
-        style_element = defs.getElementsByTagName('style').item(0)
+    if defs.find('style'):
+        style_element = defs.find('style').item(0)
 
         if replace:
-            style_element.firstChild.replaceWholeText(style)
+            # Replace CSS.
+            cdata = _CDATA(style)
+
         else:
-            style_element.firstChild.nodeValue += ' ' + style
+            # Append CSS.
+            existing = svg.findall('defs')[1].find('style').text
+            svg.findall('defs')[1].find('style').text = ''
+            cdata = _CDATA(existing + ' ' + style)
+
+        style_element.append(cdata)
 
     else:
-        style_element = svg.createElement('style')
-        css = svg.createTextNode(style)
-        style_element.appendChild(css)
+        style_element = ElementTree.Element('style')
         defs.appendChild(style_element)
+        cdata = _CDATA(style)
 
-    return svg.toxml()
+    style_element.append(cdata)
+
+    return ElementTree.tostring(svg)
 
 
 def inline(svg, css):
