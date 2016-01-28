@@ -77,7 +77,7 @@ class CssTestCase(unittest.TestCase):
 
     def testReScale(self):
         result = css.rescale('tests/test_data/test.svg', 1.37)
-        self.assertIn('scale(1.37)', result)
+        self.assertIn('scale(1.37)', result[0:2000])
 
     def testPickStyle(self):
         stylefile = 'tmp.css'

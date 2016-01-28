@@ -11,9 +11,8 @@
 import sys
 import logging
 import click
-from .css import rescale, add_style
 from .projection import generatecrs
-from . import svgis, __version__
+from . import css, svgis, __version__
 
 
 none = {
@@ -88,19 +87,23 @@ style_help = ("Style to append to SVG. "
 @inp
 @outp
 @click.option('--style', '-s', type=str, help=style_help, default='')
-@click.option('-r', '--replace', default=False)
-def style(input, output, style, replace):
-    """Add a CSS style to an SVG"""
-    click.echo(add_style(input, style, replace).encode('utf-8'), file=output)
+@click.option('-r', '--replace', flag_value=True, help='Replace existing styles')
+@click.option('--inline/--no-inline', '-l/ ', **csskwargs)
+def style(input, output, **kwargs):
+    """Add or inline the CSS styles of an SVG"""
+    result = css.add_style(input, kwargs['style'], kwargs['replace'])
+    if kwargs['inline']:
+        result = css.inline(result)
+    click.echo(result.encode('utf-8'), file=output)
 
 
 @main.command()
 @inp
 @outp
 @click.option('-f', '--scale', type=int)
-def scale(input, output, scale):
+def scale(input, output, **kwargs):
     '''Scale all coordinates in an SVG by a factor'''
-    click.echo(rescale(input, factor=scale).encode('utf-8'), file=output)
+    click.echo(css.rescale(input, factor=kwargs['scale']).encode('utf-8'), file=output)
 
 
 project_help = ('Specify a map projection. '

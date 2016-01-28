@@ -9,49 +9,37 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 import os.path
 import logging
-from xml.dom import minidom
-try:
-    from lxml import etree
-    import cssselect
-    import tinycss
-except ImportError:
-    pass
+import xml.etree.ElementTree as ElementTree
+import cssselect
+import tinycss
+
+SVG_NS = 'http://www.w3.org/2000/svg'
+
+
+def _register():
+    ElementTree.register_namespace('', SVG_NS)
+
+
+def _cdata(text):
+    return '<![CDATA[' + text + ']]>'
+
+
+def _ns(tag):
+    return '{' + SVG_NS + '}' + tag
 
 
 def rescale(svgfile, factor):
-    svg = minidom.parse(svgfile)
+    _register()
+    try:
+        svg = ElementTree.parse(svgfile)
+        scalar = 'scale({})'.format(factor)
+        g = svg.getroot().find(_ns('g'))
+        g.attrib['transform'] = (g.attrib.get('transform') + ' ' + scalar).strip()
 
-    scalar = 'scale({})'.format(factor)
+    except AttributeError:
+        raise
 
-    gs = svg.getElementsByTagName('g')[0]
-
-    transform = gs.attributes.get('transform')
-
-    if transform:
-        transform.value = transform.value + ' ' + scalar
-    else:
-        gs.setAttribute('transform', scalar)
-
-    return svg.toxml()
-
-
-def _CDATA(text=None):
-    element = ElementTree.Element('![CDATA[')
-    element.text = text
-    return element
-
-
-def _prepare_cdata():
-    ElementTree._original_serialize_xml = ElementTree._serialize_xml
-
-    def _serialize_xml(write, elem, *args):
-        if elem.tag == '![CDATA[':
-            write("\n<{}{}]]>\n".format(elem.tag, elem.text))
-            return
-
-        return ElementTree._original_serialize_xml(write, elem, *args)
-
-    ElementTree._serialize_xml = ElementTree._serialize['xml'] = _serialize_xml
+    return unicode(ElementTree.tostring(svg.getroot(), encoding='utf-8'))
 
 
 def add_style(svgfile, style, replace=False):
@@ -62,7 +50,7 @@ def add_style(svgfile, style, replace=False):
         newstyle (string): CSS string, or path to CSS file.
         replace (bool): If true, replace the existing CSS with newstyle (default: False)
     '''
-    _prepare_cdata()
+    _register()
 
     if style == '-':
         style = '/dev/stdin'
@@ -74,40 +62,43 @@ def add_style(svgfile, style, replace=False):
             style = f.read()
 
     try:
-        svg = ElementTree.parse(svgfile)
+        svg = ElementTree.parse(svgfile).getroot()
     except IOError:
         svg = ElementTree.fromstring(svgfile)
 
-    defs = svg.findall('defs').pop(0)
-
-    if not defs:
-        defs = ElementTree.Element('defs')
-        svg.insert(0, defs)
-
-    if defs.find('style'):
-        style_element = defs.find('style').item(0)
-
-        if replace:
-            # Replace CSS.
-            cdata = _CDATA(style)
-
-        else:
-            # Append CSS.
-            existing = svg.findall('defs')[1].find('style').text
-            svg.findall('defs')[1].find('style').text = ''
-            cdata = _CDATA(existing + ' ' + style)
-
-        style_element.append(cdata)
+    if svg.find(_ns('defs')) is not None:
+        defs = svg.find(_ns('defs'))
 
     else:
-        style_element = ElementTree.Element('style')
-        defs.appendChild(style_element)
-        cdata = _CDATA(style)
+        defs = ElementTree.Element(_ns('defs'))
+        svg.insert(0, defs)
 
-    style_element.append(cdata)
+    if defs.find(_ns('style')) is not None:
+        style_element = defs.find(_ns('style'))
 
-    return ElementTree.tostring(svg)
+        if not replace:
+            # Append CSS.
+            existing = style_element.text or ''
+            style = _cdata(existing + ' ' + style)
+            style_element.text = ''
 
+    else:
+        style_element = ElementTree.Element(_ns('style'))
+        defs.append(style_element)
+
+    style_element.text = _cdata(style)
+
+    try:
+        return unicode(ElementTree.tostring(svg, encoding='utf-8'))
+    except AttributeError:
+        print(svg)
+        raise
+
+
+def inline(svg, css=None):
+    '''
+    Inline the CSS rules into the SVG. This is a very rough operation,
+    and full css precedence rules won't be respected.
 
 def inline(svg, css):
     '''Inline given css rules into SVG'''
