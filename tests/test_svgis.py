@@ -10,6 +10,7 @@
 
 import unittest
 import re
+from xml.dom import minidom
 from svgis import svgis, errors
 try:
     basestring
@@ -80,7 +81,6 @@ class SvgisTestCase(unittest.TestCase):
 
         classes = svgis._construct_classes(self.classes, {'apple': 1})
         self.assertEqual(classes, u'apple_1 potato')
-
 
     def testCreateClassesMissing(self):
         classes = svgis._construct_classes(self.classes, {'apple': ''})
@@ -168,8 +168,26 @@ class SvgisTestCase(unittest.TestCase):
             except AssertionError:
                 raise AssertionError(type(b))
 
-
         self.assertEqual(type(a), type(b))
+
+    def testMapFunc(self):
+        args = {
+            "scale": 1000,
+            "padding": 10,
+            "inline_css": True,
+            "clip": False,
+            'project': 'EPSG:32117',
+        }
+        result = svgis.map([self.file], (-80, 40, -71, 45.1), **args)
+
+        self.assertIn(svgis.STYLE, result)
+
+        doc = minidom.parseString(result)
+
+        for poly in doc.getElementsByTagName('polygon'):
+            style = poly.getAttribute('style')
+            assert 'fill:none' in style
+            assert 'stroke-linejoin:round' in style
 
 if __name__ == '__main__':
     unittest.main()
