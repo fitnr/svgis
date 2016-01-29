@@ -14,25 +14,6 @@ except ImportError:
     pass
 
 
-def d2_geom(geom):
-    if geom['type'] == 'Point':
-        geom['coordinates'] = geom['coordinates'][:2]
-
-    elif geom['type'] in ('MultiPoint', 'LineString'):
-        geom['coordinates'] = [p[:2] for p in geom['coordinates']]
-
-    elif geom['type'] in ('MultiLineString', 'Polygon'):
-        geom['coordinates'] = [[p[:2] for p in ring] for ring in geom['coordinates']]
-
-    elif geom['type'] == 'MultiPolygon':
-        geom['coordinates'] = [[[p[:2] for p in ring] for ring in poly] for poly in geom['coordinates']]
-
-    elif geom['type'] == 'GeometryCollection':
-        geom['geometries'] = [d2_geom(g) for g in geom['geometries']]
-
-    return geom
-
-
 def _expand_np(coordinates):
     return np.array(_expand_py(coordinates))
 
@@ -64,10 +45,7 @@ def expand_geom(geom):
     elif geom['type'] in ('Polygon', 'MultiLineString'):
         geom['coordinates'] = expand_rings(geom['coordinates'])
 
-    elif geom['type'] in ('MultiPoint', 'LineString'):
-        geom['coordinates'] = expand(geom['coordinates'])
-
-    elif geom['type'] == 'Point':
+    elif geom['type'] in ('Point', 'MultiPoint', 'LineString'):
         geom['coordinates'] = expand(geom['coordinates'])
 
     elif geom['type'] == 'GeometryCollection':
