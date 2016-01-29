@@ -45,6 +45,7 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
         class_fields (Sequence): A comma-separated string or list of class names to
                                  use the SVG drawing.
         id_field (string): Field to use to determine id of each element in the drawing.
+        inline_css (bool): If True, try to move CSS declarations into each element.
 
     Returns:
         String (unicode in Python 2) containing an entire SVG document.
@@ -285,7 +286,7 @@ class SVGIS(object):
                 geom = t(geom)
 
         except ValueError as e:
-            self.log.error("Error drawing feature %s of %s: %s", file_name, feature.get('id'), e.message)
+            self.log.error("Error drawing feature %s of %s: %s", file_name, feature.get('id', '?'), e)
             return u''
 
         # Set up the element's properties.
@@ -298,7 +299,7 @@ class SVGIS(object):
             return draw.geometry(geom, **kwargs)
 
         except errors.SvgisError as e:
-            self.log.error("Error drawing %s: %s", file_name, e.message)
+            self.log.error("Error drawing %s: %s", file_name, e)
             return u''
 
     def compose(self, style=None, scalar=None, bounds=None, **kwargs):
