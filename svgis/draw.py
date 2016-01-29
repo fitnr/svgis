@@ -88,7 +88,7 @@ def polygon(coordinates, **kwargs):
 
     kwargs['class'] = ('polygon ' + kwargs.pop('class', '')).strip()
 
-    instructions = [coordinates[0], 'z']
+    instructions = coordinates[0][:] + ['z']
 
     for ring in coordinates[1:]:
         # make all interior run the counter-clockwise

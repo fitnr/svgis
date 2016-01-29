@@ -6,6 +6,7 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
 
+from __future__ import division
 import os.path
 from collections import Iterable
 from functools import partial
@@ -28,7 +29,7 @@ STYLE = ('polyline, line, rect, path, polygon, .polygon {'
          '}')
 
 
-def map(layers, bounds=None, scale=1, padding=0, **kwargs):
+def map(layers, bounds=None, scale=None, padding=0, **kwargs):
     '''
     Draw a geodata layer to SVG. This is shorthand for creating a :class:`SVGIS` instance
     and immediately runnning :class:`SVGIS.compose`.

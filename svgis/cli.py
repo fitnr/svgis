@@ -125,7 +125,7 @@ project_help = ('Specify a map projection. '
 @click.option('-j', '--project', default='local', metavar='KEYWORD', type=str, help=project_help)
 @click.option('-s', '--simplify', **simplifykwargs)
 @click.option('--clip/--no-clip', ' /-n', **clipkwargs)
-@click.option('-x', '--no-viewbox', default=False, flag_value=True, help='Draw SVG without a ViewBox. May improve compatibility.')
+@click.option('--viewbox/--no-viewbox',  ' /-x', default=True, help='Draw SVG with or without a ViewBox. Drawing without may improve compatibility.')
 @click.option('--inline/--no-inline', '-l/ ', **csskwargs)
 def draw(input, output, **kwargs):
     '''Draw SVGs from input geodata'''
