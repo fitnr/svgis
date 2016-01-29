@@ -113,6 +113,11 @@ class CssTestCase(unittest.TestCase):
         finally:
             os.remove('tmp.css')
 
+    def testAddStyleNoDefs(self):
+        svg = self.svg.replace('<defs></defs>', '')
+        new = css.add_style(svg, self.css)
+        result = minidom.parseString(new).getElementsByTagName('defs').item(0).getElementsByTagName('style').item(0)
+        assert self.css in result.toxml()
 
 if __name__ == '__main__':
     unittest.main()
