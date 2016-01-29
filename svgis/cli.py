@@ -9,6 +9,7 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
 import sys
+from signal import signal, SIGPIPE, SIG_DFL
 import logging
 import click
 from .projection import generatecrs
@@ -70,6 +71,9 @@ def main(context):
     ch = logging.StreamHandler()
     ch.setLevel(logging.WARN)
     context.log.addHandler(ch)
+
+    signal(SIGPIPE, SIG_DFL)
+
 
 # Style
 style_help = ("Style to append to SVG. "
