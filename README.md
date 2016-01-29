@@ -47,6 +47,8 @@ unzip cb_2014_us_nation_20m.zip
 svgis draw --project EPSG:5070 --scale 1000 --bounds -124 20.5 -64 49 cb_2014_us_nation_20m.shp -o us.svg
 ````
 
+The next two examples use the [Natural Earth](http://naturalearthdata.com) admin-0 data set.
+
 Draw upper income countries in green, low-income countries in blue:
 
 ````
@@ -69,7 +71,7 @@ svgis draw \
     --scale 1000 \
     --simplify 0.10 \
     --style "#Germany { fill: purple }" \
-    --id-field NAME \
+    --id-field name \
     --bounds -10 30 40 65 \
     ne_110m_admin_0_countries.shp \
     -o out.svg
