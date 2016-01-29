@@ -95,15 +95,17 @@ class SvgisTestCase(unittest.TestCase):
         self.assertEqual(str(self.svgis_obj), expected)
 
     def testDrawGeometry(self):
-        geom = {
-            'type': 'LineString',
-            'coordinates': [[-110.8, 35.3], [-110.9, 35.8], [-110.5, 35.1], [-110.8, 35.3]]
+        feat = {
+            "geometry": {
+                'type': 'LineString',
+                'coordinates': [[-110.8, 35.3], [-110.9, 35.8], [-110.5, 35.1], [-110.8, 35.3]]
+            },
+            "properties": {
+                'foo': 'bar',
+                'cat': 'meow'
+            }
         }
-        props = {
-            'foo': 'bar',
-            'cat': 'meow'
-        }
-        drawn = svgis._draw_feature(geom, properties=props, classes=['foo'], id_field='cat')
+        drawn = self.svgis_obj._feature(feat, [], classes=['foo'], id_field='cat')
         assert isinstance(drawn, basestring)
 
         self.assertIn('id="meow"', drawn)

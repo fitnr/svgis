@@ -10,10 +10,6 @@
 
 import unittest
 from svgis import draw, errors, svgis
-try:
-    import numpy as np
-except ImportError:
-    pass
 
 try:
     basestring
@@ -23,81 +19,98 @@ except NameError:
 
 class DrawTestCase(unittest.TestCase):
 
+    properties = {
+        'cat': u'meow',
+        'dog': 'woof'
+    }
+
+    classes = [u'foo', 'cat']
+
+    lis1 = [[-110.6, 35.3], [-110.7, 35.5], [-110.3, 35.5], [-110.2, 35.1], [-110.2, 35.8], [-110.3, 35.2],
+            [-110.1, 35.8], [-110.8, 35.5], [-110.7, 35.7], [-110.1, 35.4], [-110.7, 35.1], [-110.6, 35.3]]
+
+    lis2 = [[-110.8, 35.3], [-110.6, 35.4], [-110.1, 35.5], [-110.1, 35.5], [-110.4, 35.2],
+            [-110.5, 35.1], [-110.5, 35.1], [-110.9, 35.8], [-110.5, 35.1], [-110.8, 35.3]]
+
     def setUp(self):
-        self.properties = {
-            'cat': u'meow',
-            'dog': 'woof'
-        }
-
-        self.classes = [u'foo', 'cat']
-
-        self.lis1 = [[-110.6, 35.3], [-110.7, 35.5], [-110.3, 35.5], [-110.2, 35.1], [-110.2, 35.8], [-110.3, 35.2],
-                     [-110.1, 35.8], [-110.8, 35.5], [-110.7, 35.7], [-110.1, 35.4], [-110.7, 35.1], [-110.6, 35.3]]
-
-        lis2 = [[-110.8, 35.3], [-110.6, 35.4], [-110.1, 35.5], [-110.1, 35.5], [-110.4, 35.2],
-                [-110.5, 35.1], [-110.5, 35.1], [-110.9, 35.8], [-110.5, 35.1], [-110.8, 35.3]]
-
         self.multipolygon = {
-            "type": "MultiPolygon",
-            "id": "MultiPolygon",
-            "coordinates": [[self.lis1], [lis2]]
+            "properties": self.properties,
+            "geometry": {
+                "type": "MultiPolygon",
+                "id": "MultiPolygon",
+                "coordinates": [[self.lis1], [self.lis2]]
+            }
         }
         self.polygon = {
-            "type": "Polygon",
-            "id": "Polygon",
-            "coordinates": [self.lis1]
+            "properties": self.properties,
+            "geometry": {
+                "type": "Polygon",
+                "id": "Polygon",
+                "coordinates": [self.lis1]
+            }
         }
         self.multilinestring = {
-            'type': 'MultiLineString',
-            "id": "MultiLineString",
-            'coordinates': [lis2, lis2]
+            "properties": self.properties,
+            "geometry": {
+                'type': 'MultiLineString',
+                "id": "MultiLineString",
+                'coordinates': [self.lis2, self.lis2]
+            }
         }
         self.linestring = {
-            'coordinates': lis2,
-            'type': 'LineString',
-            "id": "LineString",
+            "properties": self.properties,
+            "geometry": {
+                'coordinates': self.lis2,
+                'type': 'LineString',
+                "id": "LineString",
+            }
         }
         self.point = {
-            'coordinates': (0.0, 0),
-            'type': 'Point',
-            "id": "Point",
+            "properties": self.properties,
+            "geometry": {
+                'coordinates': (0.0, 0),
+                'type': 'Point',
+                "id": "Point",
+            }
         }
 
+        self.obj = svgis.SVGIS([])
+
     def testDrawPoint(self):
-        feat = svgis._draw_feature(self.point, self.properties, classes=self.classes)
+        feat = self.obj._feature(self.point, [], classes=self.classes, id_field=None)
 
         assert isinstance(feat, basestring)
         self.assertIn('cat_meow', feat)
 
     def testDrawLine(self):
-        line = draw.lines(self.linestring)
+        line = draw.lines(self.linestring['geometry'])
         assert isinstance(line, basestring)
 
-        feat = svgis._draw_feature(self.linestring, self.properties, classes=self.classes)
+        feat = self.obj._feature(self.linestring, [], classes=self.classes, id_field=None)
 
         assert isinstance(feat, basestring)
         assert 'cat_meow' in feat
 
     def testDrawMultiLine(self):
-        mls1 = draw.multilinestring(self.multilinestring['coordinates'])
-        mls2 = draw.lines(self.multilinestring)
+        mls1 = draw.multilinestring(self.multilinestring['geometry']['coordinates'])
+        mls2 = draw.lines(self.multilinestring['geometry'])
 
         assert isinstance(mls1, basestring)
         assert isinstance(mls2, basestring)
 
-        grp = svgis._draw_feature(self.multilinestring, self.properties, classes=self.classes)
+        grp = self.obj._feature(self.multilinestring, [], classes=self.classes, id_field=None)
 
         assert isinstance(grp, basestring)
         assert 'cat_meow' in grp
 
     def testDrawPolygon(self):
-        drawn = draw.polygon(self.polygon['coordinates'])
+        drawn = draw.polygon(self.polygon['geometry']['coordinates'])
         assert "{},{}".format(*self.lis1[0]) in drawn
-        feat = svgis._draw_feature(self.polygon, self.properties, classes=self.classes)
+        feat = self.obj._feature(self.polygon, [], classes=self.classes, id_field=None)
         assert 'cat_meow' in feat
 
     def testDrawMultiPolygon(self):
-        drawn = draw.multipolygon(self.multipolygon['coordinates'])
+        drawn = draw.multipolygon(self.multipolygon['geometry']['coordinates'])
 
         assert isinstance(drawn, basestring)
 
@@ -137,11 +150,11 @@ class DrawTestCase(unittest.TestCase):
             "type": "GeometryCollection",
             "id": "GC",
             "geometries": [
-                self.polygon,
-                self.linestring,
-                self.point,
-                self.multipolygon,
-                self.multilinestring
+                self.polygon['geometry'],
+                self.linestring['geometry'],
+                self.point['geometry'],
+                self.multipolygon['geometry'],
+                self.multilinestring['geometry']
             ],
         }
         a = draw.geometry(gc, id='cats')
@@ -149,10 +162,10 @@ class DrawTestCase(unittest.TestCase):
         assert 'id="cats"' in a
 
     def testDrawAndConvertToString(self):
-        draw.geometry(self.linestring)
-        draw.geometry(self.multilinestring)
-        draw.geometry(self.polygon)
-        draw.geometry(self.multipolygon)
+        draw.geometry(self.linestring['geometry'])
+        draw.geometry(self.multilinestring['geometry'])
+        draw.geometry(self.polygon['geometry'])
+        draw.geometry(self.multipolygon['geometry'])
 
 if __name__ == '__main__':
     unittest.main()

@@ -5,7 +5,6 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
-
 from __future__ import division
 import os.path
 from collections import Iterable
@@ -115,19 +114,6 @@ def _get_classes(classlist, properties, name=None):
     return classes
 
 
-def _draw_feature(geom, properties=None, classes=None, id_field=None, **kwargs):
-    '''Draw a single feature given a geometry object and properties object'''
-    properties = properties or {}
-    classes = classes or []
-
-    kwargs['class'] = _construct_classes(classes, properties)
-
-    if id_field:
-        kwargs['id'] = svg.sanitize(properties.get(id_field))
-
-    return draw.geometry(geom, **kwargs)
-
-
 class SVGIS(object):
 
     """
@@ -205,7 +191,7 @@ class SVGIS(object):
             return clip.prepare([c * scalar for c in convert.extend_bbox(self._projected_bounds)])
 
         else:
-            return lambda x: x
+            return None
 
     def _reprojector(self, in_crs):
         '''Return a reprojection transform from in_crs to self.out_crs.'''
@@ -213,7 +199,7 @@ class SVGIS(object):
             return partial(fiona.transform.transform_geom, in_crs, self.out_crs)
 
         else:
-            return lambda geom: geom
+            return None
 
     def set_crs(self, layer_crs, bounds):
         '''Set the output CRS, if not yet set. Also update internal mbr.'''
@@ -252,47 +238,68 @@ class SVGIS(object):
             # Set the output CRS, if not yet set. Also extend _projected_bounds.
             self.set_crs(layer.crs, bounds)
 
-            # Get clipping function based on a slightly extended version of projected_mbr.
-            clipper = self._get_clipper(layer.crs, layer.bounds, bounds, scalar=scalar)
-
-            # feature reprojection function (could be no op).
-            reproject = self._reprojector(layer.crs)
+            transforms = [
+                self._reprojector(layer.crs),
+                partial(fionautil.scale.geometry, factor=scalar),
+                # Get clipping function based on a slightly extended version of _projected_bounds.
+                self._get_clipper(layer.bounds, bounds, scalar=scalar),
+                kwargs.pop('simplifier', None)
+            ]
 
             # Correct for OGR's lack of creativity for GeoJSONs
             if layer.name == 'OGRGeoJSON':
-                layer.name, _ = os.path.splitext(os.path.basename(filename))
+                kwargs['_file_name'], _ = os.path.splitext(os.path.basename(filename))
+            else:
+                kwargs['_file_name'] = layer.name
 
             # A list of class names to get from layer properties.
-            kwargs['classes'] = _get_classes(kwargs.pop('class_fields', []), layer.schema['properties'], layer.name)
+            classes = _get_classes(kwargs.pop('class_fields', []), layer.schema['properties'], layer.name)
 
             # Remove the id field if it doesn't appear in the properties.
             id_field = kwargs.pop('id_field', self.id_field)
-            if id_field in list(layer.schema['properties'].keys()):
-                kwargs['id_field'] = id_field
 
-            group = []
-            for _, f in layer.items(bbox=bounds):
-                # Project and scale
-                try:
-                    geom = fionautil.scale.geometry(reproject(f['geometry']), scalar)
-                except ValueError as e:
-                    self.log.error("Error drawing feature %s of %s: %s", filename, f.get('id'), e.message)
-                    continue
+            kwargs['id_field'] = id_field if id_field in list(layer.schema['properties'].keys()) else None
 
-                # clip to bounds
-                geom = clipper(geom)
+            group = [self._feature(f, transforms, classes, **kwargs) for _, f in layer.items(bbox=bounds)]
 
-                # Simplify
-                geom = simplifier(geom)
+        return svg.group(group, id=kwargs['_file_name'])
 
-                try:
-                    target = _draw_feature(geom, f['properties'], **kwargs)
-                    group.append(target)
+    def _feature(self, feature, transforms, classes, id_field, **kwargs):
+        '''
+        Draw a single feature.
 
-                except errors.SvgisError as e:
-                    self.log.error("Error drawing %s: %s", filename, e.message)
+        Args:
+            feature (dict): A GeoJSON like feature dict produced by Fiona.
+            transforms (list): Functions to apply to the geometry.
+            classes (list): Names of fields to apply as classes in the output element.
+            id_field (string): Field to use as id of the output element.
+            kwargs: Additional properties to apply to the element.
+        '''
+        # Produce the geometry.
+        file_name = kwargs.pop('_file_name', '?')
 
-        return svg.group(group, id=layer.name)
+        try:
+            geom = feature.pop('geometry')
+
+            for t in [x for x in transforms if x is not None]:
+                geom = t(geom)
+
+        except ValueError as e:
+            self.log.error("Error drawing feature %s of %s: %s", file_name, feature.get('id'), e.message)
+            return u''
+
+        # Set up the element's properties.
+        kwargs['class'] = _construct_classes(classes, feature['properties'])
+
+        if id_field:
+            kwargs['id'] = svg.sanitize(feature['properties'].get(id_field))
+
+        try:
+            return draw.geometry(geom, **kwargs)
+
+        except errors.SvgisError as e:
+            self.log.error("Error drawing %s: %s", file_name, e.message)
+            return u''
 
     def compose(self, style=None, scalar=None, bounds=None, **kwargs):
         '''
