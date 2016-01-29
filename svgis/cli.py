@@ -118,7 +118,7 @@ project_help = ('Specify a map projection. '
 @click.option('-f', '--scale', type=int, default=None, help='Scale for the map (units are divided by this number)')
 @click.option('-p', '--padding', type=int, default=None, required=None, help='Buffer the map (in projection units)')
 @click.option('-i', '--id-field', type=str, metavar='FIELD', help='Geodata field to use as ID')
-@click.option('-a', '--class-fields', type=str, metavar='FIELDS', help='Geodata fields to use as class (comma-separated)')
+@click.option('-a', '--class-fields', type=str, default='', metavar='FIELDS', help='Geodata fields to use as class (comma-separated)')
 @click.option('-j', '--project', default='local', metavar='KEYWORD', type=str, help=project_help)
 @click.option('-s', '--simplify', **simplifykwargs)
 @click.option('--clip/--no-clip', ' /-n', **clipkwargs)

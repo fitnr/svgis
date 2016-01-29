@@ -45,7 +45,7 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
         class_fields (Sequence): A comma-separated string or list of class names to
                                  use the SVG drawing.
         id_field (string): Field to use to determine id of each element in the drawing.
-        inline_css (bool): If True, try to move CSS declarations into each element.
+        inline (bool): If True, try to move CSS declarations into each element.
 
     Returns:
         String (unicode in Python 2) containing an entire SVG document.
@@ -58,11 +58,7 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
 
     project, out_crs = projection.pick(kwargs.pop('project', None))
 
-    class_fields = kwargs.pop('class_fields', None)
-    try:
-        class_fields = class_fields.split(',')
-    except AttributeError:
-        pass
+    class_fields = (kwargs.pop('class_fields', None) or '').split(',')
 
     drawing = SVGIS(
         layers,
@@ -170,7 +166,8 @@ class SVGIS(object):
 
         self.id_field = kwargs.pop('id_field', None)
 
-        self.class_fields = kwargs.pop('class_fields', None)
+        self.class_fields = kwargs.pop('class_fields', [])
+
 
     def __repr__(self):
         return ('SVGIS(files={0.files}, out_crs={0.out_crs})').format(self)
@@ -254,7 +251,8 @@ class SVGIS(object):
                 kwargs['_file_name'] = layer.name
 
             # A list of class names to get from layer properties.
-            classes = _get_classes(kwargs.pop('class_fields', []), layer.schema['properties'], layer.name)
+            cf = kwargs.pop('class_fields', self.class_fields)
+            classes = _get_classes(cf, layer.schema['properties'], layer.name)
 
             # Remove the id field if it doesn't appear in the properties.
             id_field = kwargs.pop('id_field', self.id_field)
@@ -280,7 +278,7 @@ class SVGIS(object):
         file_name = kwargs.pop('_file_name', '?')
 
         try:
-            geom = feature.pop('geometry')
+            geom = feature.get('geometry')
 
             for t in [x for x in transforms if x is not None]:
                 geom = t(geom)
@@ -313,7 +311,7 @@ class SVGIS(object):
             viewbox (bool): If True, draw SVG with a viewbox. If False, translate coordinates to the frame. Defaults to True.
             precision (float): Round coordinates to this precision [default: 0].
             simplify (float): Must be between 0 and 1. Fraction of removable coordinates to keep.
-            inline_css (bool): If True, try to run CSS into each element.
+            inline (bool): If True, try to run CSS into each element.
 
         Returns:
             String (unicode in Python 2) containing an entire SVG document.
@@ -324,7 +322,7 @@ class SVGIS(object):
         bounds = bounds or self._unprojected_bounds
 
         viewbox = kwargs.pop('viewbox', True)
-        inline_css = kwargs.pop('inline_css', False)
+        inline = kwargs.pop('inline', False)
 
         if 'simplify' in kwargs:
             kwargs['simplifier'] = convert.simplifier(kwargs.pop('simplify'))
@@ -356,7 +354,7 @@ class SVGIS(object):
         container = svg.group(members, **groupargs)
         drawing = svg.drawing((w, h), [container], **svgargs)
 
-        if inline_css:
+        if inline:
             return css.inline(drawing, style)
 
         else:

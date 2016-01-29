@@ -23,7 +23,8 @@ def sanitize(string):
         string (unicode [py2]/str [py3]): String to sanitize.
     '''
     try:
-        string = string.replace(u' ', u'_')
+        string = unicode(string)
+        string = string.replace(u' ', u'_').replace(u'.', u'')
         string = string if string[0] in ('_-' + ascii_letters) else '_' + string
         return unicode(string)
 

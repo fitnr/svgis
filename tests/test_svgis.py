@@ -19,9 +19,22 @@ except NameError:
 
 
 class SvgisTestCase(unittest.TestCase):
-    properties = {'apple': 'fruit', 'pear': 1}
+    properties = {
+        'apple': 'fruit',
+        'pear': 1,
+        'kale': 'leafy green',
+    }
     classes = ('apple', 'potato')
     file = 'tests/test_data/cb_2014_us_nation_20m.shp'
+
+    polygon = {
+        "properties": properties,
+        "geometry": {
+            "type": "Polygon",
+            "id": "Polygon",
+            "coordinates": [[(0, 0), (1, 0), (0, 1), (0, 0)]]
+        }
+    }
 
     def setUp(self):
         self.svgis_obj = svgis.SVGIS(self.file)
@@ -188,6 +201,20 @@ class SvgisTestCase(unittest.TestCase):
             style = poly.getAttribute('style')
             assert 'fill:none' in style
             assert 'stroke-linejoin:round' in style
+
+    def testDrawWithClasses(self):
+        r0 = self.svgis_obj._feature(self.polygon, [], classes=['potato'], id_field=None)
+        assert 'class="potato"' in r0
+
+        r1 = self.svgis_obj._feature(self.polygon, [], classes=['kale'], id_field='apple')
+        assert 'kale_leafy_green' in r1
+        assert 'id="fruit"' in r1
+
+        r2 = self.svgis_obj._feature(self.polygon, [], id_field='pear', classes=['apple', 'pear', 'kale'])
+        self.assertIn('id="_1"', r2)
+        assert 'apple_fruit' in r2
+        assert 'pear_1' in r2
+        assert 'kale_leafy_green' in r2
 
 if __name__ == '__main__':
     unittest.main()
