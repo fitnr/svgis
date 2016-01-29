@@ -92,3 +92,14 @@ def simplifier(ratio):
 
     except (TypeError, ValueError, NameError):
         return lambda g: g
+
+
+def bbox_covers(b1, b2):
+    '''
+    Return True if b1 covers b2.
+
+    Args:
+        b1 (tuple): A bounding box (minx, miny, maxx, maxy)
+        b2 (tuple): A bounding box
+    '''
+    return b1[0] <= b2[0] and b1[1] <= b2[1] and b1[2] >= b2[2] and b1[3] >= b2[3]

@@ -49,3 +49,14 @@ class ConvertTestCase(unittest.TestCase):
             assert isinstance(c, functools.partial)
         except ImportError:
             assert c.__name__ == '<lambda>'
+
+    def test_bbox_covers(self):
+        b1 = (0, 0, 10, 10)
+        b2 = (0, 0, 20, 10)
+        b3 = (0, 0, 5, 11)
+
+        assert convert.bbox_covers(b1, b2) is False
+        assert convert.bbox_covers(b2, b1) is True
+        assert convert.bbox_covers(b1, b3) is False
+        assert convert.bbox_covers(b3, b1) is False
+        assert convert.bbox_covers(b3, b3) is True

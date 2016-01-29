@@ -29,17 +29,18 @@ class ProjectionTestCase(unittest.TestCase):
                    '+units=m +no_defs')
         self.assertEqual(projection.tm_proj4(0, 0, 0), fixture)
 
-    def testReprojectBounds(self):
-        bounds = [(-73, 42), (-74, 42), (-74, 43), (-73, 43), (-73, 42)]
-        with self.assertRaises(TypeError):
-            projection.reproject_bounds(None, {'init': 'epsg:4269'}, bounds)
+    def testTransformBounds(self):
+        bounds = (-74, 42, -73, 43)
 
         with self.assertRaises(TypeError):
-            projection.reproject_bounds({'init': 'epsg:4269'}, None, bounds)
+            projection.transform_bounds(None, {'init': 'epsg:4269'}, bounds)
 
-        a = projection.reproject_bounds({'init': 'epsg:4269'}, {'init': 'epsg:3102'}, bounds)
+        with self.assertRaises(TypeError):
+            projection.transform_bounds({'init': 'epsg:4269'}, None, bounds)
 
-        fixture = (43332273.50269379, 15584115.894447982, 44004519.424246654, 16339179.938904058)
+        a = projection.transform_bounds({'init': 'epsg:4269'}, {'init': 'epsg:3102'}, bounds)
+
+        fixture = (43332273.50269379, 15584115.894447982, 44004519.424246654, 16320640.928220816)
 
         for z in zip(a, fixture):
             self.assertAlmostEqual(*z)

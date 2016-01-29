@@ -146,11 +146,11 @@ class SVGIS(object):
 
     # pylint: disable=too-many-instance-attributes
 
-    # bounds is the bounding box in input coordinates
-    bounds = None
+    # The bounding box in input coordinates.
+    _unprojected_bounds = None
 
-    # MBR is the bounding box in output coordinates, to be determined as we draw.
-    mbr = (None, None, None, None)
+    # The bounding box in output coordinates, to be determined as we draw.
+    _projected_bounds = (None, None, None, None)
 
     in_crs = None
 
@@ -163,7 +163,7 @@ class SVGIS(object):
             raise ValueError("'files' must be a file name or list of file names")
 
         if bounds and len(bounds) == 4:
-            self.bounds = bounds
+            self._unprojected_bounds = bounds
 
         self.out_crs = out_crs
 
@@ -188,19 +188,21 @@ class SVGIS(object):
     def __repr__(self):
         return ('SVGIS(files={0.files}, out_crs={0.out_crs})').format(self)
 
-    def _get_clipper(self, in_crs, in_bounds, out_bounds, scalar=None):
+    def _get_clipper(self, layer_bounds, out_bounds, scalar=None):
         '''
         Get a clipping function for the given input crs and bounds.
+
+        Args:
+            layer_bounds (tuple): The bounds of the layer.
+            out_bounds (tuple): The desired output bounds (in layer coordinates).
+            scalar (float): Map scale.
 
         Returns:
             None if in_bounds == out_bounds or clipping is off.
         '''
         scalar = scalar or self.scalar
-        projected_mbr = projection.project_mbr(in_crs, self.out_crs, *out_bounds)
-        self.mbr = convert.updatebounds(self.mbr, projected_mbr)
-
-        if self.clip and out_bounds != in_bounds:
-            return clip.prepare([c * scalar for c in convert.extend_bbox(projected_mbr)])
+        if self.clip and not convert.bbox_covers(out_bounds, layer_bounds):
+            return clip.prepare([c * scalar for c in convert.extend_bbox(self._projected_bounds)])
 
         else:
             return lambda x: x
@@ -213,35 +215,41 @@ class SVGIS(object):
         else:
             return lambda geom: geom
 
-    def set_crs(self, crs, bounds):
-        '''Set the output CRS, if not yet set.'''
+    def set_crs(self, layer_crs, bounds):
+        '''Set the output CRS, if not yet set. Also update internal mbr.'''
         if not self.in_crs:
-            self.in_crs = crs
+            self.in_crs = layer_crs
 
         if not self.out_crs:
             # Determine projection transformation:
             # either use something passed in, a non latlong layer projection,
             # the local UTM, or customize local TM
-            self.out_crs = projection.choosecrs(crs, bounds, proj_method=self.proj_method)
+            self.out_crs = projection.choosecrs(layer_crs, bounds, proj_method=self.proj_method)
 
-    def _compose_file(self, filename, scalar, bounds=None, **kwargs):
+        projected = projection.transform_bounds(layer_crs, self.out_crs, bounds)
+        self._projected_bounds = convert.updatebounds(self._projected_bounds, projected)
+
+    def _compose_file(self, filename, scalar, unprojected_bounds=None, **kwargs):
         '''
-        Draw fiona file to string.
+        Draw fiona file to an SVG group.
 
         Args:
             filename (string): path to a fiona-readable file
             scalar (int): map scale
-            bounds (tuple): (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK
+            unprojected_bounds (tuple): (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK.
+                                        "Unprojected" here refers to the fact that we haven't transformed these bounds yet.
+                                        They may well, in fact, be in a projection.
             simplifier (function): Simplification function. Defaults to self.simplify.
             class_fields (list): Fields to turn in the element classes (default: self.class_fields).
             id_field (string): Field to use as element ID (default: self.id_field).
+
+        Returns:
+            unicode
         '''
         with fiona.open(filename, "r") as layer:
-            bounds = bounds or self.bounds or layer.bounds
+            bounds = unprojected_bounds or self._unprojected_bounds or layer.bounds
 
-            simplifier = kwargs.pop('simplifier', lambda x: x)
-
-            # Set the output CRS, if not yet set.
+            # Set the output CRS, if not yet set. Also extend _projected_bounds.
             self.set_crs(layer.crs, bounds)
 
             # Get clipping function based on a slightly extended version of projected_mbr.
@@ -305,7 +313,7 @@ class SVGIS(object):
         # Set up arguments
         scalar = scalar or self.scalar
         style = self.style + (style or '')
-        bounds = bounds or self.bounds
+        bounds = bounds or self._unprojected_bounds
 
         viewbox = kwargs.pop('viewbox', True)
         inline_css = kwargs.pop('inline_css', False)
@@ -327,9 +335,9 @@ class SVGIS(object):
 
         # Draw files
         with fiona.drivers():
-            members = [self._compose_file(f, scalar, bounds=bounds, **kwargs) for f in self.files]
+            members = [self._compose_file(f, scalar, unprojected_bounds=bounds, **kwargs) for f in self.files]
 
-        w, h, x0, y1 = self._dims(scalar, bounds=bounds)
+        w, h, x0, y1 = self._dims(scalar, unprojected_bounds=bounds)
 
         if viewbox:
             svgargs['viewbox'] = (x0, -y1, w, h)
@@ -346,7 +354,7 @@ class SVGIS(object):
         else:
             return drawing
 
-    def _dims(self, scalar, bounds=None):
+    def _dims(self, scalar, unprojected_bounds=None):
         '''
         Calculate the width, height, origin X and max Y of the document.
         By default, uses self's minimum bounding rectangle.
@@ -355,10 +363,10 @@ class SVGIS(object):
             scalar (int): Map scale
             bounds (Sequence): Optional bounds to calculate with (in output coordinates)
         '''
-        if bounds is not None:
-            bounds = projection.reproject_bounds(self.in_crs, self.out_crs, convert.bounds_to_ring(*bounds))
+        if unprojected_bounds is None:
+            bounds = self._projected_bounds
         else:
-            bounds = self.mbr
+            bounds = projection.transform_bounds(self.in_crs, self.out_crs, unprojected_bounds)
 
         scalar = float(scalar)
 

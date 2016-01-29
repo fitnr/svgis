@@ -13,6 +13,7 @@ import pyproj
 import utm
 from fiona import transform
 import fiona.crs
+from . import convert
 
 '''
 Helpers for dealing with projections
@@ -73,7 +74,7 @@ def choosecrs(in_crs, bounds, proj_method=None):
         in_crs (dict): A fiona-type proj4 dictionary
         bounds (tuple): (minx, miny, maxx, maxy)
         proj_method (string): wither 'utm' or 'local'
-    
+
     Returns:
         fiona-type proj4 dict.
     '''
@@ -85,19 +86,18 @@ def choosecrs(in_crs, bounds, proj_method=None):
         return fiona.crs.from_string(generatecrs(*bounds, proj_method=proj_method))
 
 
-def project_mbr(in_crs, out_crs, minx, miny, maxx, maxy):
-    minpt, maxpt = list(zip(*transform.transform(in_crs, out_crs, (minx, maxx), (miny, maxy))))
-    return minpt + maxpt
-
-
-def reproject_bounds(in_crs, out_crs, boundaryring):
-    xs, ys = zip(*boundaryring)
-
+def transform_bounds(in_crs, out_crs, bounds):
+    '''
+    Project a bounding box, taking care to not slice off the sides.
+    '''
     if in_crs is None:
         raise TypeError('Need input CRS, not None')
 
     if out_crs is None:
         raise TypeError('Need output CRS, not None')
+
+    ring = convert.bounds_to_ring(*bounds)
+    xs, ys = zip(*ring)
 
     xbounds, ybounds = transform.transform(in_crs, out_crs, xs, ys)
 
@@ -129,4 +129,3 @@ def pick(project):
         out_crs = fiona.crs.from_string(project)
 
     return use_proj, out_crs
-
