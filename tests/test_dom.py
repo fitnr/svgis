@@ -60,7 +60,7 @@ class DomTestCase(unittest.TestCase):
         dom.apply_rule(document, self.rules[0])
 
         polygon = document.find('.//{http://www.w3.org/2000/svg}polygon')
-        self.assertEqual(polygon.attrib['style'], 'fill:orange')
+        self.assertIn('fill:orange', polygon.attrib['style'])
 
         dom.apply_rule(document, self.rules[6])
 
