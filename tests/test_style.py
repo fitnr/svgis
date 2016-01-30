@@ -48,13 +48,15 @@ class CssTestCase(unittest.TestCase):
         assert 'fill:purple' not in inlined
 
         doc = minidom.parseString(inlined)
-        polyline = doc.getElementsByTagName('polyline').item(0).getAttribute('style')
-        cat = doc.getElementsByTagName('polyline').item(1).getAttribute('style')
-        polygon = doc.getElementsByTagName('polygon').item(0).getAttribute('style')
 
-        assert 'stroke:green' in polygon
+        polygon = doc.getElementsByTagName('polygon').item(0).getAttribute('style')
+        self.assertIn('stroke:green', polygon)
         self.assertIn('fill:orange', polygon)
+
+        cat = doc.getElementsByTagName('polyline').item(1).getAttribute('style')
         self.assertIn('fill:red', cat)
+
+        polyline = doc.getElementsByTagName('polyline').item(0).getAttribute('style')
         self.assertIn('stroke:blue', polyline)
 
     def test_add_style(self):

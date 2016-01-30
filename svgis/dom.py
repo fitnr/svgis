@@ -7,6 +7,7 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
+import logging
 
 '''
 Utilities for manipulating the DOM and applying styles to same.
@@ -25,11 +26,11 @@ def ns(tag):
 
 def apply_rule(doc, rule):
     '''
-    Apply a tinycss Rule to an SVG document built by SVGIS.
+    Apply a tinycss Rule to an ElementTree.Element (built by SVGIS).
     '''
     tokenlist = _build_tokenlist(rule.selector)
 
-    declaration = u' '.join(u'{}:{};'.format(d.name, d.value.as_css()) for d in rule.declarations)
+    declaration = _build_declaration(rule.declarations)
 
     for tokens in tokenlist:
         # Starts as None as a marker to look into document,
@@ -40,6 +41,12 @@ def apply_rule(doc, rule):
 
         for el in els:
             el.attrib['style'] = el.attrib.get('style', u'') + declaration
+
+
+def _build_declaration(declarations):
+    return (u' '.join(
+        u'{}:{};'.format(d.name, d.value.as_css()) for d in declarations
+    )).strip(';')
 
 
 def _match_classes(elem_classes, rule_classes):
@@ -57,18 +64,12 @@ def _build_tokenlist(tokens):
     itertokens = iter(tokens)
 
     for token in itertokens:
+        if token.is_container:
+            tokenlist[-1].append(token)
+            continue
+
         if token.value == ',':
             tokenlist.append([])
-            continue
-
-        if token.type == '[':
-            tokenlist.append([])
-            continue
-
-        # ignore a ':' and whatever comes after the ':'.
-        if token.value == ':':
-            if next(itertokens).value == ':':
-                next(itertokens)
             continue
 
         tokenlist[-1].append(token)
@@ -93,7 +94,7 @@ def _get_elems_by_tagname(doc, els, tagname):
 
 
 def _unsupported_token(token):
-    return token.type == 'DELIM' and token.value in ('+', '~', '')
+    return token.is_container or token.type == 'ATKEYWORD' or token.value in ('+', '~', ':')
 
 
 def _process_tokens(doc, els, tokens):
@@ -110,17 +111,20 @@ def _process_tokens(doc, els, tokens):
         return [], []
 
     if tokens[0].value == '*':
-        els = doc.findall('.//')
+        if els is None:
+            els = doc.findall('.//')
+
         remaining_tokens = tokens[1:]
 
     # Look inside the given elements!
     elif tokens[0].type == 'S':
         try:
-            els = [u for e in els for u in e.findall('./')]
+            els = [u for e in els for u in e.findall('.//')]
             remaining_tokens = tokens[1:]
 
         except TypeError:
-            return None, tokens[1:]
+            els = None
+            remaining_tokens = tokens[1:]
 
     # Child operator is easy.
     elif tokens[0].value == '>' and tokens[0].type == 'DELIM':
@@ -142,18 +146,30 @@ def _process_tokens(doc, els, tokens):
         classes = []
 
         for tok in tokens:
-            if tok.type == 'S':
+            if tok.value == '.' and tok.type == 'DELIM':
+                continue
+
+            elif tok.type == 'IDENT':
+                classes.append(tok)
+
+            else:
                 break
 
-            if tok.type == 'IDENT':
-                classes.append(tok.value)
+        try:
+            els = _find_classes(doc, els, [c.value for c in classes])
+            # All tokens after the last class in classes.
+            remaining_tokens = tokens[tokens.index(classes[-1]) + 1:]
+        except ValueError:
+            remaining_tokens = tokens[1:]
 
-        els = _find_classes(doc, els, classes)
-        remaining_tokens = []
-
-    # first token is <IDENT>: it's an element, possibly followed by classes.
+    # first token is <IDENT>: it's an element, possibly followed other stuff.
     elif tokens[0].type == 'IDENT':
         els = _get_elems_by_tagname(doc, els, ns(tokens[0].value))
+        remaining_tokens = tokens[1:]
+
+    # Didn't recognize that token!
+    else:
+        logging.getLogger('svgis').warn('Unknown CSS: %s', tokens[0].value)
         remaining_tokens = tokens[1:]
 
     return els, remaining_tokens
