@@ -258,11 +258,17 @@ class SVGIS(object):
             # Remove the id field if it doesn't appear in the properties.
             id_field = kwargs.pop('id_field', self.id_field)
 
-            kwargs['id_field'] = id_field if id_field in list(layer.schema['properties'].keys()) else None
+            layer_classes = list(layer.schema['properties'].keys())
+            kwargs['id_field'] = id_field if id_field in layer_classes else None
 
             group = [self._feature(f, transforms, classes, **kwargs) for _, f in layer.items(bbox=bounds)]
 
-        return svg.group(group, id=kwargs['_file_name'])
+        gargs = {
+            'id': kwargs['_file_name'],
+            'class': ' '.join(_style.sanitize(c) for c in layer_classes)
+        }
+
+        return svg.group(group, **gargs)
 
     def _feature(self, feature, transforms, classes, id_field, **kwargs):
         '''

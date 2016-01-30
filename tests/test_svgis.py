@@ -76,9 +76,14 @@ class SvgisTestCase(unittest.TestCase):
 
     def testSvgisClassFields(self):
         composed = self.svgis_obj.compose(class_fields=('NAME', 'GEOID'))
-        match = re.search(r'class="(.+?)"', composed)
+
+        matchiter = re.finditer(r'class="(.+?)"', composed)
+        match = next(matchiter)
+
         self.assertIsNotNone(match)
-        self.assertIn('NAME_United_States', match.groups()[0])
+        self.assertIn(u'AFFGEOID GEOID NAME', match.groups()[0])
+
+        match = next(matchiter)
         self.assertIn('GEOID_US', match.groups()[0])
         self.assertIn('cb_2014_us_nation_20m', match.groups()[0])
 
