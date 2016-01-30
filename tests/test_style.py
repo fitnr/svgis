@@ -19,32 +19,42 @@ from svgis import style
 class CssTestCase(unittest.TestCase):
     svg = """<svg baseProfile="full" height="1" version="1.1" xmlns="http://www.w3.org/2000/svg">
             <defs></defs>
-            <g id="test">
-                <polygon class="test" points="3,2 -2,6 8,-1 8,2 4,1 3,2" />
-            </g>
-            <g id="foo">
-                <polyline class="foo" points="3,2 -2,6 8,-1"></polyline>
+            <g>
+                <g id="test">
+                    <polygon class="test" points="3,2 -2,6 8,-1 8,2 4,1 3,2" />
+                </g>
+                <g id="foo">
+                    <polyline id="baz" class="foo" points="3,2 -2,6 8,-1"></polyline>
+                </g>
+                <g id="cat">
+                    <polyline id="meow" points="3,2 -2,6 8,-1"></polyline>
+                </g>
             </g>
         </svg>"""
 
     css = """polygon {fill: orange;}
                 .test { stroke: green; }
                 polyline { stroke: blue}
-                #foo polyline { fill: red }"""
+                .test, #baz { stroke-width: 2; }
+                #test ~ #foo { fill: purple; }
+                #cat polyline { fill: red }"""
 
     file = 'tests/test_data/test.svg'
 
-    def testinlinecss(self):
+    def testInlineCSS(self):
         inlined = style.inline(self.svg, self.css)
         assert inlined != self.svg
 
+        assert 'fill:purple' not in inlined
+
         doc = minidom.parseString(inlined)
         polyline = doc.getElementsByTagName('polyline').item(0).getAttribute('style')
+        cat = doc.getElementsByTagName('polyline').item(1).getAttribute('style')
         polygon = doc.getElementsByTagName('polygon').item(0).getAttribute('style')
 
         assert 'stroke:green' in polygon
         self.assertIn('fill:orange', polygon)
-        self.assertIn('fill:red', polyline)
+        self.assertIn('fill:red', cat)
         self.assertIn('stroke:blue', polyline)
 
     def test_add_style(self):
@@ -97,7 +107,7 @@ class CssTestCase(unittest.TestCase):
             w.write(self.css)
 
         try:
-            result = style.add_style(self.file, style)
+            result = style.add_style(self.file, cssfile)
             self.assertIn(self.css, result[0:2000])
 
         finally:

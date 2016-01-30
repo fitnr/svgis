@@ -139,13 +139,13 @@ def inline(svg, style=None):
     _register()
     try:
         doc = ElementTree.fromstring(svg.encode('utf-8'))
-        wrap = doc.get('./' + _ns('g'))
+        wrap = doc.find('./' + _ns('g'))
 
         if not style:
             path = './' + _ns('defs') + '/' + _ns('style')
             style = doc.findall(path).pop().text
 
-        stylesheet = tinycss.make_parser().parse_stylesheet(style)
+        stylesheet = tinycss.make_parser().parse_stylesheet(_minify(style))
 
         for rule in stylesheet.rules:
             tokenlist = _build_tokenlist(rule.selector)
@@ -153,11 +153,9 @@ def inline(svg, style=None):
             declaration = u' '.join(u'{}:{};'.format(d.name, d.value.as_css()) for d in rule.declarations)
 
             for tokens in tokenlist:
-
                 # Starts as None as a marker to look into document,
                 # instead of filtering the list.
                 els = None
-
                 while len(tokens) > 0:
                     els, tokens = _process_tokens(wrap, els, tokens)
 
@@ -171,6 +169,10 @@ def inline(svg, style=None):
         raise
 
 
+def _minify(stylesheet):
+    return re.sub(r',\s+', ',', stylesheet)
+
+
 def _match_classes(elem_classes, rule_classes):
     '''Check if rule_classes all fall in elem_classes.'''
     return all([c in elem_classes for c in rule_classes])
@@ -180,8 +182,9 @@ def _isgroup(el):
     return el.tag == '{http://www.w3.org/2000/svg}g'
 
 
-def _idrule(selector):
-    return re.sub(r'^#([^.^#^>^ ]+)$', r"*[@id='\1']", selector)
+def _idrule(idname):
+    # Get rid of the hash here.
+    return "*[@id='{}']".format(idname[1:])
 
 
 def _build_tokenlist(tokens):
@@ -217,7 +220,7 @@ def _find_classes(doc, els, classes):
     return [e for e in els if _match_classes(e.attrib.get('class', []), classes)]
 
 
-def _find_elems(doc, els, tagname):
+def _get_elems_by_tagname(doc, els, tagname):
     '''Find elems in els (or doc) that have the given tagname.'''
     if els is None:
         return doc.findall('.//' + tagname)
@@ -237,26 +240,42 @@ def _process_tokens(doc, els, tokens):
         els = doc.findall('.//')
         remaining_tokens = tokens[1:]
 
+    # Look inside the given elements!
+    elif tokens[0].type == 'S':
+        try:
+            els = [u for e in els for u in e.findall('./')]
+            remaining_tokens = tokens[1:]
+
+        except TypeError:
+            return None, tokens[1:]
+
     # Is there a <HASH>: it's an ID, find that, then look for other classes or tags.
     elif any(t.type == 'HASH' for t in tokens):
         idtokens = [t for t in tokens if t.type == 'HASH']
 
-        # Allow for multiple id hashes, but we only want the first one
-        for i in idtokens:
-            idtokens.pop(idtokens.index(i))
+        # Remove all the id hashes.
+        remaining_tokens = [t for t in tokens if t not in idtokens]
 
+        # Allow for multiple id hashes, but we only want the first one
         els = doc.findall('.//' + _idrule(idtokens[0].value))
-        remaining_tokens = tokens[1:]
 
     # first token is <DELIM '.'>: make a list of classes
     elif tokens[0].value == '.' and tokens[0].type == 'DELIM':
-        classes = [t for t in tokens if t.type == 'IDENT']
+        classes = []
+
+        for tok in tokens:
+            if tok.type == 'S':
+                break
+
+            if tok.type == 'IDENT':
+                classes.append(tok.value)
+
         els = _find_classes(doc, els, classes)
         remaining_tokens = []
 
     # first token is <IDENT>: it's an element, possibly followed by classes.
     elif tokens[0].type == 'IDENT':
-        els = _find_elems(doc, els, _ns(tokens[0].value))
+        els = _get_elems_by_tagname(doc, els, _ns(tokens[0].value))
         remaining_tokens = tokens[1:]
 
     return els, remaining_tokens
