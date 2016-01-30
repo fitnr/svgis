@@ -90,8 +90,8 @@ def add_style(svgfile, style, replace=False):
     Add to or replace the CSS style in an SVG file.
 
     Args:
-        svgfile (string): Path to an SVG file or an SVG string.
-        newstyle (string): CSS string, or path to CSS file.
+        svgfile (str): Path to an SVG file or an SVG string.
+        newstyle (str): CSS string, or path to CSS file.
         replace (bool): If true, replace the existing CSS with newstyle (default: False)
     '''
     _register()
@@ -141,7 +141,15 @@ def add_style(svgfile, style, replace=False):
 def inline(svg, style=None):
     '''
     Inline the CSS rules in an SVG. This is a very rough operation,
-    and full css precedence rules won't be respected.
+    and full css precedence rules won't be respected. Ignores sibling
+    operators (``~``, ``+``), psuedo-selectors (e.g. ``:first-child``), and
+    attribute selectors (e.g. ``.foo[name=bar]``). Works best with rules like:
+
+    * ``.class``
+    * ``tag``
+    * ``tag.class``
+    * ``#layer .class``
+    * ``#layer tag``
 
     Args:
         svg (string): An SVG document.

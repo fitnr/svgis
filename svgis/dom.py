@@ -17,20 +17,25 @@ SVG_NS = 'http://www.w3.org/2000/svg'
 
 
 def cdata(text):
+    '''Wrap text in CDATA section.'''
     return '<![CDATA[' + text + ']]>'
 
 
 def ns(tag):
+    '''Apply the SVG namespace to a tag, e.g. ``g`` to ``{http://www.w3.org/2000/svg}g``.'''
     return '{' + SVG_NS + '}' + tag
 
 
 def apply_rule(doc, rule):
     '''
-    Apply a tinycss Rule to an ElementTree.Element (built by SVGIS).
+    Apply a tinycss Rule to an ElementTree.Element
+    (only tested on documents created by SVGIS).
     '''
     tokenlist = _build_tokenlist(rule.selector)
 
-    declaration = _build_declaration(rule.declarations)
+    declaration = u' '.join(
+        u'{}:{};'.format(d.name, d.value.as_css()) for d in rule.declarations
+    )
 
     for tokens in tokenlist:
         # Starts as None as a marker to look into document,
@@ -41,12 +46,6 @@ def apply_rule(doc, rule):
 
         for el in els:
             el.attrib['style'] = el.attrib.get('style', u'') + declaration
-
-
-def _build_declaration(declarations):
-    return (u' '.join(
-        u'{}:{};'.format(d.name, d.value.as_css()) for d in declarations
-    )).strip(';')
 
 
 def _match_classes(elem_classes, rule_classes):

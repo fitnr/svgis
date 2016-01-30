@@ -1,5 +1,5 @@
 ==================
-Command-Line Usage
+Command-line usage
 ==================
 
 The main function of the SVGIS command line tool is to draw maps. SVGIS also comes with several helper tools for modifying maps and getting generating map projections.
@@ -191,17 +191,18 @@ file contains nation polygons, and includes ``continent``,
 
 .. code:: bash
 
-    svgis draw --class-fields continent,income_grp --id-field name ne_110m_admin_0_countries.shp -o out.svg
+    svgis draw --class-fields continent,income_grp --id-field name \
+      ne_110m_admin_0_countries.shp -o out.svg
 
 The result will include something like:
 
-::
+.. code:: xml
 
-    <g id="ne_110m_admin_0_countries">
-        <g class="ne_110m_admin_0_countries continent_Asia income_grp_5_Low_income" id="Afghanistan">/* Afghanistan */</g>
-        <g class="ne_110m_admin_0_countries continent_Africa income_grp_3_Upper_middle_income" id="Angola">/* Angola */</g>
+    <g id="ne_110m_admin_0_countries" class="scalerank featurecla labelrank ...">
+        <g id="Afghanistan" class="ne_110m_admin_0_countries continent_Asia income_grp_5._Low_income">/* Afghanistan */</g>
+        <g id="Angola" class="ne_110m_admin_0_countries continent_Africa income_grp_3._Upper_middle_income">/* Angola */</g>
         /* ... */
-        <g class="ne_110m_admin_0_countries continent_Africa income_grp_5_Low_income" id="Zimbabwe">/* Zimbabwe */</g>
+        <g id="Zimbabwe" class="ne_110m_admin_0_countries continent_Africa income_grp_5._Low_income">/* Zimbabwe */</g>
     </g>
 
 The name of a layer (``ne_110m_admin_0_countries``) will always be in
@@ -209,13 +210,22 @@ the classes of its child elements. This makes writing CSS that addresses
 particular layers easier, given that some implementations of SVG don't
 properly css rules with ids (e.g. Adobe Illustrator, ImageMagick).
 
-Note that the 'income\_grp' field contains values like "4. Lower middle
-income", SVGIS has sanitized them for use in the output svg.
+Note that the ``income\_grp`` field contains values like "5. Low income",
+which resultes in a class like ``income_grp_5._Low_income``. Classes
+like this can be used in CSS by escaping the period with a bash slash ``\``:
 
-Each layer is always wrapped in a group with id set to the name of its
-source layer.
+.. code::
 
-.. code:: svg
+    .income_grp_5\._Low_income {
+        fill: teal;
+        stroke: none;
+    }
+
+
+Each layer is always wrapped in a group with ``id`` set to the name of its
+source layer. This value is repeated as a class for each element in the layer.
+
+.. code:: xml
 
   <g id="my_layer">
     <!-- features in my_layer.shp -->
@@ -236,7 +246,7 @@ The ``--simplify`` option takes a number between 1 and 100, which is the
 percentage of points to retain. Numbers above 80 usually produce output with
 few visible changes.
 
-::
+.. code:: bash
 
     svgis draw --simplify 75 in.shp -o out.svg
     svgis draw -s 25 in.shp -o out.svg
@@ -247,13 +257,16 @@ inline
 Run with this option to add style information onto each element.
 Some SVG clients (Adobe Illustrator) prefer inline styles.
 
-When ``--inline`` is given, SVG elements will look like::
+When ``--inline`` is given, SVG elements will look like:
 
-    <polyline class="layer_name" style="stroke: green; ..." points="0,0 1,1">
+.. code:: xml
 
-::
-    svgis draw --inline in.geojson -o out.svg
-    svgis draw -l in.geojson -o out.svg
+    <polyline style="stroke: green; ..." points="0,0 1,1">
+
+.. code:: bash
+
+    svgis draw --style example.css --inline in.geojson -o out.svg
+    svgis draw -s example.css -l in.geojson -o out.svg
 
 clip/no-clip
 ^^^^^^^^^^^^

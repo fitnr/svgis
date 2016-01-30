@@ -1,7 +1,9 @@
 Styling maps
 ============
 
-SVGIS supports a limited subset of CSS for styling maps.
+You can use any kind of CSS that you like to style maps
+made with SVGIS. However, when using the ``inline`` option,
+SVGIS supports a subset of CSS.
 
 This applies both to the selectors, which are limited by 
 Python's built-in XML support, and to the declarations, 
@@ -10,11 +12,12 @@ which are limited by the
 
 A few useful things to know about how SVGIS draws maps:
 
-* SVGIS places all the features in a layer in a group with an id set to
-the layer's name.
-* Polygons with holes are drawn as path elements with the class ``polygon``.
+* SVGIS places all the features in a layer in a group. This group has an ``id`` equal to
+the layer's name, and a ``class`` equal to the column names of the layer.
+* Polygons with holes are drawn as ``path`` elements with the class ``polygon``.
 * SVGIS can set the id and class of features based on the input data.
 * By default, SVGIS draws black lines and no fill on shapes.
+
 
 Style the features in a layer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -27,6 +30,42 @@ Style the features in a layer
         stroke-width: 1px;
         stroke-dasharray: 5, 3, 2;
     }
+
+
+Style certain layers
+^^^^^^^^^^^^^^^^^^^^^
+
+Say that we're combining geodata from the US Census with data from Natural
+Earth. All Census layers have a GEOID field, and we use this to draw these
+layers with a ``opacity: 0.50``.
+
+.. code:: css
+
+    /* example.css */
+    .GEOID * {
+        opacity: 0.50
+    }
+    #tl_2015_us_aiannh {
+        fill: orange;
+    }
+    #ne_10m_time_zones {
+        stroke-width: 2px;
+    }
+
+
+Use this style to create a map projected in
+`North America Equidistant Conic <http://epsg.io/102010>`_.
+
+
+.. code:: bash
+
+    svgis draw --style example.css \
+        --project EPSG:102010 \
+        tl_2015_us_state.shp \
+        tl_2015_us_aiannh.shp \
+        ne_10m_time_zones.shp \
+        -o out.svg
+
 
 
 Style all polygons in a drawing
@@ -68,14 +107,13 @@ have an ID field.
 
     #ne_110m_admin_0_countries polygon,
     #ne_110m_admin_0_countries .polygon {
-        fill: tan
+        fill: tan;
     }
 
     #ne_110m_lakes polygon,
     #ne_110m_lakes .polygon {
-        fill: blue
+        fill: blue;
     }
-
 
 
 Style based on data
@@ -84,16 +122,17 @@ Style based on data
 Use the ``class-fields`` option to add classes to data based on their data.
 In this example, the ``income_grp`` field in the admin-0 data set it used.
 This is ideal of SVGIS, since the data is already broken into bins. These bins
-have names like "5. Low Income", which SVGIS will sanitize to ``5_Low_Income``.
+have names like "5. Low Income", which SVGIS is partially sanitized to
+``5._Low_Income``. The period can be escaped with a ``\``.
 
 .. code:: css
 
     /* style.css */
-    .income_grp_5_Low_income {
-        fill: blue
+    .income_grp_5\._Low_income {
+        fill: blue;
     }
-    .income_grp_3_Upper_middle_income {
-        fill: green
+    .income_grp_3\._Upper_middle_income {
+        fill: green;
     }
 
 .. code:: bash

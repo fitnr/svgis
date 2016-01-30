@@ -5,12 +5,13 @@ Create SVG drawings from vector geodata files (SHP, geoJSON, etc).
 
 SVGIS is good for: creating small multiples, combining lots of datasets in a sensible projections, and drawing maps with  basic styles based on classes in the source data.
 
-
 ```bash
 svgis draw input.shp -o out.svg
 svgis draw --project utm south_dakota.shp north_dakota.geojson -o dakota.svg
 svgis draw --style my.css england.shp scotland.shp wales.shp -o great_britain.svg
 ````
+
+Documentation: http://pythonhosted.org/svgis
 
 ## Install
 

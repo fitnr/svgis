@@ -1,4 +1,4 @@
-Classes and Methods
+Classes and methods
 ===================
 
 Svgis is primarily built as a command line tool, but it has full
@@ -10,3 +10,4 @@ API customization.
    svgis
    svg
    draw
+   style
