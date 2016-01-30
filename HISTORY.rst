@@ -1,3 +1,19 @@
+0.3.3
+-----
+
+* Switch from `argparse` to `click` for cli functions. Much better performance, same options.
+* Switch `--simplify` argument to accept an integer between 1-99
+* Change `--project/-j` option in `svgis project` to `--method/-m`
+* Remove lxml dependency for inlining CSS.
+* Completely refactor functions that parse XML to use ElementTree (quicker than minidom).
+* Add column names to class of layer group.
+* Prevent broken pipes
+* Squash several bugs related to setting class fields.
+* Squash bugs in drawing certain paths.
+* Remove duplicate/unused code.
+* Ensure use of unicode internally, fixed some small Py3 bugs.
+* More tests and more docs!
+
 0.3.2
 -----
 
