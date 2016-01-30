@@ -23,6 +23,7 @@ from . import dom
 Utilities for messing with SVG styling.
 '''
 
+
 def _register():
     ElementTree.register_namespace('', dom.SVG_NS)
 
@@ -167,7 +168,7 @@ def inline(svg, style=None):
         logging.getLogger('svgis').warn("Unable to inline CSS becuase: %s", e)
         return svg
 
-def _parse_css(stylesheet):
-    mini = re.sub(r',\s+', ',', stylesheet)
-    return tinycss.make_parser().parse_stylesheet(mini)
 
+def _parse_css(stylesheet):
+    mini = re.sub(r'\s+([,>~+])\s+', r'\1', stylesheet)
+    return tinycss.make_parser().parse_stylesheet(mini)

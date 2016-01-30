@@ -122,6 +122,11 @@ def _process_tokens(doc, els, tokens):
         except TypeError:
             return None, tokens[1:]
 
+    # Child operator is easy.
+    elif tokens[0].value == '>' and tokens[0].type == 'DELIM':
+        remaining_tokens = tokens[1:]
+        els = [u for e in els for u in e.findall('./')]
+
     # Is there a <HASH>: it's an ID, find that, then look for other classes or tags.
     elif any(t.type == 'HASH' for t in tokens):
         idtokens = [t for t in tokens if t.type == 'HASH']
