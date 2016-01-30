@@ -24,13 +24,11 @@ Then:
 pip install svgis
 ```
 
-Some additional options are available if you want to download more prerequisites:
+An additional feature is available if you want to download more prerequisites:
 ````
-# Include the ability to inline CSS, which is pretty much required by Adobe Illustrator
-sudo apt-get libxml2-dev libxslt-dev python-dev
-pip install svgis[inline]
-
 # Clip output shapes to the bounding box (smaller files)
+brew install geos # os x
+sudo yum/apt-get geos # linux
 pip install svgis[clip]
 ````
 

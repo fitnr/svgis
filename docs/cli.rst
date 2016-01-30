@@ -212,8 +212,15 @@ properly css rules with ids (e.g. Adobe Illustrator, ImageMagick).
 Note that the 'income\_grp' field contains values like "4. Lower middle
 income", SVGIS has sanitized them for use in the output svg.
 
-Each layer is always wrapped in a group (``<g>``) with id equal to the
-name of its source layer.
+Each layer is always wrapped in a group with id set to the name of its
+source layer.
+
+.. code:: svg
+
+  <g id="my_layer">
+    <!-- features in my_layer.shp -->
+  </g>
+
 
 simplify
 ^^^^^^^^
@@ -237,10 +244,6 @@ few visible changes.
 inline
 ^^^^^^
 
-Install with ``pip install svgis[inline]`` to make this available. This
-requires additional libraries, see `lxml installation
-notes <http://lxml.de/installation.html>`__.
-
 Run with this option to add style information onto each element.
 Some SVG clients (Adobe Illustrator) prefer inline styles.
 
@@ -252,8 +255,8 @@ When ``--inline`` is given, SVG elements will look like::
     svgis draw --inline in.geojson -o out.svg
     svgis draw -l in.geojson -o out.svg
 
-no-clip
-^^^^^^^
+clip/no-clip
+^^^^^^^^^^^^
 
 Install with ``pip install svgis[clip]`` to make this available. This
 requires additional libraries, see the `shapely installation
