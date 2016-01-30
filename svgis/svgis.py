@@ -100,7 +100,7 @@ def _construct_classes(classes, properties):
 
     props = {unicode(k): unicode(v) for k, v in properties.items()}
 
-    classes = [svg.sanitize(_property(unicode(x), props)) for x in classes]
+    classes = [_style.sanitize(_property(unicode(x), props)) for x in classes]
     return (u' '.join(classes)).strip()
 
 
@@ -292,7 +292,7 @@ class SVGIS(object):
         kwargs['class'] = _construct_classes(classes, feature['properties'])
 
         if id_field:
-            kwargs['id'] = svg.sanitize(feature['properties'].get(id_field))
+            kwargs['id'] = _style.sanitize(feature['properties'].get(id_field))
 
         try:
             return draw.geometry(geom, **kwargs)

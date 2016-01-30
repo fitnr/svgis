@@ -119,5 +119,18 @@ class CssTestCase(unittest.TestCase):
         result = minidom.parseString(new).getElementsByTagName('defs').item(0).getElementsByTagName('style').item(0)
         assert self.css in result.toxml()
 
+    def testSanitize(self):
+        assert style.sanitize(None) == u'None'
+        assert style.sanitize(u'') == u''
+        self.assertEqual(style.sanitize(u'ü'), u'_ü')
+        self.assertEqual(style.sanitize(u'!foo'), u'_!foo')
+        assert style.sanitize(u'müller') == u'müller'
+
+        self.assertEqual(style.sanitize(1), u'_1')
+
+        self.assertEqual(style.sanitize('foo\.bar'), u'foo\.bar')
+        self.assertEqual(style.sanitize(u'foo\.bar'), u'foo\.bar')
+
+
 if __name__ == '__main__':
     unittest.main()

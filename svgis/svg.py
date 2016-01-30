@@ -8,32 +8,10 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
-import re
-from string import ascii_letters
-
 '''
 Create string versions of SVG elements.
 '''
 
-
-def sanitize(string):
-    '''
-    Make input safe of use in an svg ID or class field.
-    Replaces blocks of whitespace with an underscore (``_``).
-    If the first character isn't an ascii letter, dash (``-``)
-    or underscore (``_``), an underscore is added to the beginning.
-
-    Args:
-        string (mixed): Input to sanitize. Will be immediately coerced to
-                        unicode. If that fails, returns an empty string.
-    '''
-    try:
-        string = re.sub(r'\s+', u'_', unicode(string))
-        string = string if string[0] in ('_-' + ascii_letters) else '_' + string
-        return unicode(string)
-
-    except (AttributeError, IndexError):
-        return u''
 
 
 def circle(point, **kwargs):
