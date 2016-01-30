@@ -69,8 +69,8 @@ svgis draw \
     --project EPSG:102013 \
     --scale 1000 \
     --simplify 0.10 \
-    --style "#Germany { fill: purple }" \
-    --id-field name \
+    --style ".Germany { fill: purple }" \
+    --class-fields name \
     --bounds -10 30 40 65 \
     ne_110m_admin_0_countries.shp \
     -o out.svg

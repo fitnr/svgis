@@ -18,7 +18,7 @@ With SVGIS, a command like this:
 
 .. code:: bash
 
-    svgis draw --style ".ne_10m_admin_0_countries {fill: tan;} #Germany * { fill: purple }" \
+    svgis draw --style ".ne_10m_admin_0_countries {fill: tan;} .Germany { fill: purple }" \
     --bounds -13 35 35 62 \
     --project EPSG:102013 \
     --scale 1000 \
