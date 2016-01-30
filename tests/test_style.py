@@ -13,7 +13,7 @@ import re
 import os
 from io import BytesIO, StringIO
 from xml.dom import minidom
-from svgis import css
+from svgis import style
 
 
 class CssTestCase(unittest.TestCase):
@@ -35,7 +35,7 @@ class CssTestCase(unittest.TestCase):
     file = 'tests/test_data/test.svg'
 
     def testinlinecss(self):
-        inlined = css.inline(self.svg, self.css)
+        inlined = style.inline(self.svg, self.css)
         assert inlined != self.svg
 
         doc = minidom.parseString(inlined)
@@ -48,7 +48,7 @@ class CssTestCase(unittest.TestCase):
         self.assertIn('stroke:blue', polyline)
 
     def test_add_style(self):
-        new = css.add_style(self.file, self.css)
+        new = style.add_style(self.file, self.css)
         result = minidom.parseString(new).getElementsByTagName('defs').item(0).getElementsByTagName('style').item(0)
         assert self.css in result.toxml()
 
@@ -61,12 +61,12 @@ class CssTestCase(unittest.TestCase):
         except TypeError:
             io_svg = StringIO(replaced_svg)
 
-        new = css.add_style(io_svg, self.css)
+        new = style.add_style(io_svg, self.css)
         result = minidom.parseString(new).getElementsByTagName('defs').item(0).getElementsByTagName('style').item(0)
         assert self.css in result.toxml()
 
     def testReScale(self):
-        result = css.rescale('tests/test_data/test.svg', 1.37)
+        result = style.rescale('tests/test_data/test.svg', 1.37)
         self.assertIn('scale(1.37)', result[0:2000])
 
     def testPickStyle(self):
@@ -76,28 +76,28 @@ class CssTestCase(unittest.TestCase):
             w.write(self.css)
 
         try:
-            result = css.pick(stylefile)
+            result = style.pick(stylefile)
             self.assertEqual(self.css, result)
 
         finally:
             os.remove('tmp.css')
 
-        result = css.pick(self.css)
+        result = style.pick(self.css)
         self.assertEqual(self.css, result)
 
-        assert css.pick(None) is None
+        assert style.pick(None) is None
 
     def testAddCli(self):
-        result = css.add_style(self.file, self.css)
+        result = style.add_style(self.file, self.css)
         self.assertIn(self.css, result[0:2000])
 
-        style = 'tmp.css'
+        cssfile = 'tmp.css'
 
-        with open(style, 'w') as w:
+        with open(cssfile, 'w') as w:
             w.write(self.css)
 
         try:
-            result = css.add_style(self.file, style)
+            result = style.add_style(self.file, style)
             self.assertIn(self.css, result[0:2000])
 
         finally:
@@ -105,7 +105,7 @@ class CssTestCase(unittest.TestCase):
 
     def testAddStyleNoDefs(self):
         svg = self.svg.replace('<defs></defs>', '')
-        new = css.add_style(svg, self.css)
+        new = style.add_style(svg, self.css)
         result = minidom.parseString(new).getElementsByTagName('defs').item(0).getElementsByTagName('style').item(0)
         assert self.css in result.toxml()
 

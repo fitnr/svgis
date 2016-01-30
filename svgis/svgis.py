@@ -13,7 +13,8 @@ import logging
 import fiona
 import fiona.transform
 import fionautil.scale
-from . import convert, clip, css, draw, errors, projection, svg
+from . import convert, clip, draw, errors, projection, svg
+from . import style as _style
 
 """
 Draw geodata layers into SVGs.
@@ -54,7 +55,7 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
     bounds = bounds if bounds and len(bounds) == 4 else None
 
     # Try to read style file
-    styles = css.pick(kwargs.pop('style', None))
+    styles = _style.pick(kwargs.pop('style', None))
 
     project, out_crs = projection.pick(kwargs.pop('project', None))
 
@@ -355,7 +356,7 @@ class SVGIS(object):
         drawing = svg.drawing((w, h), [container], **svgargs)
 
         if inline:
-            return css.inline(drawing, style)
+            return _style.inline(drawing, style)
 
         else:
             return drawing

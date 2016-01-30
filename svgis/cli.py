@@ -13,7 +13,7 @@ from signal import signal, SIGPIPE, SIG_DFL
 import logging
 import click
 from .projection import generatecrs
-from . import css, svgis, __version__
+from . import style as _style, svgis, __version__
 
 
 none = {
@@ -89,9 +89,9 @@ style_help = ("Style to append to SVG. "
 @click.option('--inline/--no-inline', '-l/ ', **csskwargs)
 def style(input, output, **kwargs):
     """Add or inline the CSS styles of an SVG"""
-    result = css.add_style(input, kwargs['style'], kwargs['replace'])
+    result = _style.add_style(input, kwargs['style'], kwargs['replace'])
     if kwargs['inline']:
-        result = css.inline(result)
+        result = _style.inline(result)
     click.echo(result.encode('utf-8'), file=output)
 
 
@@ -101,7 +101,7 @@ def style(input, output, **kwargs):
 @click.option('-f', '--scale', type=int)
 def scale(input, output, **kwargs):
     '''Scale all coordinates in an SVG by a factor'''
-    click.echo(css.rescale(input, factor=kwargs['scale']).encode('utf-8'), file=output)
+    click.echo(_style.rescale(input, factor=kwargs['scale']).encode('utf-8'), file=output)
 
 
 project_help = ('Specify a map projection. '

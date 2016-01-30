@@ -9,7 +9,7 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 import unittest
 from xml.dom import minidom
-from svgis import css, svg
+from svgis import style, svg
 
 try:
     basestring
@@ -24,7 +24,7 @@ class SvgTestCase(unittest.TestCase):
         self.newstyle = 'stroke {color:red;}'
 
     def test_rescale(self):
-        new = css.rescale(self.file, 100)
+        new = style.rescale(self.file, 100)
 
         g = minidom.parseString(new).getElementsByTagName('g')[0]
         assert 'scale(100)' in g.attributes.get('transform').value
