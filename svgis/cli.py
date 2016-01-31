@@ -128,8 +128,12 @@ project_help = ('Specify a map projection. '
 @click.option('--clip/--no-clip', ' /-n', **clipkwargs)
 @click.option('--viewbox/--no-viewbox',  ' /-x', default=True, help='Draw SVG with or without a ViewBox. Drawing without may improve compatibility.')
 @click.option('--inline/--no-inline', '-l/ ', **csskwargs)
+@click.option('-q', '--quiet', default=False, flag_value=True, help='Ignore warnings.')
 def draw(input, output, **kwargs):
     '''Draw SVGs from input geodata'''
+    if kwargs.pop('quiet', None):
+        logging.getLogger('svgis').setLevel(logging.ERROR)
+
     click.echo(svgis.map(input, **kwargs).encode('utf-8'), file=output)
 
 

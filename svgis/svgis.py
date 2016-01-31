@@ -291,7 +291,7 @@ class SVGIS(object):
                 geom = t(geom)
 
         except ValueError as e:
-            self.log.error("Error drawing feature %s of %s: %s", file_name, feature.get('id', '?'), e)
+            self.log.warn("Error drawing feature %s of %s: %s", file_name, feature.get('id', '?'), e)
             return u''
 
         # Set up the element's properties.
@@ -304,7 +304,7 @@ class SVGIS(object):
             return draw.geometry(geom, **kwargs)
 
         except errors.SvgisError as e:
-            self.log.error("Error drawing %s: %s", file_name, e)
+            self.log.warn("Error drawing %s: %s", file_name, e)
             return u''
 
     def compose(self, style=None, scalar=None, bounds=None, **kwargs):
