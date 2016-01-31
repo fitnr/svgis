@@ -381,6 +381,9 @@ class SVGIS(object):
         else:
             bounds = projection.transform_bounds(self.in_crs, self.out_crs, unprojected_bounds)
 
+        if any([convert.isinf(b) for b in bounds]):
+            self.log.warn('Drawing has infinite bounds, consider changing projection or bounding box.')
+
         scalar = float(scalar)
 
         try:

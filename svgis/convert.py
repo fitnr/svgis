@@ -16,24 +16,37 @@ except ImportError:
     pass
 
 
+def isinf(x):
+    inf = float('inf')
+    return x == inf or x == inf * -1
+
 def updatebounds(old, new):
     '''
     Extend old with any more distant values from newpoints.
     Also replace any missing min/max points in old with values from new.
     '''
     bounds = []
+    inf = float('inf')
 
     # python3 gives TypeError when using None in min/max
     # This contraption avoids that problem.
     # List comp below replaces Nones in bounds with real values in new or old
     for n, m in zip(new[:2], old[:2]):
         try:
+            if m == inf * -1 or n == inf * -1:
+                bounds.append(max(n, m))
+                continue
+
             bounds.append(min(n, m))
         except TypeError:
             bounds.append(None)
 
     for n, m in zip(new[2:], old[2:]):
         try:
+            if m == inf or n == inf:
+                bounds.append(min(n, m))
+                continue
+
             bounds.append(max(n, m))
         except TypeError:
             bounds.append(None)
