@@ -245,7 +245,7 @@ class SVGIS(object):
                 kwargs.pop('simplifier', None)
             ]
 
-            # Correct for OGR's lack of creativity for GeoJSONs
+            # Correct for OGR's lack of creativity for GeoJSONs.
             if layer.name == 'OGRGeoJSON':
                 kwargs['_file_name'], _ = os.path.splitext(os.path.basename(filename))
             else:
@@ -253,7 +253,7 @@ class SVGIS(object):
 
             # A list of class names to get from layer properties.
             cf = kwargs.pop('class_fields', self.class_fields)
-            classes = _get_classes(cf, layer.schema['properties'], layer.name)
+            classes = _get_classes(cf, layer.schema['properties'], kwargs['_file_name'])
 
             # Remove the id field if it doesn't appear in the properties.
             id_field = kwargs.pop('id_field', self.id_field)
