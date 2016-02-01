@@ -14,6 +14,8 @@ A few useful things to know about how SVGIS draws maps:
 
 * SVGIS places all the features in a layer in a group. This group has an ``id`` equal to
 the layer's name, and a ``class`` equal to the column names of the layer.
+* The ``class-fields`` and ``id-field`` options can be used to add ``class``es and ``id``s
+to the data. SVGIS always adds the layer name as a class to each feature.
 * Polygons with holes are drawn as ``path`` elements with the class ``polygon``.
 * SVGIS can set the id and class of features based on the input data.
 * By default, SVGIS draws black lines and no fill on shapes.
@@ -22,9 +24,12 @@ the layer's name, and a ``class`` equal to the column names of the layer.
 Style the features in a layer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code:: css
+This works because every element of layer ``cb_2014_us_nation_20m.shp`` will have
+the class ``cb_2014_us_nation_20m``.
 
-    #cb_2014_us_nation_20m polygon {
+.. code:: css
+    
+    .cb_2014_us_nation_20m {
         fill: blue;
         stroke: green;
         stroke-width: 1px;
@@ -43,19 +48,18 @@ layers with a ``opacity: 0.50``.
 
     /* example.css */
     .GEOID * {
-        opacity: 0.50
+        opacity: 0.50;
     }
-    #tl_2015_us_aiannh {
+    .tl_2015_us_aiannh {
         fill: orange;
     }
-    #ne_10m_time_zones {
+    .ne_10m_time_zones {
         stroke-width: 2px;
     }
 
 
 Use this style to create a map projected in
 `North America Equidistant Conic <http://epsg.io/102010>`_.
-
 
 .. code:: bash
 
@@ -70,6 +74,9 @@ Use this style to create a map projected in
 
 Style all polygons in a drawing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Polygons with holes are drawn as paths, and multipolygons are drawn in groups.
+To style all polygons, use the ``.polygon`` class:
 
 .. code:: css
 
