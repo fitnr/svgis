@@ -34,7 +34,7 @@ def _applyid(multifunc):
 
 
 def linestring(coordinates, **kwargs):
-    return svg.element('polyline', coordinates, **kwargs)
+    return svg.polyline(coordinates, **kwargs)
 
 
 @_applyid
@@ -79,7 +79,7 @@ def polygons(geom, **kwargs):
 
 def polygon(coordinates, **kwargs):
     if len(coordinates) == 1:
-        return svg.element('polygon', coordinates[0], **kwargs)
+        return svg.polygon(coordinates[0], **kwargs)
 
     # This is trickier because drawing holes in SVG.
     # We go clockwise on the first ring, then counterclockwise
@@ -88,7 +88,7 @@ def polygon(coordinates, **kwargs):
 
     kwargs['class'] = ('polygon ' + kwargs.pop('class', '')).strip()
 
-    instructions = coordinates[0][:] + ['z']
+    instructions = ['M'] + list(coordinates[0]) + ['z']
 
     for ring in coordinates[1:]:
         # make all interior run the counter-clockwise

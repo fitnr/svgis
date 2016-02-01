@@ -13,15 +13,70 @@ Create string versions of SVG elements.
 '''
 
 
+def _wrap(tag, contents=None, **kwargs):
+    '''Wrap contents in a tag'''
+    attribs = toattribs(**kwargs)
+    if contents:
+        return u'<{0}{1}>{2}</{0}>'.format(tag, attribs, contents)
+    else:
+        return u'<{0}{1}/>'.format(tag, attribs)
+
+
+def _element(tag, **kwargs):
+    return u'<{}{}/>'.format(tag, toattribs(**kwargs))
+
 
 def circle(point, **kwargs):
     '''
-    Write a svg circle element. Keyword arguments are mapped to attributes.
+    Create a svg circle element. Keyword arguments are mapped to attributes.
 
     Args:
         point (tuple): The center of the circle
     '''
-    return u'<circle cx="{0[0]}" cy="{0[1]}"'.format(point) + toattribs(**kwargs) + '/>'
+    return _element(u'circle', cx=point[0], cy=point[1], **kwargs)
+
+
+def text(string, start, **kwargs):
+    '''
+    Create an svg text element.
+
+    Args:
+        string (str): text for element
+        start (tuple): starting coordinate
+
+    Returns:
+        str
+    '''
+    return _wrap(u'text', string, x=start[0], y=start[1], **kwargs)
+
+
+def rect(start, width, height, **kwargs):
+    '''
+    Create an svg rect element.
+
+    Args:
+        start (tuple): starting coordinate
+        width (int): rect width
+        height (int): rect height
+
+    Returns:
+        str
+    '''
+    return _element(u'rect', x=start[0], y=start[1], width=width, height=height, **kwargs)
+
+
+def line(start, end, **kwargs):
+    '''
+    Create an svg line element.
+
+    Args:
+        start (tuple): starting coordinate
+        end (tuple): ending coordinate
+
+    Returns:
+        str
+    '''
+    return _element(u'line', x1=start[0], y1=start[1], x2=end[0], y2=end[1], **kwargs)
 
 
 def _isstr(x):
@@ -30,27 +85,45 @@ def _isstr(x):
 
 def path(coordinates, **kwargs):
     '''
-    Write an svg path element as a string.
+    Create an svg path element as a string.
 
     Args:
         coordinates (Sequence): A sequence of coordinates and string instructions
     '''
-    attribs = toattribs(**kwargs)
     coords = [i if _isstr(i) else u'{0[0]},{0[1]}'.format(i) for i in coordinates]
+    return _element(u'path', d=' '.join(coords), **kwargs)
 
-    return u'<path d="M ' + ' '.join(coords) + '"' + attribs + '/>'
+
+def polyline(coordinates, **kwargs):
+    '''
+    Create an svg polyline element
+
+    Args:
+        coordinates (Sequence): x, y coordinates
+
+    Returns:
+        str
+    '''
+    points = u' '.join(u'{0[0]},{0[1]}'.format(c) for c in coordinates)
+    return _element(u'polyline', points=points, **kwargs)
 
 
-def element(tag, coordinates, **kwargs):
-    return (
-        u'<' + tag + ' points="' +
-        ' '.join('{0[0]},{0[1]}'.format(c) for c in coordinates) +
-        '"' + toattribs(**kwargs) + '/>'
-    )
+def polygon(coordinates, **kwargs):
+    '''
+    Create an svg polygon element
+
+    Args:
+        coordinates (Sequence): x, y coordinates
+
+    Returns:
+        str
+    '''
+    points = u' '.join(u'{0[0]},{0[1]}'.format(c) for c in coordinates)
+    return _element(u'polygon', points=points, **kwargs)
 
 
 def toattribs(**kwargs):
-    attribs = u' '.join(u'{}="{}"'.format(k, v) for k, v in kwargs.items() if v)
+    attribs = u' '.join(u'{}="{}"'.format(k, v) for k, v in kwargs.items() if v is not None)
 
     if len(attribs) > 0:
         attribs = ' ' + attribs
@@ -86,19 +159,8 @@ def group(members=None, **kwargs):
     Returns:
         unicode
     '''
-    attribs = toattribs(**kwargs)
-
-    if not members:
-        return u'<g' + attribs + ' />'
-
-    return u'<g' + attribs + '>' + ''.join(members) + '</g>'
-
-
-def setviewbox(viewbox=None):
-    if not viewbox:
-        return ''
-    else:
-        return u' viewBox="{},{},{},{}"'.format(*viewbox)
+    members = members or ''
+    return _wrap(u'g', ''.join(members), **kwargs)
 
 
 def drawing(size, members, viewbox=None, style=None):
@@ -111,11 +173,15 @@ def drawing(size, members, viewbox=None, style=None):
         viewbox (Sequence): Four coordinates that describe a bounding box.
         style (string): CSS string.
     '''
-    svg = (u'<svg baseProfile="full" version="1.1"'
-           ' xmlns="http://www.w3.org/2000/svg"'
-          )
-    dimension = u' width="{}" height="{}"'.format(*size)
-    vb = setviewbox(viewbox)
-    defs = defstyle(style)
+    kwargs = {
+        'width': size[0],
+        'height': size[1],
+        'baseProfile': 'full',
+        'version': '1.1',
+        'xmlns': 'http://www.w3.org/2000/svg',
+    }
+    if viewbox:
+        kwargs['viewBox'] = '{},{},{},{}'.format(*viewbox)
 
-    return svg + dimension + vb + u'>' + defs + u''.join(members) + u'</svg>'
+    contents = defstyle(style) + u''.join(members)
+    return _wrap(u'svg', contents, **kwargs)

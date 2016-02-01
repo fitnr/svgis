@@ -40,11 +40,7 @@ class SvgTestCase(unittest.TestCase):
 
         assert self.newstyle in s
 
-    def testviewbox(self):
-        vb = svg.setviewbox([1, 1, 1, 1])
-        assert 'viewBox' in vb
-
-    def testSetGroup(self):
+    def testGroup(self):
         g = svg.group()
         self.assertIsInstance(g, basestring)
 
@@ -66,7 +62,7 @@ class SvgTestCase(unittest.TestCase):
         point = svg.circle((0.0, 0.0), r=2)
         assert isinstance(point, basestring)
         assert 'r="2"' in point
-        assert 'cy="0.0"' in point
+        self.assertIn('cy="0.0"', point)
         assert 'cx="0.0"' in point
 
     def testDrawPath(self):
