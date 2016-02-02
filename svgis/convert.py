@@ -7,18 +7,13 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
 
-from __future__ import division
 from functools import partial
 
 try:
     import visvalingamwyatt as vw
 except ImportError:
     pass
-
-
-def isinf(x):
-    inf = float('inf')
-    return x == inf or x == inf * -1
+from . import utils
 
 
 def updatebounds(old, new):
@@ -66,19 +61,10 @@ def extend_bbox(bbox, ext=100):
     return bbox[0] - ext, bbox[1] - ext, bbox[2] + ext, bbox[3] + ext
 
 
-def _frange(a, b, count=None):
-    """Yield <count> points between two floats"""
-    jump = (b - a) / (count or 10)
-
-    while a < b:
-        yield a
-        a += jump
-
-
 def bounds_to_ring(minx, miny, maxx, maxy):
     """Convert min, max points to a boundary ring."""
 
-    xs, ys = list(_frange(minx, maxx)), list(_frange(miny, maxy))
+    xs, ys = list(utils.between(minx, maxx)), list(utils.between(miny, maxy))
 
     left_top = [(minx, y) for y in ys] + [(x, maxy) for x in xs][1:]
 

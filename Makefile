@@ -36,6 +36,7 @@ test: tests/test_data/cb_2014_us_nation_20m.shp tests/test_data/test.svg
 	svgis scale -f 10 $(lastword $^) > /dev/null
 	svgis project -m utm -- -110.277906 35.450777 -110.000477 35.649030
 	svgis project -- -110.277906 35.450777 -110.000477 35.649030
+	svgis graticule -s 1 -- -110.2 35.45 -110.1 35.6 > /dev/null
 	svgis bounds $<
 	svgis bounds $< | \
 		xargs -n4 svgis draw -f 1000 -j '$(PROJECTION)' $< -b | \

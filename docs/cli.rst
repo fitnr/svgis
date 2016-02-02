@@ -359,6 +359,34 @@ reprojections it may include extra space.
 
 
 
+svgis graticule
+^^^^^^^^^^^^^^^^
+
+Generate a graticule (grid) in a given projection. The output file is in geojson format.
+
+For coordinates with negative numbers, use the ``--`` argument separator to prevent the utility
+getting confused:
+
+::
+    svgis graticule -o graticule.json -- 16.3 -34.8 32.8 -22.0
+
+::
+
+    Usage: svgis graticule [OPTIONS] minx miny maxx maxy
+
+      Generate a GeoJSON containing a graticule. Accepts a bounding box in
+      longitude and latitude (WGS84).
+
+    Options:
+      -s, --step FLOAT       Step between lines (in projected units)  [required]
+      -j, --crs TEXT         Specify a map projection. Accepts either an EPSG code
+                             (e.g. epsg:4456), a proj4 string, a file containing a
+                             proj4, "utm" (use local UTM), "local" (generate a
+                             local projection).
+      -o, --output FILENAME  Defaults to stdout.
+      -h, --help             Show this message and exit.
+
+
 svgis scale
 ^^^^^^^^^^^
 
@@ -393,6 +421,13 @@ svgis project
 ^^^^^^^^^^^^^
 
 SVGIS can automatically generate local projections or pick the local UTM projection for input geodata. This utility gives the projection SVGIS would pick for a given boundary box. It expects WGS84 coordinates.
+
+For coordinates with negative numbers, use the ``--`` argument separator to prevent the utility
+getting confused:
+
+::
+    svgis project -m utm -- 16.3449768409 -34.8191663551 32.830120477 -22.0913127581
+    +proj=utm +zone=35 +south +datum=WGS84 +units=m +no_defs
 
 ::
 

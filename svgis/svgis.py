@@ -16,6 +16,7 @@ import fiona.transform
 import fionautil.scale
 from . import convert, clip, draw, errors, projection, svg
 from . import style as _style
+from .utils import isinf
 
 """
 Draw geodata layers into SVGs.
@@ -455,7 +456,7 @@ class SVGIS(object):
         else:
             bounds = projection.transform_bounds(self.in_crs, self.out_crs, unprojected_bounds)
 
-        if any([convert.isinf(b) for b in bounds]):
+        if any([isinf(b) for b in bounds]):
             self.log.warn('Drawing has infinite bounds, consider changing projection or bounding box.')
 
         try:

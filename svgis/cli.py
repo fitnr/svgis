@@ -13,7 +13,7 @@ from signal import signal, SIGPIPE, SIG_DFL
 import logging
 import click
 from . import projection
-from . import style as _style, svgis, __version__
+from . import graticule as _graticule, style as _style, svgis, __version__
 
 
 none = {
@@ -157,8 +157,28 @@ def draw(layer, output, **kwargs):
 
 # Proj
 @main.command()
-@click.argument('bounds', nargs=4, type=float, metavar="minx, miny, maxx, maxy", default=None)
+@click.argument('bounds', nargs=4, type=float, metavar="minx miny maxx maxy", default=None)
 @click.option('-m', '--method', default='local', type=click.Choice(('utm', 'local')), help='Defaults to local.')
 def project(bounds, method):
     '''Get a local Transverse Mercator or UTM projection for a bounding box. Expects WGS84 coordinates.'''
     click.echo(projection.generatecrs(*bounds, proj_method=method).encode('utf-8'))
+
+
+crs_help2 = ('Specify a map projection. '
+                'Accepts either an EPSG code (e.g. epsg:4456), '
+                'a proj4 string, '
+                'a file containing a proj4, '
+                '"utm" (use local UTM), '
+                '"local" (generate a local projection).')
+
+
+# Graticule
+@main.command()
+@click.argument('bounds', nargs=4, type=float, metavar='minx miny maxx maxy')
+@click.option('-s', '--step', type=float, help='Step between lines (in projected units)', required=True)
+@click.option('-j', '--crs', type=str, default=None, help=crs_help2)
+@click.option('-o', '--output', default=sys.stdout, type=click.File('wb'), help="Defaults to stdout.")
+def graticule(bounds, step, crs, output):
+    '''Generate a GeoJSON containing a graticule. Accepts a bounding box in longitude and latitude (WGS84).'''
+    click.echo(_graticule.geojson(bounds, step, crs), file=output)
+    
