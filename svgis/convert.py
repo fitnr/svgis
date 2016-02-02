@@ -101,7 +101,7 @@ def simplifier(ratio):
         if ratio is None or ratio >= 100 or ratio < 1:
             raise ValueError
 
-        return partial(simplify, ratio=ratio)
+        return partial(simplify, ratio=ratio/100.)
 
     except (TypeError, ValueError, NameError):
         return lambda g: g
