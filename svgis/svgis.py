@@ -162,6 +162,7 @@ class SVGIS(object):
         self.clip = kwargs.pop('clip', True)
 
         self.log = logging.getLogger('svgis')
+        self.log.info('Starting SVGIS with %s', self.files)
 
         self.simplifier = convert.simplifier(kwargs.pop('simplify', None))
 
@@ -231,6 +232,7 @@ class SVGIS(object):
         Returns:
             unicode
         '''
+        self.log.info('Starting %s', filename)
         with fiona.open(filename, "r") as layer:
             bounds = unprojected_bounds or self._unprojected_bounds or layer.bounds
 
@@ -267,7 +269,7 @@ class SVGIS(object):
             'id': kwargs['_file_name'],
             'class': ' '.join(_style.sanitize(c) for c in layer_classes)
         }
-
+        self.log.info('Finishing %s', filename)
         return svg.group(group, **gargs)
 
     def _feature(self, feature, transforms, classes, id_field, **kwargs):
@@ -362,6 +364,7 @@ class SVGIS(object):
         drawing = svg.drawing((w, h), [container], **svgargs)
 
         if inline:
+            self.log.info('Inlining styles')
             return _style.inline(drawing, style)
 
         else:
