@@ -105,10 +105,10 @@ def scale(input, output, **kwargs):
 
 
 project_help = ('Specify a map projection. '
-                'Accepts either a valid EPSG code (e.g. epsg:4456), '
-                'a valid proj4 string, '
+                'Accepts either an EPSG code (e.g. epsg:4456), '
+                'a proj4 string, '
                 'a file containing a proj4, '
-                '"utm", '
+                '"utm" (use local UTM), '
                 '"file" (use existing), '
                 '"local" (generate a local projection).')
 
@@ -123,7 +123,7 @@ project_help = ('Specify a map projection. '
 @click.option('-p', '--padding', type=int, default=None, required=None, help='Buffer the map (in projection units)')
 @click.option('-i', '--id-field', type=str, metavar='FIELD', help='Geodata field to use as ID')
 @click.option('-a', '--class-fields', type=str, default='', metavar='FIELDS', help='Geodata fields to use as class (comma-separated)')
-@click.option('-j', '--project', default='local', metavar='KEYWORD', type=str, help=project_help)
+@click.option('-r', '--crs', default='local', metavar='KEYWORD', type=str, help=project_help)
 @click.option('-s', '--simplify', **simplifykwargs)
 @click.option('--clip/--no-clip', ' /-n', **clipkwargs)
 @click.option('--viewbox/--no-viewbox',  ' /-x', default=True, help='Draw SVG with or without a ViewBox. Drawing without may improve compatibility.')

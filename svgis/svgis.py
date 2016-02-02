@@ -40,7 +40,7 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
         bounds (sequence): (minx, miny, maxx, maxy)
         scale (int): Map scale. Larger numbers -> smaller maps
         padding (int): Pad around bounds by this much. In projection units.
-        project (string): EPSG code, PROJ.4 string, or file containing a PROJ.4 string
+        crs (string): EPSG code, PROJ.4 string, or file containing a PROJ.4 string
         clip (bool): If true, clip features output to bounds.
         style (string): Path to a css file or a css string.
         class_fields (Sequence): A comma-separated string or list of class names to
@@ -57,7 +57,7 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
     # Try to read style file
     styles = _style.pick(kwargs.pop('style', None))
 
-    project, out_crs = projection.pick(kwargs.pop('project', None))
+    proj_method, out_crs = projection.pick(kwargs.pop('crs', None))
 
     class_fields = (kwargs.pop('class_fields', None) or '').split(',')
 
@@ -65,7 +65,7 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
         layers,
         bounds=bounds,
         scalar=scale,
-        project=project,
+        proj_method=proj_method,
         out_crs=out_crs,
         padding=padding,
         style=styles,
@@ -151,7 +151,7 @@ class SVGIS(object):
 
         self.out_crs = out_crs
 
-        self.proj_method = kwargs.pop('project', None)
+        self.proj_method = kwargs.pop('proj_method', None)
 
         self.scalar = kwargs.pop('scalar', 1) or 1
 
