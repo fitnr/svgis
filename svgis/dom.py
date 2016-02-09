@@ -44,8 +44,9 @@ def apply_rule(doc, rule):
         while len(tokens) > 0:
             els, tokens = _process_tokens(doc, els, tokens)
 
-        for el in els:
-            el.attrib['style'] = el.attrib.get('style', u'') + declaration
+        if els:
+            for el in els:
+                el.attrib['style'] = el.attrib.get('style', u'') + declaration
 
 
 def _match_classes(elem_classes, rule_classes):
