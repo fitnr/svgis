@@ -1,3 +1,15 @@
+0.3.4
+-----
+
+* change `--project` option to `--crs`.
+* Fix error with empty CSS selectors
+* Add quiet and verbose logging options to `svgis draw`.
+* Fix simplification in `svgis draw`.
+* Ensure that geojson layers get a pretty name.
+* Regularize `svgis.svg`, adding tools for creating more SVG elements, even those not directly used here.
+* Try, just slightly, not to have infinite bounds
+* Expand docs.
+
 0.3.3
 -----
 

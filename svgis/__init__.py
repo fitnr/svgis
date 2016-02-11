@@ -8,14 +8,17 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
 
+from . import clip
 from . import convert
 from . import draw
+from . import errors
 from . import projection
 from . import svg
 from . import style
+from . import svgis
 from .svgis import map, SVGIS
 
-__version__ = '0.3.3'
+__version__ = '0.3.4'
 
 __all__ = [
     'convert',

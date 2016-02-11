@@ -20,6 +20,7 @@ def isinf(x):
     inf = float('inf')
     return x == inf or x == inf * -1
 
+
 def updatebounds(old, new):
     '''
     Extend old with any more distant values from newpoints.

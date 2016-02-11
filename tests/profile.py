@@ -19,4 +19,4 @@ if __name__ == '__main__':
     PROJECTION = '+proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'
     BOUNDS = (-124.0, 20.5, -64.0, 49.0)
 
-    svgis.map(shp, style=css, scale=1000, project=PROJECTION, bounds=BOUNDS, clip=True)
+    svgis.map(shp, style=css, scale=1000, crs=PROJECTION, bounds=BOUNDS, clip=True)
