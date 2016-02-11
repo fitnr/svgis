@@ -123,7 +123,7 @@ project_help = ('Specify a map projection. '
 @click.option('-p', '--padding', type=int, default=None, required=None, help='Buffer the map (in projection units)')
 @click.option('-i', '--id-field', type=str, metavar='FIELD', help='Geodata field to use as ID')
 @click.option('-a', '--class-fields', type=str, default='', metavar='FIELDS', help='Geodata fields to use as class (comma-separated)')
-@click.option('-r', '--crs', default='local', metavar='KEYWORD', type=str, help=project_help)
+@click.option('-j', '--crs', default='local', metavar='KEYWORD', type=str, help=project_help)
 @click.option('-s', '--simplify', **simplifykwargs)
 @click.option('--clip/--no-clip', ' /-n', **clipkwargs)
 @click.option('--viewbox/--no-viewbox',  ' /-x', default=True, help='Draw SVG with or without a ViewBox. Drawing without may improve compatibility.')

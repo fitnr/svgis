@@ -23,7 +23,7 @@ class MapTestCase(unittest.TestCase):
 
     def testMapWithStyle(self):
         result = svgis.map(
-            self.shp, style=self.css, scale=1000, project=self.projection, bounds=self.bounds, clip=None)
+            self.shp, style=self.css, scale=1000, crs=self.projection, bounds=self.bounds, clip=None)
         self.assertIn(self.css, result)
 
         style = 'tmp.css'
@@ -32,14 +32,14 @@ class MapTestCase(unittest.TestCase):
 
         try:
             result = svgis.map(
-                self.shp, style=style, scale=1000, project=self.projection, bounds=self.bounds, clip=None)
+                self.shp, style=style, scale=1000, crs=self.projection, bounds=self.bounds, clip=None)
             self.assertIn(self.css, result)
 
         finally:
             os.remove('tmp.css')
 
     def testMap(self):
-        a = svgis.map(self.shp, scale=1000, project=self.projection, bounds=self.bounds, clip=False)
+        a = svgis.map(self.shp, scale=1000, crs=self.projection, bounds=self.bounds, clip=False)
 
         result = minidom.parseString(a).getElementsByTagName('svg').item(0)
         fixture = minidom.parse(self.fixture).getElementsByTagName('svg').item(0)
@@ -51,7 +51,7 @@ class MapTestCase(unittest.TestCase):
             self.assertAlmostEqual(r, f, 5)
 
     def testMapProjFile(self):
-        a = svgis.map(self.shp, scale=1000, project='tests/test_data/test.proj4', bounds=self.bounds, clip=False)
+        a = svgis.map(self.shp, scale=1000, crs='tests/test_data/test.proj4', bounds=self.bounds, clip=False)
 
         result = minidom.parseString(a).getElementsByTagName('svg').item(0)
         fixture = minidom.parse(self.fixture).getElementsByTagName('svg').item(0)

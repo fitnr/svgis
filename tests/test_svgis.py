@@ -194,7 +194,7 @@ class SvgisTestCase(unittest.TestCase):
             "padding": 10,
             "inline_css": True,
             "clip": False,
-            'project': 'EPSG:32117',
+            'crs': 'EPSG:32117',
         }
         result = svgis.map([self.file], (-80, 40, -71, 45.1), **args)
 
