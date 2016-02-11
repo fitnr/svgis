@@ -5,7 +5,7 @@ Create SVG drawings from vector geodata files (SHP, geoJSON, etc).
 
 SVGIS is good for: creating small multiples, combining lots of datasets in a sensible projections, and drawing maps with  basic styles based on classes in the source data.
 
-```bash
+```
 svgis draw input.shp -o out.svg
 svgis draw --project utm south_dakota.shp north_dakota.geojson -o dakota.svg
 svgis draw --style my.css england.shp scotland.shp wales.shp -o great_britain.svg
@@ -35,7 +35,7 @@ pip install svgis[clip]
 
 ## Command line tools
 
-The `svgis` command line tool has four commands: `draw`, `project`, `scale` and `style`. `svgis scale` and `svgis style` will add a scaling factor or CSS style to an existing SVG file. `svgis project` is a utility for determining what projection `svgis draw` will (optionally) generate for given bounding boxes. Read the [docs]() for complete information on these commands and their options.
+The `svgis` command line tool has four commands: `draw`, `project`, `scale` and `style`. `svgis scale` and `svgis style` will add a scaling factor or CSS style to an existing SVG file. `svgis project` is a utility for determining what projection `svgis draw` will (optionally) generate for given bounding boxes. Read the [docs](http://pythonhosted.org/svgis/) for complete information on these commands and their options.
 
 ### Examples
 
