@@ -22,6 +22,11 @@ cov:
 	coverage report
 	coverage html
 
+docs.zip: $(wildcard docs/*.rst docs/*/*.rst)
+	$(MAKE) -C $(<D) html
+	cd $(<D)/_build/html; \
+	zip -qr ../../../$@ . -x '*/.DS_Store' .DS_Store
+
 profile: tests/profile.py
 	python $(PYTHONFLAGS) -m cProfile -s tottime tests/profile.py 2>/dev/null | head -5
 	@python $(PYTHONFLAGS) -m cProfile -s tottime $< | \
@@ -52,7 +57,7 @@ tests/test_data/cb_2014_us_nation_20m.zip: tests/test_data
 
 tests/test_data: ; mkdir -p $@
 
-deploy: README.rst | clean
+deploy: docs.zip README.rst | clean
 	python setup.py register
 	python3 setup.py bdist_wheel
 	rm -rf build

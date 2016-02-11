@@ -12,10 +12,8 @@ which are limited by the
 
 A few useful things to know about how SVGIS draws maps:
 
-* SVGIS places all the features in a layer in a group. This group has an ``id`` equal to
-the layer's name, and a ``class`` equal to the column names of the layer.
-* The ``class-fields`` and ``id-field`` options can be used to add ``class``es and ``id``s
-to the data. SVGIS always adds the layer name as a class to each feature.
+* SVGIS places all the features in a layer in a group. This group has an ``id`` equal to the layer's name, and a ``class`` equal to the column names of the layer.
+* The ``class-fields`` and ``id-field`` options can be used to add a ``class`` and ``id`` to the the drawing's elements. SVGIS always adds the layer name as a class to each feature.
 * Polygons with holes are drawn as ``path`` elements with the class ``polygon``.
 * SVGIS can set the id and class of features based on the input data.
 * By default, SVGIS draws black lines and no fill on shapes.

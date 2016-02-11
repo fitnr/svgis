@@ -24,10 +24,10 @@ Draw SVGs from input geodata.
       -i, --id-field FIELD            Geodata field to use as ID
       -a, --class-fields FIELDS       Geodata fields to use as class (comma-
                                       separated)
-      -j, --project KEYWORD           Specify a map projection. Accepts either a
-                                      valid EPSG code (e.g. epsg:4456), a valid
-                                      proj4 string, a file containing a proj4,
-                                      "utm", "file" (use existing), "local"
+      -j, --crs KEYWORD               Specify a map projection. Accepts either an
+                                      EPSG code (e.g. epsg:4456), a proj4 string,
+                                      a file containing a proj4, "utm" (use local
+                                      UTM), "file" (use existing), "local"
                                       (generate a local projection).
       -s, --simplify FACTOR           Simplify geometries. Accepts an integer
                                       between 1 and 100, the percentage points in
@@ -39,8 +39,9 @@ Draw SVGs from input geodata.
       -l, --inline / --no-inline      Inline CSS. Slightly slower, but required by
                                       some clients (e.g. Adobe) (default: do not
                                       inline).
+      -q, --quiet                     Ignore warnings.
+      -v, --verbose                   Talk a lot.
       -h, --help                      Show this message and exit.
-
 
 
 bounds
@@ -74,10 +75,12 @@ a certain display unit e.g. (pixels, fractions of an inch). Additionally,
 clients may have trouble handling very large numbers, using the scale option
 will produce smaller units.
 
-project
+(The shorthand option for ``--scale`` is ``-f`` as in factor.)
+
+crs
 ^^^^^^^
 
-The project argument accept a particular projection or a keyword that
+The ``crs`` argument accepts a particular projection or a keyword that
 helps SVGIS pick a projection for you.
 
 -  `EPSG <http://epsg.io>`__ code
@@ -90,14 +93,14 @@ non lat-lng projection (e.g. a state plane system or the British
 National Grid). If the first input file is projected, that projection
 will be used for the output. If the first file is in lat-long
 coordinates, a local projection will be generated, just like if
-``--project=local`` was given.
+``--crs=local`` was given.
 
 This example will draw an svg with `EPSG:2908 <http://epsg.io/2908>`__,
 the New York Long Island state plane projection:
 
 .. code:: bash
 
-    svgis draw --project EPSG:2908 nyc.shp -o nyc.svg
+    svgis draw --crs EPSG:2908 nyc.shp -o nyc.svg
 
 This example uses a Proj.4 string to draw with the `North America Albers
 Equal Area Conic <http://epsg.io/102008>`__ projection, which doesn't
@@ -106,7 +109,7 @@ have an EPSG code.
 .. code:: bash
 
     svgis draw in.shp -o out.svg \
-        --project "+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 \
+        --crs "+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 \
         +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
 
 This is equivalent to the above, and uses a proj.4 file:
@@ -116,7 +119,7 @@ This is equivalent to the above, and uses a proj.4 file:
     echo "+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 \
     +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs" > proj4.txt
 
-    svgis draw in.shp --project proj4.txt -o out.svg
+    svgis draw in.shp --crs proj4.txt -o out.svg
 
 With the ``utm`` keyword, SVGIS attempts to draw coordinates in the
 local UTM projection. The centerpoint of the bounding box will be used
@@ -125,7 +128,7 @@ several UTM boundaries.
 
 .. code:: bash
 
-    svgis draw --project utm in.shp -o out.svg
+    svgis draw --crs utm in.shp -o out.svg
     svgis draw -j utm in2.shp -o out2.svg
 
 When the local argument is given, SVGIS will generate a Transverse
@@ -135,13 +138,15 @@ urban area.
 
 .. code:: bash
 
-    svgis draw --project local input.shp -o out.svg
+    svgis draw --crs local input.shp -o out.svg
     svgis draw -j local input.shp -o out.svg
 
 To properly convert the input coordinate, svgis needs to know your input
 projection. If the input file doesn't specify an internal projection,
 SVGIS will assume that the coordinates are given in
 `WGS84 <http://epsg.io/4326>`__.
+
+(The shorthand option for ``--crs`` is ``-j`` as in ject.)
 
 style
 ^^^^^
@@ -153,7 +158,10 @@ The style parameter takes either a CSS file or a CSS string.
     svgis draw --style style.css in.shp -o out.svg
     svgis draw --style "line { stroke: green; }" in.shp -o out.svg
 
-SVG adds a ``polygon`` class to 
+SVGIS adds a ``polygon`` class to paths that drawn to represent
+multi-part polygons (polygons with holes).
+
+(The shorthand option for ``--style`` is ``-c`` as in CSS.)
 
 padding
 ^^^^^^^
