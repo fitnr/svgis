@@ -7,6 +7,7 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
 
+from types import GeneratorType
 try:
     from shapely.geometry import shape, mapping
     import numpy as np
@@ -23,10 +24,13 @@ def _expand_py(coordinates):
 
 
 def expand(ring):
-    try:
-        return _expand_np(ring)
-    except NameError:
-        return _expand_py(ring)
+    if isinstance(ring, GeneratorType):
+        try:
+            return _expand_np(ring)
+        except NameError:
+            return _expand_py(ring)
+    else:
+        return ring
 
 
 def expand_rings(rings):
