@@ -9,10 +9,11 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
 import os.path
-import pyproj
-import utm
 from fiona import transform
 import fiona.crs
+import fionautil.layer
+import pyproj
+import utm
 from . import convert
 
 '''
@@ -73,7 +74,7 @@ def choosecrs(in_crs, bounds, proj_method=None):
     Args:
         in_crs (dict): A fiona-type proj4 dictionary
         bounds (tuple): (minx, miny, maxx, maxy)
-        proj_method (string): wither 'utm' or 'local'
+        proj_method (string): either 'utm' or 'local'
 
     Returns:
         fiona-type proj4 dict.
@@ -102,6 +103,29 @@ def transform_bounds(in_crs, out_crs, bounds):
     xbounds, ybounds = transform.transform(in_crs, out_crs, xs, ys)
 
     return min(xbounds), min(ybounds), max(xbounds), max(ybounds)
+
+
+def layer_bounds(layer, crs=None):
+    '''
+    Get the bounds of a layer, optionally transforming them into a given CRS (or local or utm).
+
+    Args:
+        layer (str): path to a geodata file.
+        crs (str): (optional) Any of the crs specs typically accepted
+                   by SVGIS (An EPSG code, a proj4 string, a file containing a proj4, 'local' or 'utm')
+
+    Returns:
+        tuple
+    '''
+    meta = fionautil.layer.meta(layer)
+
+    if crs:
+        _, crs = pick(crs)
+        result = transform_bounds(meta['crs'], crs, meta['bounds'])
+    else:
+        result = meta['bounds']
+
+    return result
 
 
 def pick(project):

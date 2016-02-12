@@ -12,7 +12,7 @@ import sys
 from signal import signal, SIGPIPE, SIG_DFL
 import logging
 import click
-from .projection import generatecrs
+from . import projection
 from . import style as _style, svgis, __version__
 
 
@@ -104,13 +104,22 @@ def scale(input, output, **kwargs):
     click.echo(_style.rescale(input, factor=kwargs['scale']).encode('utf-8'), file=output)
 
 
-project_help = ('Specify a map projection. '
+crs_help = ('Specify a map projection. '
                 'Accepts either an EPSG code (e.g. epsg:4456), '
                 'a proj4 string, '
                 'a file containing a proj4, '
                 '"utm" (use local UTM), '
                 '"file" (use existing), '
                 '"local" (generate a local projection).')
+
+
+@main.command()
+@click.argument('layer', default=sys.stdin, type=click.Path(exists=True))
+@click.option('-j', '--crs', type=str, metavar='KEYWORD', default=None, help=crs_help)
+def bounds(layer, crs):
+    '''Return the bounds for a given layer.'''
+    a = projection.layer_bounds(layer, crs)
+    click.echo('{} {} {} {}'.format(*a), file=sys.stdout)
 
 
 # Draw
@@ -123,7 +132,7 @@ project_help = ('Specify a map projection. '
 @click.option('-p', '--padding', type=int, default=None, required=None, help='Buffer the map (in projection units)')
 @click.option('-i', '--id-field', type=str, metavar='FIELD', help='Geodata field to use as ID')
 @click.option('-a', '--class-fields', type=str, default='', metavar='FIELDS', help='Geodata fields to use as class (comma-separated)')
-@click.option('-j', '--crs', default='local', metavar='KEYWORD', type=str, help=project_help)
+@click.option('-j', '--crs', default='local', metavar='KEYWORD', type=str, help=crs_help)
 @click.option('-s', '--simplify', **simplifykwargs)
 @click.option('--clip/--no-clip', ' /-n', **clipkwargs)
 @click.option('--viewbox/--no-viewbox',  ' /-x', default=True, help='Draw SVG with or without a ViewBox. Drawing without may improve compatibility.')
@@ -143,7 +152,7 @@ def draw(input, output, **kwargs):
         log.handlers[0].setLevel(logging.ERROR)
         log.setLevel(logging.ERROR)
 
-    click.echo(svgis.map(input, **kwargs).encode('utf-8'), file=output)
+    click.echo(svgis.map(layer, **kwargs).encode('utf-8'), file=output)
     log.info('writing %s', output.name)
 
 
@@ -153,4 +162,4 @@ def draw(input, output, **kwargs):
 @click.option('-m', '--method', default='local', type=click.Choice(('utm', 'local')), help='Defaults to local.')
 def project(bounds, method):
     '''Get a local Transverse Mercator or UTM projection for a bounding box. Expects WGS84 coordinates.'''
-    click.echo(generatecrs(*bounds, proj_method=method).encode('utf-8'))
+    click.echo(projection.generatecrs(*bounds, proj_method=method).encode('utf-8'))

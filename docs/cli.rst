@@ -141,6 +141,14 @@ urban area.
     svgis draw --crs local input.shp -o out.svg
     svgis draw -j local input.shp -o out.svg
 
+If, for some reason you want to draw an SVG in lat-long coordinates,
+use the ``file`` keyword to force the projection of the first passed file:
+
+.. code:: bash
+    svgis draw --crs file input.shp -o out.svg
+    svgis draw -j file one.shp two.geojson -o out.svg
+
+
 To properly convert the input coordinate, svgis needs to know your input
 projection. If the input file doesn't specify an internal projection,
 SVGIS will assume that the coordinates are given in
@@ -300,6 +308,35 @@ Clipping won't occur when no bounding box is given.
 
 Helpers
 =======
+
+svgis bounds
+^^^^^^^^^^^^
+
+Get the bounds of a layer. The ``--crs`` option will transform the 
+bounds into the given projection, otherwise the native coordinates 
+are returned.
+
+The result is four coordinates in minx, miny, maxx, maxy order:
+
+::
+
+    svgis bounds in.shp
+    -87.8098 41.6444 -87.5209 42.0201
+
+::
+
+    Usage: svgis bounds [OPTIONS] [LAYER]
+
+      Return the bounds for a given layer.
+
+    Options:
+      -j, --crs KEYWORD  Specify a map projection. Accepts either an EPSG code
+                     epsg:4456), a proj4 string, a file containing a proj4, "utm"
+                     (use local UTM), "file" (use existing), "local" (generate a
+                     local projection).
+      -h, --help     Show this message and exit.
+
+
 
 svgis scale
 ^^^^^^^^^^^
