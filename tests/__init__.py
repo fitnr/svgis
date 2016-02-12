@@ -11,6 +11,19 @@
 from . import test_cli
 from . import test_convert
 from . import test_draw
+from . import test_error
 from . import test_projection
+from . import test_projection_draw
 from . import test_svg
 from . import test_svgis
+
+__all__ = [
+    'test_cli',
+    'test_convert',
+    'test_draw',
+    'test_error',
+    'test_projection',
+    'test_projection_draw',
+    'test_svg',
+    'test_svgis',
+]
