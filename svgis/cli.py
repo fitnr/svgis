@@ -132,11 +132,16 @@ project_help = ('Specify a map projection. '
 @click.option('-v', '--verbose', default=False, flag_value=True, help='Talk a lot.')
 def draw(input, output, **kwargs):
     '''Draw SVGs from input geodata'''
+
+    log = logging.getLogger('svgis')
+
     if kwargs.pop('verbose', None):
-        logging.getLogger('svgis').setLevel(logging.INFO)
+        log.handlers[0].setLevel(logging.INFO)
+        log.setLevel(logging.INFO)
 
     if kwargs.pop('quiet', None):
-        logging.getLogger('svgis').setLevel(logging.ERROR)
+        log.handlers[0].setLevel(logging.ERROR)
+        log.setLevel(logging.ERROR)
 
     click.echo(svgis.map(input, **kwargs).encode('utf-8'), file=output)
 
