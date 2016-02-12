@@ -53,11 +53,10 @@ csskwargs = {
     'default': False,
     'help': ('Inline CSS styles to each element. '
              'Slightly slower, but required by some clients (e.g. Adobe) '
-             '(default: do not inline).'
-            ),
+             '(default: do not inline).'),
 }
 
-inp = click.argument('input', default=sys.stdin, type=click.File('rb'))
+inp = click.argument('layer', default=sys.stdin, type=click.File('rb'))
 outp = click.argument('output', default=sys.stdout, type=click.File('wb'))
 
 
@@ -87,9 +86,9 @@ style_help = ("Style to append to SVG. "
 @click.option('--style', '-s', type=str, help=style_help, default='')
 @click.option('-r', '--replace', flag_value=True, help='Replace existing styles')
 @click.option('--inline/--no-inline', '-l/ ', **csskwargs)
-def style(input, output, **kwargs):
+def style(layer, output, **kwargs):
     """Add or inline the CSS styles of an SVG"""
-    result = _style.add_style(input, kwargs['style'], kwargs['replace'])
+    result = _style.add_style(layer, kwargs['style'], kwargs['replace'])
     if kwargs['inline']:
         result = _style.inline(result)
     click.echo(result.encode('utf-8'), file=output)
@@ -99,9 +98,9 @@ def style(input, output, **kwargs):
 @inp
 @outp
 @click.option('-f', '--scale', type=int)
-def scale(input, output, **kwargs):
+def scale(layer, output, **kwargs):
     '''Scale all coordinates in an SVG by a factor'''
-    click.echo(_style.rescale(input, factor=kwargs['scale']).encode('utf-8'), file=output)
+    click.echo(_style.rescale(layer, factor=kwargs['scale']).encode('utf-8'), file=output)
 
 
 crs_help = ('Specify a map projection. '
@@ -124,7 +123,7 @@ def bounds(layer, crs):
 
 # Draw
 @main.command()
-@click.argument('input', nargs=-1, type=str, required=True)
+@click.argument('layer', nargs=-1, type=str, required=True)
 @click.option('-o', '--output', default=sys.stdout, type=click.File('wb'), help="Defaults to stdout.")
 @click.option('-b', '--bounds', nargs=4, type=float, metavar="minx, miny, maxx, maxy", help='In the same coordinate system as the input layers', default=None)
 @click.option('-c', '--style', type=str, metavar='CSS', help="CSS file or string")
@@ -139,7 +138,7 @@ def bounds(layer, crs):
 @click.option('--inline/--no-inline', '-l/ ', **csskwargs)
 @click.option('-q', '--quiet', default=False, flag_value=True, help='Ignore warnings.')
 @click.option('-v', '--verbose', default=False, flag_value=True, help='Talk a lot.')
-def draw(input, output, **kwargs):
+def draw(layer, output, **kwargs):
     '''Draw SVGs from input geodata'''
 
     log = logging.getLogger('svgis')
