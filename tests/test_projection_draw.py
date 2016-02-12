@@ -35,20 +35,26 @@ class ProjectionDrawTestCase(unittest.TestCase):
 
     def testDrawWithReProjection(self):
         s = svgis.SVGIS(self.files, self.bounds[2790], out_crs=EPSG3528, scalar=100)
-        doc = minidom.parseString(s.compose())
-        polygons = doc.getElementsByTagName('polygon')
+        svg = s.compose()
 
-        assert len(polygons) == 2
+        i = svg.index('points')
+        self.assertIn('points', svg[i:])
 
-        assert 'points' in polygons[0].attributes.items()[0]
-        assert 'points' in polygons[1].attributes.items()[0]
+        polygons = minidom.parseString(svg).getElementsByTagName('polygon')
 
+        self.assertEqual(len(polygons), 2)
+
+        self.assertIn('points', dict(polygons[0].attributes.items()))
+        self.assertIn('points', dict(polygons[1].attributes.items()))
 
     def testDrawWithReProjectionRepeat(self):
         s = svgis.SVGIS(self.files[::-1], self.bounds[4269], out_crs=EPSG3528, scalar=100)
         s.compose()
 
-        s.compose(bounds=(-87.6475, 42.0705, -87.5165, 42.1452))
+        u = s.compose(bounds=(-87.6475, 42.0705, -87.5165, 42.1452))
+
+        i = u.index('points')
+        self.assertIn('points', u[i:])
 
 
 if __name__ == '__main__':
