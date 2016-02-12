@@ -44,7 +44,7 @@ cache:
 before_install:
     - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -qq update; fi
     - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -qq install -y libgdal1-dev; fi
-    - pip install docutils coverage
+    - pip install docutils coverage python-coveralls
     - if [[ $NUMPY == "yes" ]]; then pip install numpy; fi
     - if [[ $NUMPY != "yes" ]]; then pip uninstall -y numpy; fi
 
@@ -63,6 +63,7 @@ after_script:
   - svgis style -h
   - svgis scale -h
   - svgis project -h
-  - make cov
+  - svgis bounds -h
+  - coveralls
   - make profile
   - pip list

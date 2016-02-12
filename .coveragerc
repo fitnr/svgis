@@ -1,0 +1,7 @@
+[run]
+source = svgis
+
+[report]
+omit =
+  */python?.?/*
+  */site-packages/*
