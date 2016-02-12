@@ -141,24 +141,24 @@ class SvgisTestCase(unittest.TestCase):
         self.svgis_obj.in_crs = {'init': 'epsg:4269'}
         self.svgis_obj.out_crs = {'init': 'epsg:4269'}
 
-        a = self.svgis_obj._dims(1, bbox)
-        for z in zip(a, (10, 10, 0, 10)):
+        a = self.svgis_obj._corners(1, bbox)
+        for z in zip(a, (0, 0, 10, 10)):
             self.assertAlmostEqual(*z)
 
-        b = self.svgis_obj._dims(0.5, bbox)
-        for z in zip(b, (5, 5, 0, 5)):
+        b = self.svgis_obj._corners(0.5, bbox)
+        for z in zip(b, (0, 0, 5, 5)):
             self.assertAlmostEqual(*z)
 
         self.svgis_obj.padding = 10
-        c = self.svgis_obj._dims(0.25, bbox)
-        for z in zip(c, (22.5, 22.5, 0., 2.5)):
+        c = self.svgis_obj._corners(0.25, bbox)
+        for z in zip(c, (0, 0, 2.5, 2.5)):
             self.assertAlmostEqual(*z)
 
         with self.assertRaises((TypeError, ValueError)):
-            self.svgis_obj._dims(0.5, (1, 2, 3))
+            self.svgis_obj._corners(0.5, (1, 2, 3))
 
         with self.assertRaises((TypeError, ValueError)):
-            self.svgis_obj._dims(0.5, None)
+            self.svgis_obj._corners(0.5, None)
 
     def testSvgisComposeType(self):
         a = self.svgis_obj.compose(inline_css=True)

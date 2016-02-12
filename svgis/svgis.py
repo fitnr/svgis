@@ -5,6 +5,7 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
+
 from __future__ import division
 import os.path
 from collections import Iterable
@@ -120,15 +121,13 @@ class SVGIS(object):
     Args:
         files (list): A list of files to draw.
         bounds (Sequence): An iterable with four float coordinates in (minx, miny, maxx, maxy) format
-        out_crs (dict): A proj-4 like mapping. Overrides proj.
-        project (string): A keyword for picking a projection (file, utm or local).
+        out_crs (dict): A proj-4 like mapping. Overrides proj_method.
+        proj_method (string): A keyword for picking a projection (file, utm or local).
         style (string): CSS to add to output file
         scalar (int): Map scale to use (output coordinate are divided by this)
         padding (number): Buffer each edge by this many map units
 
     """
-
-    # pylint: disable=too-many-instance-attributes
 
     # The bounding box in input coordinates.
     _unprojected_bounds = None
@@ -268,9 +267,6 @@ class SVGIS(object):
                 # self._projected_bounds will continue to be updated.
                 self._extend_bounds(layer.crs, bounds)
 
-            # import pdb
-            # pdb.set_trace()
-
             transforms = [
                 self._reprojector(layer.crs),
                 partial(fionautil.scale.geometry, factor=scalar),
@@ -313,6 +309,9 @@ class SVGIS(object):
             classes (list): Names of fields to apply as classes in the output element.
             id_field (string): Field to use as id of the output element.
             kwargs: Additional properties to apply to the element.
+
+        Returns:
+            unicode
         '''
         # Produce the geometry.
         file_name = kwargs.pop('_file_name', '?')
@@ -340,15 +339,16 @@ class SVGIS(object):
             self.log.warn("Error drawing %s: %s", file_name, e)
             return u''
 
-    def compose(self, style=None, scalar=None, bounds=None, **kwargs):
+    def compose(self, scalar=None, bounds=None, **kwargs):
         '''
         Draw files to svg.
 
         Args:
             scalar (int): factor by which to scale the data, generally a small number (1/map scale).
-            style (string): CSS to append to parent object CSS
-            bounds (list):/tuple Map bounding box in input units. Defaults to map data bounds.
-            viewbox (bool): If True, draw SVG with a viewbox. If False, translate coordinates to the frame. Defaults to True.
+            bounds (Sequence): Map bounding box in input units. Defaults to map data bounds.
+            style (str): CSS to append to parent object CSS.
+            viewbox (bool): If True, draw SVG with a viewbox. If False, translate coordinates to the frame.
+                            Defaults to True.
             precision (float): Round coordinates to this precision [default: 0].
             simplify (float): Must be between 0 and 1. Fraction of removable coordinates to keep.
             inline (bool): If True, try to run CSS into each element.
@@ -358,9 +358,12 @@ class SVGIS(object):
         '''
         # Set up arguments
         scalar = scalar or self.scalar
-        style = self.style + (style or '')
-        viewbox = kwargs.pop('viewbox', True)
-        inline = kwargs.pop('inline', False)
+
+        drgs = {
+            'style': kwargs.pop('style', ''),
+            'viewbox': kwargs.pop('viewbox', True),
+            'inline': kwargs.pop('inline', False),
+        }
 
         if bounds:
             reset_bounds = True
@@ -375,48 +378,77 @@ class SVGIS(object):
 
         kwargs['precision'] = kwargs.get('precision', 0)
 
-        groupargs = {
-            'transform': 'scale(1, -1) translate({},{})'.format(self.padding, -self.padding),
-            'fill_rule': 'evenodd'
-        }
-        svgargs = {
-            'style': style
-        }
-
         # Draw files
         with fiona.drivers():
             members = [self._compose_file(f, scalar, unprojected_bounds=bounds, **kwargs) for f in self.files]
 
-        w, h, x0, y1 = self._dims(scalar, unprojected_bounds=bounds)
+        drawing = self._draw(members, bounds, scalar, **drgs)
 
         # Reset bounds so that self can be used again fresh. This is hacky.
         if reset_bounds:
             self._projected_bounds = (None, None, None, None)
 
-        if viewbox:
-            svgargs['viewbox'] = (x0, -y1, w, h)
+        return drawing
+
+    def _draw(self, members, bounds, scalar, **kwargs):
+        '''
+        Combine drawn layers into an SVG drawing.
+
+        Args:
+            members (list): unicode representations of SVG groups.
+            bounds (Sequence): Map bounding box in input units. If None, uses map data bounds.
+            scalar (int): factor by which to scale the data, generally a small number (1/map scale).
+            style (str): CSS to append to parent object CSS.
+            viewbox (bool): If True, draw SVG with a viewbox. If False, translate coordinates to
+                            the frame. Defaults to True.
+            inline (bool): If True, try to run CSS into each element.
+
+        Returns:
+            String (unicode in Python 2) containing an entire SVG document.
+        '''
+        groupargs = {
+            'transform': 'scale(1, -1) translate({},{})'.format(self.padding, -self.padding),
+            'fill_rule': 'evenodd'
+        }
+
+        svgargs = {
+            'style': self.style + (kwargs.pop('style', '') or '')
+        }
+
+        x0, y0, x1, y1 = self._corners(scalar, unprojected_bounds=bounds)
+
+        # width and height
+        size = [
+            x1 - x0 + (self.padding * 2),
+            y1 - y0 + (self.padding * 2)
+        ]
+
+        if kwargs.pop('viewbox', True):
+            svgargs['viewbox'] = [x0, -y1] + size
         else:
             groupargs['transform'] += ' translate({}, {})'.format(-x0, -y1)
 
         # Create container and then SVG
         container = svg.group(members, **groupargs)
-        drawing = svg.drawing((w, h), [container], **svgargs)
+        drawing = svg.drawing(size, [container], **svgargs)
 
-        if inline:
+        if kwargs.pop('inline', False):
             self.log.info('Inlining styles')
-            return _style.inline(drawing, style)
+            drawing = _style.inline(drawing, svgargs['style'])
 
-        else:
-            return drawing
+        return drawing
 
-    def _dims(self, scalar, unprojected_bounds=None):
+    def _corners(self, scalar, unprojected_bounds=None):
         '''
-        Calculate the width, height, origin X and max Y of the document.
+        Calculate the bounds in svg coordinates.
         By default, uses self's minimum bounding rectangle.
 
         Args:
             scalar (int): Map scale
             bounds (Sequence): Optional bounds to calculate with (in output coordinates)
+
+        Returns:
+            tuple representing minx, miny, maxx, maxy in output coordinates
         '''
         if unprojected_bounds is None:
             bounds = self._projected_bounds
@@ -426,14 +458,8 @@ class SVGIS(object):
         if any([convert.isinf(b) for b in bounds]):
             self.log.warn('Drawing has infinite bounds, consider changing projection or bounding box.')
 
-        scalar = float(scalar)
-
         try:
-            x0, y0, x1, y1 = [i * scalar for i in bounds]
-            w = x1 - x0 + (self.padding * 2)
-            h = y1 - y0 + (self.padding * 2)
-
-            return w, h, x0, y1
+            return [i * float(scalar) for i in bounds]
 
         except ValueError:
             raise ValueError('Problem calculating bounds. Check that bounds are in minx, miny, maxx, maxy order.')
