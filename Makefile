@@ -39,10 +39,11 @@ test: tests/test_data/cb_2014_us_nation_20m.shp tests/test_data/test.svg
 	svgis scale -f 10 $(lastword $^) > /dev/null
 	svgis project -m utm -- -110.277906 35.450777 -110.000477 35.649030
 	svgis project -- -110.277906 35.450777 -110.000477 35.649030
-
-	svgis draw -j '$(PROJECTION)' -f 1000 $< | \
+	svgis bounds $<
+	svgis bounds $< | \
+		xargs -n4 svgis draw -f 1000 -j '$(PROJECTION)' $< -b | \
 		svgis style -s 'polygon{fill:green}' - | \
-		svgis scale -f 10 - > /dev/null
+		svgis scale -f 10 - >/dev/null
 
 tests/test_data/test.svg: tests/test_data/cb_2014_us_nation_20m.shp
 	- svgis draw -j '$(PROJECTION)' -f 1000 -c "polygon { fill: blue }" --bounds -124 20.5 -64 49 $< -o $@

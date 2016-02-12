@@ -323,6 +323,23 @@ The result is four coordinates in minx, miny, maxx, maxy order:
     svgis bounds in.shp
     -87.8098 41.6444 -87.5209 42.0201
 
+
+This is useful for setting the bounds of a drawing based on the bounds
+of a layer:
+
+::
+
+    svgis bounds in.shp |
+    xargs -n 4 svgis draw --crs EPSG:3003 in.shp in2.json in3.shp --bounds > out.svg
+
+
+Or, check what projection SVGIS will generate given a file:
+
+::
+
+    svgis bounds in.shp |
+    xargs -n 4 svgis project --
+
 ::
 
     Usage: svgis bounds [OPTIONS] [LAYER]
