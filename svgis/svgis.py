@@ -133,6 +133,9 @@ class SVGIS(object):
     # The bounding box in input coordinates.
     _unprojected_bounds = None
 
+    # The crs of these bounds
+    _unprojected_bounds_crs = None
+
     # The bounding box in output coordinates, to be determined as we draw.
     _projected_bounds = (None, None, None, None)
 
@@ -162,14 +165,13 @@ class SVGIS(object):
         self.clip = kwargs.pop('clip', True)
 
         self.log = logging.getLogger('svgis')
-        self.log.info('Starting SVGIS with %s', self.files)
+        self.log.info('starting SVGIS with %s', self.files)
 
         self.simplifier = convert.simplifier(kwargs.pop('simplify', None))
 
         self.id_field = kwargs.pop('id_field', None)
 
         self.class_fields = kwargs.pop('class_fields', [])
-
 
     def __repr__(self):
         return ('SVGIS(files={0.files}, out_crs={0.out_crs})').format(self)
@@ -212,8 +214,21 @@ class SVGIS(object):
             # the local UTM, or customize local TM
             self.out_crs = projection.choosecrs(layer_crs, bounds, proj_method=self.proj_method)
 
-        projected = projection.transform_bounds(layer_crs, self.out_crs, bounds)
+    def _project_bounds(self, in_crs, passed_bounds):
+        '''Set projected bounds, but only once.'''
+        if passed_bounds and not any(self._projected_bounds):
+            self._projected_bounds = projection.transform_bounds(in_crs, self.out_crs, passed_bounds)
+            self._unprojected_bounds_crs = in_crs
+
+    def _extend_bounds(self, in_crs, layer_bounds):
+        '''Extend projected bounds, used when calculating bounds as we go.'''
+        projected = projection.transform_bounds(in_crs, self.out_crs, layer_bounds)
         self._projected_bounds = convert.updatebounds(self._projected_bounds, projected)
+
+    def _get_local_projected_bounds(self, layer_crs):
+        '''Get the projected bounds in local terms.'''
+        if layer_crs != self._unprojected_bounds_crs:
+            return projection.transform_bounds(self.out_crs, layer_crs, self._projected_bounds)
 
     def _compose_file(self, filename, scalar, unprojected_bounds=None, **kwargs):
         '''
@@ -232,12 +247,29 @@ class SVGIS(object):
         Returns:
             unicode
         '''
-        self.log.info('Starting %s', filename)
+        self.log.info('starting %s', filename)
         with fiona.open(filename, "r") as layer:
+
             bounds = unprojected_bounds or self._unprojected_bounds or layer.bounds
 
-            # Set the output CRS, if not yet set. Also extend _projected_bounds.
+            # Set the output CRS, if not yet set.
             self.set_crs(layer.crs, bounds)
+
+            if unprojected_bounds or self._unprojected_bounds:
+                # Use the passed bounds, if they exist.
+                # This sets self._projected_bounds, and prevents it from being altered
+                self._project_bounds(layer.crs, unprojected_bounds)
+                # Get the bounds to use here from the projected bounds.
+                # If None, the unprojected bounds are our best bet.
+                bounds = self._get_local_projected_bounds(layer.crs) or unprojected_bounds or self._unprojected_bounds
+
+            else:
+                # Using bounds from all the input layers.
+                # self._projected_bounds will continue to be updated.
+                self._extend_bounds(layer.crs, bounds)
+
+            # import pdb
+            # pdb.set_trace()
 
             transforms = [
                 self._reprojector(layer.crs),
@@ -249,7 +281,7 @@ class SVGIS(object):
 
             # Correct for OGR's lack of creativity for GeoJSONs.
             if layer.name == 'OGRGeoJSON':
-                kwargs['_file_name'], _ = os.path.splitext(os.path.basename(filename))
+                kwargs['_file_name'] = os.path.splitext(os.path.basename(filename))[0]
             else:
                 kwargs['_file_name'] = layer.name
 
@@ -259,7 +291,6 @@ class SVGIS(object):
 
             # Remove the id field if it doesn't appear in the properties.
             id_field = kwargs.pop('id_field', self.id_field)
-
             layer_classes = list(layer.schema['properties'].keys())
             kwargs['id_field'] = id_field if id_field in layer_classes else None
 
@@ -269,7 +300,7 @@ class SVGIS(object):
             'id': kwargs['_file_name'],
             'class': ' '.join(_style.sanitize(c) for c in layer_classes)
         }
-        self.log.info('Finishing %s', filename)
+        self.log.info('finishing %s', filename)
         return svg.group(group, **gargs)
 
     def _feature(self, feature, transforms, classes, id_field, **kwargs):
@@ -328,10 +359,14 @@ class SVGIS(object):
         # Set up arguments
         scalar = scalar or self.scalar
         style = self.style + (style or '')
-        bounds = bounds or self._unprojected_bounds
-
         viewbox = kwargs.pop('viewbox', True)
         inline = kwargs.pop('inline', False)
+
+        if bounds:
+            reset_bounds = True
+        else:
+            reset_bounds = False
+            bounds = self._unprojected_bounds
 
         if 'simplify' in kwargs:
             kwargs['simplifier'] = convert.simplifier(kwargs.pop('simplify'))
@@ -353,6 +388,10 @@ class SVGIS(object):
             members = [self._compose_file(f, scalar, unprojected_bounds=bounds, **kwargs) for f in self.files]
 
         w, h, x0, y1 = self._dims(scalar, unprojected_bounds=bounds)
+
+        # Reset bounds so that self can be used again fresh. This is hacky.
+        if reset_bounds:
+            self._projected_bounds = (None, None, None, None)
 
         if viewbox:
             svgargs['viewbox'] = (x0, -y1, w, h)

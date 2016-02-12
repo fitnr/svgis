@@ -144,6 +144,7 @@ def draw(input, output, **kwargs):
         log.setLevel(logging.ERROR)
 
     click.echo(svgis.map(input, **kwargs).encode('utf-8'), file=output)
+    log.info('writing %s', output.name)
 
 
 # Proj
