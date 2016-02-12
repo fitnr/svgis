@@ -17,11 +17,6 @@ README.rst: README.md
 
 .PHONY: all test cov deploy clean
 
-cov:
-	- coverage run --include='svgis/*','build/lib/svgis/*' setup.py $(QUIET) test
-	coverage report
-	coverage html
-
 docs.zip: $(wildcard docs/*.rst docs/*/*.rst)
 	$(MAKE) -C $(<D) html
 	cd $(<D)/_build/html; \
@@ -33,7 +28,9 @@ profile: tests/profile.py
 	grep -E '(svgis|draw|css|projection|svg|cli|clip|convert|errors).py'
 
 test: tests/test_data/cb_2014_us_nation_20m.shp tests/test_data/test.svg
-	python $(PYTHONFLAGS) setup.py $(QUIET) test
+	coverage run --include='svgis/*','build/lib/svgis/*' setup.py $(QUIET) test
+	coverage report
+	coverage html
 
 	svgis style -s 'polygon{fill:green}' $(lastword $^) > /dev/null
 	svgis scale -f 10 $(lastword $^) > /dev/null
