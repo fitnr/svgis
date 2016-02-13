@@ -9,7 +9,7 @@
 
 from __future__ import division
 from functools import partial
-from itertools import izip as zip
+
 try:
     import visvalingamwyatt as vw
 except ImportError:

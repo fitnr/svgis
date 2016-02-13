@@ -98,7 +98,7 @@ def transform_bounds(in_crs, out_crs, bounds):
         raise TypeError('Need output CRS, not None')
 
     ring = convert.bounds_to_ring(*bounds)
-    xs, ys = zip(*ring)
+    xs, ys = list(zip(*ring))
 
     xbounds, ybounds = transform.transform(in_crs, out_crs, xs, ys)
 
