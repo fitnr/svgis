@@ -117,7 +117,7 @@ def layer_bounds(layer, crs=None):
     Returns:
         tuple
     '''
-    meta = fionautil.layer.meta(layer)
+    meta = fionautil.layer.meta_complete(layer)
 
     if crs:
         _, crs = pick(crs)
