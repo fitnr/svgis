@@ -1,3 +1,12 @@
+0.3.5
+-----
+
+* Fix problem reprojecting bounds with mixed projections.
+* Add cli tool for getting bounds of a layer
+* Repair --verbose option.
+* Add `svgis bounds` command line tool for checking the bounds of a layer.
+* Expand tests (coverage now above 90%)
+
 0.3.4
 -----
 
