@@ -8,6 +8,7 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
 
+from __future__ import unicode_literals
 import unittest
 import functools
 import collections
@@ -23,9 +24,13 @@ class ConvertTestCase(unittest.TestCase):
         bounds1 = (None, 0.1, None, 1.1)
         bounds2 = (0.2, 0.2, 1.2, 1.2)
         bounds3 = (0.1, 0.3, 1.5, 1.1)
+        bounds4 = (0.05, 0.4, float('inf'), 1.2)
+        bounds5 = (0.05, -1 * float('inf'), 1.4, 1.2)
 
         self.assertSequenceEqual(convert.updatebounds(bounds1, bounds2), (0.2, 0.1, 1.2, 1.2))
         self.assertSequenceEqual(convert.updatebounds(bounds3, bounds2), (0.1, 0.2, 1.5, 1.2))
+        self.assertSequenceEqual(convert.updatebounds(bounds3, bounds4), (0.05, 0.3, 1.5, 1.2))
+        self.assertSequenceEqual(convert.updatebounds(bounds3, bounds5), (0.05, 0.3, 1.5, 1.2))
 
     def testConvertBbox(self):
         bounds = (-100, -100, 100, 100)
@@ -60,3 +65,7 @@ class ConvertTestCase(unittest.TestCase):
         assert convert.bbox_covers(b1, b3) is False
         assert convert.bbox_covers(b3, b1) is False
         assert convert.bbox_covers(b3, b3) is True
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -28,13 +28,14 @@ def updatebounds(old, new):
     '''
     bounds = []
     inf = float('inf')
+    neginf = inf * -1
 
     # python3 gives TypeError when using None in min/max
     # This contraption avoids that problem.
     # List comp below replaces Nones in bounds with real values in new or old
     for n, m in zip(new[:2], old[:2]):
         try:
-            if m == inf * -1 or n == inf * -1:
+            if neginf in (m, n):
                 bounds.append(max(n, m))
                 continue
 
@@ -44,7 +45,7 @@ def updatebounds(old, new):
 
     for n, m in zip(new[2:], old[2:]):
         try:
-            if m == inf or n == inf:
+            if inf in (m, n):
                 bounds.append(min(n, m))
                 continue
 
