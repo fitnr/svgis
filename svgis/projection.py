@@ -129,13 +129,19 @@ def layer_bounds(layer, crs=None):
 
 
 def pick(project):
-    use_proj, out_crs = None, None
+    '''
+        Pick a projection or projection method to use.
+
+    Returns:
+        tuple: (projection method, crs)
+    '''
+    proj_method, out_crs = None, None
 
     if project is None:
         project = 'local'
 
     if project.lower() in ('local', 'utm'):
-        use_proj = project.lower()
+        proj_method = project.lower()
 
     elif os.path.exists(project):
         # Is a file
@@ -152,4 +158,4 @@ def pick(project):
         # fiona.crs.from_string returns {} if it isn't.
         out_crs = fiona.crs.from_string(project)
 
-    return use_proj, out_crs
+    return proj_method, out_crs

@@ -170,7 +170,7 @@ def drawing(size, members, viewbox=None, style=None):
     Args:
         size (tuple): width, height
         members (list): Strings to add to output.
-        viewbox (Sequence): Four coordinates that describe a bounding box.
+        viewbox (Sequence): Four coordinates that describe an SVG viewBox.
         style (string): CSS string.
     '''
     kwargs = {

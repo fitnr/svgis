@@ -462,4 +462,4 @@ class SVGIS(object):
             return [i * float(scalar) for i in bounds]
 
         except ValueError:
-            raise ValueError('Problem calculating bounds. Check that bounds are in minx, miny, maxx, maxy order.')
+            raise ValueError('Problem calculating drawing dimensions. Are bounds are in minx, miny, maxx, maxy order?')

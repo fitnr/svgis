@@ -340,6 +340,10 @@ Or, check what projection SVGIS will generate given a file:
     svgis bounds in.shp |
     xargs -n 4 svgis project --
 
+Keep in mind that when converting between projections, ``svgis bounds`` is lazy.
+The returned bounding box will cover the geometry, but for certain extreme
+reprojections it may include extra space.
+
 ::
 
     Usage: svgis bounds [OPTIONS] [LAYER]

@@ -38,7 +38,7 @@ pip install svgis[clip]
 
 ## Command line tools
 
-The `svgis` command line tool has four commands: `draw`, `project`, `scale` and `style`. `svgis scale` and `svgis style` will add a scaling factor or CSS style to an existing SVG file. `svgis project` is a utility for determining what projection `svgis draw` will (optionally) generate for given bounding boxes. Read the [docs](http://pythonhosted.org/svgis/) for complete information on these commands and their options.
+The `svgis` command line tool has several commands: `bounds`, `draw`, `project`, `scale` and `style`. `svgis scale` and `svgis style` will add a scaling factor or CSS style to an existing SVG file. `svgis project` is a utility for determining what projection `svgis draw` will (optionally) generate for given bounding boxes. `svgis bounds` returns the bounding box for a layer in a given projection. Read the [docs](http://pythonhosted.org/svgis/) for complete information on these commands and their options.
 
 ### Examples
 
