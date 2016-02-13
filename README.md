@@ -1,5 +1,8 @@
 SVGIS
 -----
+[![Build Status](http://img.shields.io/travis/fitnr/svgis/master.svg?style=flat)](https://travis-ci.org/fitnr/svgis)
+[![Coverage Status](https://img.shields.io/coveralls/fitnr/svgis/master.svg?style=flat)](https://coveralls.io/r/fitnr/svgis?branch=master)
+
 
 Create SVG drawings from vector geodata files (SHP, geoJSON, etc).
 
