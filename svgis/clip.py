@@ -71,6 +71,7 @@ def prepare(bbox):
         bbox = shape(bounds)
 
         def func(geometry):
+            # This is technically only needed in Py3, but whatever.
             geom = expand_geom(geometry)
             clipped = bbox.intersection(shape(geom))
             return mapping(clipped)

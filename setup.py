@@ -63,7 +63,7 @@ setup(
     ],
 
     extras_require={
-        'numpy': ['numpy'],
+        'numpy': [''],
         'clip': ['shapely>=1.5.7'],
         'inline': [],
         'simplify': ['visvalingamwyatt>=0.1.1']
