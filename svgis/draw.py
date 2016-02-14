@@ -10,7 +10,6 @@
 
 from __future__ import division
 import fionautil.measure
-import fionautil.round
 from . import clip, svg
 from .errors import SvgisError
 
@@ -153,17 +152,14 @@ def geometry(geom, bbox=None, precision=3, **kwargs):
     if bbox:
         geom = clip.clip(geom, bbox)
 
-    if precision is not None:
-        geom = fionautil.round.geometry(geom, precision)
-
     if geom['type'] in ('Point', 'MultiPoint'):
-        return points(geom, **kwargs)
+        return points(geom, precision=precision, **kwargs)
 
     elif geom['type'] in ('LineString', 'MultiLineString'):
-        return lines(geom, **kwargs)
+        return lines(geom, precision=precision, **kwargs)
 
     elif geom['type'] in ('Polygon', 'MultiPolygon'):
-        return polygons(geom, **kwargs)
+        return polygons(geom, precision=precision, **kwargs)
 
     elif geom['type'] == 'GeometryCollection':
         return geometrycollection(geom, bbox, precision, **kwargs)

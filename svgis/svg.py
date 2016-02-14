@@ -26,17 +26,35 @@ def _element(tag, **kwargs):
     return u'<{}{}/>'.format(tag, toattribs(**kwargs))
 
 
-def circle(point, **kwargs):
+def _round(i, precision):
+    if precision is None:
+        return i
+    else:
+        return round(i, precision)
+
+
+def _fmtcoord(precision):
+    if precision is None:
+        return u'{0[0]},{0[1]}'
+    else:
+        return u'{{0[0]:.{0}f}},{{0[1]:.{0}f}}'.format(precision)
+
+
+def circle(point, precision=None, **kwargs):
     '''
     Create a svg circle element. Keyword arguments are mapped to attributes.
 
     Args:
         point (tuple): The center of the circle
+        precision (int): rounding precision
+
+    Returns:
+        str
     '''
-    return _element(u'circle', cx=point[0], cy=point[1], **kwargs)
+    return _element(u'circle', cx=_round(point[0], precision), cy=_round(point[1], precision), **kwargs)
 
 
-def text(string, start, **kwargs):
+def text(string, start, precision=None, **kwargs):
     '''
     Create an svg text element.
 
@@ -47,10 +65,11 @@ def text(string, start, **kwargs):
     Returns:
         str
     '''
+    start = [_round(i, precision) for i in start]
     return _wrap(u'text', string, x=start[0], y=start[1], **kwargs)
 
 
-def rect(start, width, height, **kwargs):
+def rect(start, width, height, precision=None, **kwargs):
     '''
     Create an svg rect element.
 
@@ -58,24 +77,33 @@ def rect(start, width, height, **kwargs):
         start (tuple): starting coordinate
         width (int): rect width
         height (int): rect height
+        precision (int): rounding precision
 
     Returns:
         str
     '''
+    start = [_round(i, precision) for i in start]
+    width = _round(width, precision)
+    height = _round(height, precision)
+
     return _element(u'rect', x=start[0], y=start[1], width=width, height=height, **kwargs)
 
 
-def line(start, end, **kwargs):
+def line(start, end, precision=None, **kwargs):
     '''
     Create an svg line element.
 
     Args:
         start (tuple): starting coordinate
         end (tuple): ending coordinate
+        precision (int): rounding precision
 
     Returns:
         str
     '''
+    start = [_round(i, precision) for i in start]
+    end = [_round(i, precision) for i in end]
+
     return _element(u'line', x1=start[0], y1=start[1], x2=end[0], y2=end[1], **kwargs)
 
 
@@ -83,42 +111,51 @@ def _isstr(x):
     return isinstance(x, basestring)
 
 
-def path(coordinates, **kwargs):
+def path(coordinates, precision=None, **kwargs):
     '''
     Create an svg path element as a string.
 
     Args:
         coordinates (Sequence): A sequence of coordinates and string instructions
+        precision (int): rounding precision
+
+    Returns:
+        str
     '''
-    coords = [i if _isstr(i) else u'{0[0]},{0[1]}'.format(i) for i in coordinates]
+    fmt = _fmtcoord(precision)
+    coords = [i if _isstr(i) else fmt.format(i) for i in coordinates]
     return _element(u'path', d=' '.join(coords), **kwargs)
 
 
-def polyline(coordinates, **kwargs):
+def polyline(coordinates, precision=None, **kwargs):
     '''
     Create an svg polyline element
 
     Args:
         coordinates (Sequence): x, y coordinates
+        precision (int): rounding precision
 
     Returns:
         str
     '''
-    points = u' '.join(u'{0[0]},{0[1]}'.format(c) for c in coordinates)
+    fmt = _fmtcoord(precision)
+    points = u' '.join(fmt.format(c) for c in coordinates)
     return _element(u'polyline', points=points, **kwargs)
 
 
-def polygon(coordinates, **kwargs):
+def polygon(coordinates, precision=None, **kwargs):
     '''
     Create an svg polygon element
 
     Args:
         coordinates (Sequence): x, y coordinates
+        precision (int): rounding precision
 
     Returns:
         str
     '''
-    points = u' '.join(u'{0[0]},{0[1]}'.format(c) for c in coordinates)
+    fmt = _fmtcoord(precision)
+    points = u' '.join(fmt.format(c) for c in coordinates)
     return _element(u'polygon', points=points, **kwargs)
 
 

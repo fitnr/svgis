@@ -76,7 +76,32 @@ class SvgTestCase(unittest.TestCase):
         assert ' M ' in path
         assert 'Z"' in path
         assert '10.0,0.0' in path
-        
+    
+    def assertPartsIn(self, fixture, test):
+        for f in fixture:
+            self.assertIn(f, test)
+
+    def testRect(self):
+        rect = svg.rect((0, 0), 10, 10).encode('utf-8')
+        fix = '<rect', 'x="0"', 'y="0"', 'width="10"', 'height="10"', '/>'
+        self.assertPartsIn(fix, rect)
+
+    def testLine(self):
+        line = svg.line((0, 0), (10, 10)).encode('utf-8')
+        fix = '<line', 'x1="0"', 'y1="0"', 'x2="10"', 'y2="10"', '/>'
+        self.assertPartsIn(fix, line)
+
+    def testText(self):
+        text = svg.text('hi', (2, 2))
+        fix = '<text', 'x="2"', 'y="2"', 'hi', '</text>'
+
+        self.assertPartsIn(fix, text)
+
+        text = svg.text('hi', (2.22222, 2.222222), precision=2)
+        fix = '<text', 'x="2.22"', 'y="2.22"', 'hi', '</text>'
+
+        self.assertPartsIn(fix, text)
+
 
 if __name__ == '__main__':
     unittest.main()
