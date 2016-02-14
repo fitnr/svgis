@@ -28,7 +28,7 @@ profile: tests/profile.py
 	grep -E '(svgis|draw|css|projection|svg|cli|clip|convert|errors).py'
 
 test: tests/test_data/cb_2014_us_nation_20m.shp tests/test_data/test.svg
-	coverage run --include='svgis/*','build/lib/svgis/*' setup.py $(QUIET) test
+	coverage run --include='svgis/*','build/lib/*' setup.py $(QUIET) test
 	coverage report
 	coverage html
 
@@ -47,6 +47,7 @@ tests/test_data/test.svg: tests/test_data/cb_2014_us_nation_20m.shp
 	- svgis draw -j '$(PROJECTION)' -f 1000 -c "polygon { fill: blue }" --bounds -124 20.5 -64 49 $< -o $@
 	@touch $@
 
+.PRECIOUS: tests/test_data/cb_2014_us_nation_20m.shp
 tests/test_data/cb_2014_us_nation_20m.shp: tests/test_data/cb_2014_us_nation_20m.zip
 	unzip -q -o $< -d $(@D)
 	@touch $@

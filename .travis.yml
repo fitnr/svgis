@@ -22,18 +22,18 @@ git:
 sudo: true
 
 env:
-  - NUMPY=yes
+  - SIMPLIFY=yes
   - CLIP=yes
-  - NUMPY= CLIP=
+  - SIMPLIFY= CLIP=
 
 matrix:
   exclude:
     - python: 3.3
-      env: NUMPY=yes
+      env: SIMPLIFY=yes
     - python: 3.3
       env: CLIP=yes
     - python: 3.4
-      env: NUMPY=yes
+      env: SIMPLIFY=yes
     - python: 3.4
       env: CLIP=yes
 
@@ -45,16 +45,16 @@ before_install:
     - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -qq update; fi
     - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -qq install -y libgdal1-dev; fi
     - pip install docutils coverage python-coveralls
-    - if [[ $NUMPY != "yes" ]]; then pip uninstall -y numpy; fi
+    - if [[ $SIMPLIFY != "yes" ]]; then pip uninstall -y numpy visvalingamwyatt || :; fi
+    - make tests/test_data/cb_2014_us_nation_20m.shp
 
 install:
-    - make
     - python setup.py install
     - if [[ $CLIP == "yes" ]]; then pip install -e .[clip]; fi
-    - if [[ $NUMPY == "yes" ]]; then pip install -e .[simplify]; fi
+    - if [[ $SIMPLIFY == "yes" ]]; then pip install -e .[simplify]; fi
 
 script:
-    - make test QUIET= -W tests/test_data/cb_2014_us_nation_20m.zip
+    - make test QUIET=
 
 after_script:
   - svgis -h

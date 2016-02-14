@@ -2,10 +2,6 @@
 source = svgis
 
 [report]
-omit =
-  */python?.?/*
-  */site-packages/*
-
 exclude_lines =
     pragma: no cover
     def __repr__
