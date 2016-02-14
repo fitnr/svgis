@@ -324,7 +324,7 @@ class SVGIS(object):
                 geom = t(geom)
 
         except ValueError as e:
-            self.log.warn("Error drawing feature %s of %s: %s", file_name, feature.get('id', '?'), e)
+            self.log.warning("Error drawing feature %s of %s: %s", file_name, feature.get('id', '?'), e)
             return u''
 
         # Set up the element's properties.
@@ -337,7 +337,7 @@ class SVGIS(object):
             return draw.geometry(geom, **kwargs)
 
         except errors.SvgisError as e:
-            self.log.warn("Error drawing %s: %s", file_name, e)
+            self.log.warning("Error drawing %s: %s", file_name, e)
             return u''
 
     def compose(self, scalar=None, bounds=None, **kwargs):
@@ -457,7 +457,7 @@ class SVGIS(object):
             bounds = projection.transform_bounds(self.in_crs, self.out_crs, unprojected_bounds)
 
         if any([isinf(b) for b in bounds]):
-            self.log.warn('Drawing has infinite bounds, consider changing projection or bounding box.')
+            self.log.warning('Drawing has infinite bounds, consider changing projection or bounding box.')
 
         try:
             return [i * float(scalar) for i in bounds]

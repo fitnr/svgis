@@ -66,7 +66,7 @@ def pick(style):
         return None
 
     except IOError:
-        logging.getLogger('svgis').warn("Couldn't read %s, proceeding with default style", style)
+        logging.getLogger('svgis').warning("Couldn't read %s, proceeding with default style", style)
 
     return style
 
@@ -173,7 +173,7 @@ def inline(svg, style=None):
 
     # Return plain old SVG.
     except (AttributeError, NameError) as e:
-        logging.getLogger('svgis').warn("Unable to inline CSS becuase: %s", e)
+        logging.getLogger('svgis').warning("Unable to inline CSS becuase: %s", e)
         return svg
 
 

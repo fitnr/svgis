@@ -169,7 +169,7 @@ def _process_tokens(doc, els, tokens):
 
     # Didn't recognize that token!
     else:
-        logging.getLogger('svgis').warn('Unknown CSS: %s', tokens[0].value)
+        logging.getLogger('svgis').warning('Unknown CSS: %s', tokens[0].value)
         remaining_tokens = tokens[1:]
 
     return els, remaining_tokens
