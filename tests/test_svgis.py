@@ -11,11 +11,8 @@
 import unittest
 import re
 from xml.dom import minidom
+import six
 from svgis import svgis, errors
-try:
-    basestring
-except NameError:
-    basestring = str
 
 
 class SvgisTestCase(unittest.TestCase):
@@ -57,7 +54,7 @@ class SvgisTestCase(unittest.TestCase):
 
     def testSvgisCompose(self):
         composed = self.svgis_obj.compose()
-        assert isinstance(composed, basestring)
+        assert isinstance(composed, six.string_types)
 
     def testProperty(self):
         result = svgis._property('apple', self.properties)
@@ -124,7 +121,7 @@ class SvgisTestCase(unittest.TestCase):
             }
         }
         drawn = self.svgis_obj._feature(feat, [], classes=['foo'], id_field='cat')
-        assert isinstance(drawn, basestring)
+        assert isinstance(drawn, six.string_types)
 
         self.assertIn('id="meow"', drawn)
         self.assertIn('class="foo_bar"', drawn)

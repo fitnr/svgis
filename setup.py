@@ -50,7 +50,10 @@ setup(
     packages=['svgis'],
 
     package_data={
-        'svgis': ['test_data/test.*']
+        'svgis': [
+            'test_data/test.*',
+            'test_data/*.json'
+        ]
     },
 
     install_requires=[
@@ -70,6 +73,8 @@ setup(
     },
 
     test_suite='tests',
+
+    tests_require=['six'],
 
     entry_points={
         'console_scripts': [
