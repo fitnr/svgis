@@ -1,3 +1,11 @@
+0.3.6
+-----
+
+* Add `svgis graticule` command line tool
+* Ensure no repeated style rules when inlining CSS.
+* Round numbers at the last minute in the svg module. This is quicker.
+* Improve py 2/3 compatibility, esp. when testing.
+
 0.3.5
 -----
 
