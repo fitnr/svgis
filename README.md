@@ -65,26 +65,31 @@ Draw upper income countries in green, low-income countries in blue:
 ````css
 /* style.css */
 .income_grp_5_Low_income {
-    fill: blue
+    fill: blue;
 }
 .income_grp_3_Upper_middle_income {
     fill: green
 }
+.ne_110m_lakes {
+    fill: #09d;
+    stroke: none;
+}
 ````
 ````
-svgis draw --style style.css --class-fields income_grp ne_110m_admin_0_countries.shp -o out.svg
+svgis draw --style style.css --class-fields income_grp ne_110m_admin_0_countries.shp ne_110m_lakes.shp -o out.svg
 ````
 
-Draw national boundaries in the Europe using an [Albers projection](http://epsg.io/102013), simplifying the output polygons, and draw Germany in purple.
+Draw national boundaries and lakes in Europe using an [Albers projection](http://epsg.io/102013), simplifying the output polygons, and draw Germany in purple.
 
 ````bash
 svgis draw \ 
     --crs EPSG:102013 \ 
     --scale 1000 \ 
     --simplify 90 \ 
-    --style ".Germany { fill: purple }" \ 
+    --style '.ne_110m_admin_0_countries { fill: tan } .Germany { fill: purple }' \
+    --style '.ne_110m_lakes { fill: #09d; stroke: none; }' \ 
     --class-fields name \ 
     --bounds -10 30 40 65 \ 
-    ne_110m_admin_0_countries.shp \ 
+    ne_110m_admin_0_countries.shp ne_110m_lakes.shp \ 
     -o out.svg
 ````
