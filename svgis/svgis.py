@@ -44,7 +44,7 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
         padding (int): Pad around bounds by this much. In projection units.
         crs (string): EPSG code, PROJ.4 string, or file containing a PROJ.4 string
         clip (bool): If true, clip features output to bounds.
-        style (string): Path to a css file or a css string.
+        style (Sequence): Path to a css file or a css string.
         class_fields (Sequence): A comma-separated string or list of class names to
                                  use the SVG drawing.
         id_field (string): Field to use to determine id of each element in the drawing.
@@ -56,12 +56,12 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
     scale = (1 / scale) if scale else 1
     bounds = bounds if bounds and len(bounds) == 4 else None
 
-    # Try to read style file
-    styles = _style.pick(kwargs.pop('style', None))
+    # Try to read style file(s)
+    styles = u''.join(_style.pick(s) for s in kwargs.pop('style', []))
 
     proj_method, out_crs = projection.pick(kwargs.pop('crs', None))
 
-    class_fields = (kwargs.pop('class_fields', None) or '').split(',')
+    class_fields = set(a for c in kwargs.pop('class_fields', []) for a in c.split(','))
 
     drawing = SVGIS(
         layers,
@@ -241,7 +241,7 @@ class SVGIS(object):
                                         "Unprojected" here refers to the fact that we haven't transformed these bounds yet.
                                         They may well, in fact, be in a projection.
             simplifier (function): Simplification function. Defaults to self.simplify.
-            class_fields (list): Fields to turn in the element classes (default: self.class_fields).
+            class_fields (sequence): Fields to turn in the element classes (default: self.class_fields).
             id_field (string): Field to use as element ID (default: self.id_field).
 
         Returns:

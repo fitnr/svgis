@@ -169,6 +169,8 @@ The style parameter takes either a CSS file or a CSS string.
 SVGIS adds a ``polygon`` class to paths that drawn to represent
 multi-part polygons (polygons with holes).
 
+This argument can be provided multiple times.
+
 (The shorthand option for ``--style`` is ``-c`` as in CSS.)
 
 padding
@@ -221,14 +223,17 @@ The result will include something like:
         <g id="Zimbabwe" class="ne_110m_admin_0_countries continent_Africa income_grp_5._Low_income">/* Zimbabwe */</g>
     </g>
 
-The name of a layer (``ne_110m_admin_0_countries``) will always be in
-the classes of its child elements. This makes writing CSS that addresses
+Note that each layer is always wrapped in a group with ``id`` set to the its name,
+and ``class`` set to the names of the its fields.
+
+The ``id`` (``ne_110m_admin_0_countries``) is repeated as a classes
+in each element of a layer. This makes writing CSS that addresses
 particular layers easier, given that some implementations of SVG don't
-properly css rules with ids (e.g. Adobe Illustrator, ImageMagick).
+properly implement css rules with ids (e.g. Adobe Illustrator, ImageMagick).
 
 Note that the ``income\_grp`` field contains values like "5. Low income",
 which resultes in a class like ``income_grp_5._Low_income``. Classes
-like this can be used in CSS by escaping the period with a bash slash ``\``:
+like this can be used in CSS by escaping the period with a bash slash (``\``):
 
 .. code::
 
@@ -237,16 +242,7 @@ like this can be used in CSS by escaping the period with a bash slash ``\``:
         stroke: none;
     }
 
-
-Each layer is always wrapped in a group with ``id`` set to the name of its
-source layer. This value is repeated as a class for each element in the layer.
-
-.. code:: xml
-
-  <g id="my_layer">
-    <!-- features in my_layer.shp -->
-  </g>
-
+The ``class-fields`` argument can be provided multiple times.
 
 simplify
 ^^^^^^^^
