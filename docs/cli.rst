@@ -76,7 +76,7 @@ Additionally, clients may have trouble handling very large numbers, so using the
 scale option can be a handy way to produce usable drawings.
 
 Scale won't alter geometries in any way other than scaling. To create smaller
-drawings, use the ``--simplify`` option.
+drawings, use the :ref:`simplify` option.
 
 (The shorthand option for ``--scale`` is ``-f`` as in factor.)
 
@@ -148,6 +148,7 @@ If, for some reason you want to draw an SVG in lat-long coordinates,
 use the ``file`` keyword to force the projection of the first passed file:
 
 .. code:: bash
+
     svgis draw --crs file input.shp -o out.svg
     svgis draw -j file one.shp two.geojson -o out.svg
 
@@ -236,7 +237,7 @@ properly implement css rules with ids (e.g. Adobe Illustrator, ImageMagick).
 
 Note that the ``income\_grp`` field contains values like "5. Low income",
 which resultes in a class like ``income_grp_5._Low_income``. Classes
-like this can be used in CSS by escaping the period with a bash slash (``\``):
+like this can be used in CSS by escaping the period with a backslash (``\``):
 
 .. code::
 
@@ -247,7 +248,8 @@ like this can be used in CSS by escaping the period with a bash slash (``\``):
 
 The ``class-fields`` argument can be provided multiple times.
 
-.. _ref:simplify
+.. _simplify:
+
 simplify
 ^^^^^^^^
 
@@ -260,7 +262,7 @@ and the requirements of the map.
 
 The ``--simplify`` option takes a number between 1 and 100, which is the 
 percentage of points to retain. Numbers above 80 usually produce output with
-few visible changes.
+few visible changes. Inputs below 20 often produce highly abstracted results.
 
 .. code:: bash
 

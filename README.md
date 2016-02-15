@@ -62,7 +62,7 @@ The next two examples use the [Natural Earth](http://naturalearthdata.com) admin
 
 Draw upper income countries in green, low-income countries in blue:
 
-````
+````css
 /* style.css */
 .income_grp_5_Low_income {
     fill: blue
@@ -76,14 +76,15 @@ svgis draw --style style.css --class-fields income_grp ne_110m_admin_0_countries
 ````
 
 Draw national boundaries in the Europe using an [Albers projection](http://epsg.io/102013), simplifying the output polygons, and draw Germany in purple.
-````
-svgis draw \
-    --crs EPSG:102013 \
-    --scale 1000 \
-    --simplify 0.10 \
-    --style ".Germany { fill: purple }" \
-    --class-fields name \
-    --bounds -10 30 40 65 \
-    ne_110m_admin_0_countries.shp \
+
+````bash
+svgis draw \ 
+    --crs EPSG:102013 \ 
+    --scale 1000 \ 
+    --simplify 90 \ 
+    --style ".Germany { fill: purple }" \ 
+    --class-fields name \ 
+    --bounds -10 30 40 65 \ 
+    ne_110m_admin_0_countries.shp \ 
     -o out.svg
-```
+````
