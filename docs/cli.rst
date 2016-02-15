@@ -70,10 +70,13 @@ for a map at a 1:1000 scale, use:
 
     svgis draw --scale 1000 in.shp -o out.svg
 
-While SVG is a vector format, clients may interpret the internal units as
-a certain display unit e.g. (pixels, fractions of an inch). Additionally, 
-clients may have trouble handling very large numbers, using the scale option
-will produce smaller units.
+This will produce a map where 1000 map units are scaled to one SVG unit. Clients
+will vary in how they represent a single unit (pixels, fractions of an inch).
+Additionally, clients may have trouble handling very large numbers, so using the
+scale option can be a handy way to produce usable drawings.
+
+Scale won't alter geometries in any way other than scaling. To create smaller
+drawings, use the ``--simplify`` option.
 
 (The shorthand option for ``--scale`` is ``-f`` as in factor.)
 
@@ -244,6 +247,7 @@ like this can be used in CSS by escaping the period with a bash slash (``\``):
 
 The ``class-fields`` argument can be provided multiple times.
 
+.. _ref:simplify
 simplify
 ^^^^^^^^
 

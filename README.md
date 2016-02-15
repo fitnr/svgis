@@ -47,7 +47,6 @@ Additional commands:
 * `svgis scale`: change the scale of an existing SVG
 * `svgis style`: add css styles to an existing SVG
 
-
 Read the [docs](http://pythonhosted.org/svgis/) for complete information on these commands and their options.
 
 ### Examples
@@ -56,7 +55,7 @@ Draw the outline of the contiguous United States, projected in Albers:
 ````
 curl -O http://www2.census.gov/geo/tiger/GENZ2014/shp/cb_2014_us_nation_20m.zip
 unzip cb_2014_us_nation_20m.zip
-svgis draw --project EPSG:5070 --scale 1000 --bounds -124 20.5 -64 49 cb_2014_us_nation_20m.shp -o us.svg
+svgis draw --crs EPSG:5070 --scale 1000 --bounds -124 20.5 -64 49 cb_2014_us_nation_20m.shp -o us.svg
 ````
 
 The next two examples use the [Natural Earth](http://naturalearthdata.com) admin-0 data set.
@@ -79,7 +78,7 @@ svgis draw --style style.css --class-fields income_grp ne_110m_admin_0_countries
 Draw national boundaries in the Europe using an [Albers projection](http://epsg.io/102013), simplifying the output polygons, and draw Germany in purple.
 ````
 svgis draw \
-    --project EPSG:102013 \
+    --crs EPSG:102013 \
     --scale 1000 \
     --simplify 0.10 \
     --style ".Germany { fill: purple }" \
