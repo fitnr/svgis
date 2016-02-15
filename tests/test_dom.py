@@ -98,5 +98,10 @@ class DomTestCase(unittest.TestCase):
             built = dom._build_tokenlist(r.selector)
             self.assertEqual(parsed, [getattr(t, 'value', '') for t in built[0]])
 
+    def testStyleDecoding(self):
+        assert dom._style_dict('fill:none;') == {'fill': 'none'}
+        self.assertEqual(dom._style_dict('fill:none;   stroke    : 3px  ; '), {'fill': 'none', 'stroke': '3px'})
+        assert dom._style_string({'fill': 'none'}) == 'fill:none'
+
 if __name__ == '__main__':
     unittest.main()

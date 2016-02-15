@@ -32,7 +32,7 @@ class MapTestCase(unittest.TestCase):
 
         try:
             result = svgis.map(
-                self.shp, style=style, scale=1000, crs=self.projection, bounds=self.bounds, clip=None)
+                self.shp, style=[style], scale=1000, crs=self.projection, bounds=self.bounds, clip=None)
             self.assertIn(self.css, result)
 
         finally:

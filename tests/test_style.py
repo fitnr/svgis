@@ -43,7 +43,7 @@ class CssTestCase(unittest.TestCase):
 
     def testInlineCSS(self):
         inlined = style.inline(self.svg, self.css)
-        assert inlined != self.svg
+        self.assertNotEqual(inlined, self.svg)
 
         assert 'fill:purple' not in inlined
 

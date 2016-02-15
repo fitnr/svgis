@@ -1,5 +1,6 @@
 [run]
 source = svgis
+branch = True
 
 [report]
 exclude_lines =

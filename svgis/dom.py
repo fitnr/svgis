@@ -33,9 +33,7 @@ def apply_rule(doc, rule):
     '''
     tokenlist = _build_tokenlist(rule.selector)
 
-    declaration = u' '.join(
-        u'{}:{};'.format(d.name, d.value.as_css()) for d in rule.declarations
-    )
+    declaration = {d.name: d.value.as_css() for d in rule.declarations}
 
     for tokens in tokenlist:
         # Starts as None as a marker to look into document,
@@ -46,7 +44,24 @@ def apply_rule(doc, rule):
 
         if els:
             for el in els:
-                el.attrib['style'] = el.attrib.get('style', u'') + declaration
+                style = _style_dict(el.attrib.get('style'))
+                style.update(declaration)
+                el.attrib['style'] = _style_string(style)
+
+
+def _style_dict(style):
+    '''Convert a style attribute into a dict.'''
+    try:
+        styles = [r.split(u':', 1) for r in style.strip(u'; \n\t').split(u';')]
+        return {x[0].strip(): x[1].strip() for x in styles}
+
+    except AttributeError:
+        return {}
+
+
+def _style_string(declaration):
+    '''Convert a dict into a style attribute.'''
+    return u';'.join(k + u':' + v for k, v in declaration.items())
 
 
 def _match_classes(elem_classes, rule_classes):
