@@ -362,7 +362,12 @@ reprojections it may include extra space.
 svgis graticule
 ^^^^^^^^^^^^^^^^
 
-Generate a graticule (grid) in a given projection. The output file is in geojson format.
+Generate a graticule (grid) in a given projection. The output file is in geojson format, with
+WGS84 coordinates.
+
+Specifying a projection will produce a grid in that projection, and the step must reflect
+projection units. However, the output file will always be in WGS84 lon/lat coordinates, but
+that shouldn't make a difference in it's use.
 
 For coordinates with negative numbers, use the ``--`` argument separator to prevent the utility
 getting confused:

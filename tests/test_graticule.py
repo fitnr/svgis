@@ -24,14 +24,14 @@ class GraticuleTestCase(unittest.TestCase):
             next(g)
 
     def test_feature(self):
-        assert graticule._feature(0, [1, 2, 3]) == {
-            'geometry': {
+        g = graticule._feature(0, [1, 2, 3])
+        assert g['geometry'] == {
                 'type': 'LineString',
                 'coordinates': [1, 2, 3]
-            },
-            'type': 'Feature',
-            'id': 0
-        }
+            }
+        assert g['type'] == 'Feature'
+        assert g['id'] ==  0
+
 
     def test_layer(self):
         a = graticule.layer([0, 0, 5, 5], 1)
@@ -42,8 +42,11 @@ class GraticuleTestCase(unittest.TestCase):
     def testgraticule(self):
         g = graticule.graticule((0, 0, 2, 2), 1)
 
-        assert next(g).get('geometry').get('coordinates') == [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4)]
-        assert next(g).get('geometry').get('coordinates') == [(1, 0), (1, 1), (1, 2), (1, 3), (1, 4)]
+        fixture1 = [(0, i / 2.) for i in range(9)]
+        fixture2 = [(1, i / 2.) for i in range(9)]
+
+        self.assertSequenceEqual(next(g).get('geometry').get('coordinates'), fixture1)
+        self.assertSequenceEqual(next(g).get('geometry').get('coordinates'), fixture2)
 
 
 if __name__ == '__main__':
