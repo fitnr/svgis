@@ -78,7 +78,9 @@ class SvgisTestCase(unittest.TestCase):
         match = next(matchiter)
 
         self.assertIsNotNone(match)
-        self.assertIn(u'AFFGEOID GEOID NAME', match.groups()[0])
+        self.assertIn(u'AFFGEOID', match.groups()[0])
+        self.assertIn(u'GEOID', match.groups()[0])
+        self.assertIn(u'NAME', match.groups()[0])
 
         match = next(matchiter)
         self.assertIn('GEOID_US', match.groups()[0])

@@ -165,7 +165,7 @@ class SVGIS(object):
         self.clip = kwargs.pop('clip', True)
 
         self.log = logging.getLogger('svgis')
-        self.log.info('starting SVGIS with %s', self.files)
+        self.log.info('starting SVGIS, files: %s', ', '.join(self.files))
 
         self.simplifier = convert.simplifier(kwargs.pop('simplify', None))
 
@@ -198,6 +198,7 @@ class SVGIS(object):
     def _reprojector(self, in_crs):
         '''Return a reprojection transform from in_crs to self.out_crs.'''
         if self.out_crs != in_crs:
+            self.log.info('set up reprojection')
             return partial(fiona.transform.transform_geom, in_crs, self.out_crs)
 
         else:
@@ -288,7 +289,7 @@ class SVGIS(object):
 
             # Remove the id field if it doesn't appear in the properties.
             id_field = kwargs.pop('id_field', self.id_field)
-            layer_classes = list(layer.schema['properties'].keys())
+            layer_classes = tuple(layer.schema['properties'].keys())
             kwargs['id_field'] = id_field if id_field in layer_classes else None
 
             group = [self._feature(f, transforms, classes, **kwargs) for _, f in layer.items(bbox=bounds)]
@@ -297,7 +298,7 @@ class SVGIS(object):
             'id': kwargs['_file_name'],
             'class': ' '.join(_style.sanitize(c) for c in layer_classes)
         }
-        self.log.info('finishing %s', filename)
+
         return svg.group(group, **gargs)
 
     def _feature(self, feature, transforms, classes, id_field, **kwargs):
@@ -314,17 +315,16 @@ class SVGIS(object):
         Returns:
             unicode
         '''
-        # Produce the geometry.
         file_name = kwargs.pop('_file_name', '?')
 
+        # Apply transformations to the geometry.
         try:
-            geom = feature.get('geometry')
-
+            geom = feature['geometry']
             for t in [x for x in transforms if x is not None]:
                 geom = t(geom)
 
         except ValueError as e:
-            self.log.warning("Error drawing feature %s of %s: %s", file_name, feature.get('id', '?'), e)
+            self.log.warning("error drawing feature %s of %s: %s", file_name, feature.get('id', '?'), e)
             return u''
 
         # Set up the element's properties.
@@ -337,7 +337,7 @@ class SVGIS(object):
             return draw.geometry(geom, **kwargs)
 
         except errors.SvgisError as e:
-            self.log.warning("Error drawing %s: %s", file_name, e)
+            self.log.warning("error drawing %s: %s", file_name, e)
             return u''
 
     def compose(self, scalar=None, bounds=None, **kwargs):
@@ -373,6 +373,7 @@ class SVGIS(object):
             bounds = self._unprojected_bounds
 
         if 'simplify' in kwargs:
+            self.log.info('setting up simplifier with factor: %s', kwargs['simplify'])
             kwargs['simplifier'] = convert.simplifier(kwargs.pop('simplify'))
         else:
             kwargs['simplifier'] = self.simplifier
@@ -383,6 +384,7 @@ class SVGIS(object):
         with fiona.drivers():
             members = [self._compose_file(f, scalar, unprojected_bounds=bounds, **kwargs) for f in self.files]
 
+        self.log.info('composing drawing')
         drawing = self._draw(members, bounds, scalar, **drgs)
 
         # Reset bounds so that self can be used again fresh. This is hacky.
@@ -434,7 +436,7 @@ class SVGIS(object):
         drawing = svg.drawing(size, [container], **svgargs)
 
         if kwargs.pop('inline', False):
-            self.log.info('Inlining styles')
+            self.log.info('inlining styles')
             drawing = _style.inline(drawing, svgargs['style'])
 
         return drawing

@@ -124,7 +124,7 @@ def bounds(layer, crs):
 # Draw
 @main.command()
 @click.argument('layer', nargs=-1, type=str, required=True)
-@click.option('-o', '--output', default=sys.stdout, type=click.File('wb'), help="Defaults to stdout.")
+@click.option('-o', '--output', default=sys.stdout, type=click.File('wb'), help="Defaults to stdout")
 @click.option('-b', '--bounds', nargs=4, type=float, metavar="minx, miny, maxx, maxy", help='In the same coordinate system as the input layers', default=None)
 @click.option('-c', '--style', type=str, metavar='CSS', help="CSS file or string", multiple=True)
 @click.option('-f', '--scale', type=int, default=None, help='Scale for the map (units are divided by this number)')
@@ -134,13 +134,12 @@ def bounds(layer, crs):
 @click.option('-j', '--crs', default='local', metavar='KEYWORD', type=str, help=crs_help)
 @click.option('-s', '--simplify', **simplifykwargs)
 @click.option('--clip/--no-clip', ' /-n', **clipkwargs)
-@click.option('--viewbox/--no-viewbox',  ' /-x', default=True, help='Draw SVG with or without a ViewBox. Drawing without may improve compatibility.')
+@click.option('--viewbox/--no-viewbox', ' /-x', default=True, help='Draw SVG with or without a ViewBox. Drawing without may improve compatibility')
 @click.option('--inline/--no-inline', '-l/ ', **csskwargs)
-@click.option('-q', '--quiet', default=False, flag_value=True, help='Ignore warnings.')
-@click.option('-v', '--verbose', default=False, flag_value=True, help='Talk a lot.')
+@click.option('-q', '--quiet', default=False, flag_value=True, help='Ignore warnings')
+@click.option('-v', '--verbose', default=False, flag_value=True, help='Talk a lot')
 def draw(layer, output, **kwargs):
     '''Draw SVGs from input geodata'''
-
     log = logging.getLogger('svgis')
 
     if kwargs.pop('verbose', None):
@@ -158,7 +157,7 @@ def draw(layer, output, **kwargs):
 # Proj
 @main.command()
 @click.argument('bounds', nargs=4, type=float, metavar="minx miny maxx maxy", default=None)
-@click.option('-m', '--method', default='local', type=click.Choice(('utm', 'local')), help='Defaults to local.')
+@click.option('-m', '--method', default='local', type=click.Choice(('utm', 'local')), help='Defaults to local')
 def project(bounds, method):
     '''Get a local Transverse Mercator or UTM projection for a bounding box. Expects WGS84 coordinates.'''
     click.echo(projection.generatecrs(*bounds, proj_method=method).encode('utf-8'))
@@ -177,7 +176,7 @@ crs_help2 = ('Specify a map projection. '
 @click.argument('bounds', nargs=4, type=float, metavar='minx miny maxx maxy')
 @click.option('-s', '--step', type=float, help='Step between lines (in projected units)', required=True)
 @click.option('-j', '--crs', type=str, default=None, help=crs_help2)
-@click.option('-o', '--output', default=sys.stdout, type=click.File('wb'), help="Defaults to stdout.")
+@click.option('-o', '--output', default=sys.stdout, type=click.File('wb'), help="Defaults to stdout")
 def graticule(bounds, step, crs, output):
     '''Generate a GeoJSON containing a graticule. Accepts a bounding box in longitude and latitude (WGS84).'''
     click.echo(_graticule.geojson(bounds, step, crs), file=output)

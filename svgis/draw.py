@@ -147,7 +147,7 @@ def geometry(geom, bbox=None, precision=3, **kwargs):
         kwargs (object): keyword args to be passed onto the created elements (e.g. class, id, style).
 
     Returns:
-        unicode representation of SVG element(s) of the given geometry
+        unicode representation of SVG element(s) of the given geometry.
     '''
     if bbox:
         geom = clip.clip(geom, bbox)
@@ -170,7 +170,7 @@ def geometry(geom, bbox=None, precision=3, **kwargs):
 
 def group(geometries, **kwargs):
     '''
-    Add a list of geometries to a group
+    Add a list of geometries to a group.
 
     Args:
         geometries (Sequence): GeoJSON-like geometry dicts.
