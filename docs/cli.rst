@@ -32,6 +32,7 @@ Draw SVGs from input geodata.
       -s, --simplify FACTOR           Simplify geometries. Accepts an integer
                                       between 1 and 100, the percentage points in
                                       each geometry to retain
+      -P, --precision INTEGER         Rounding precision for coordinates
       --clip / -n, --no-clip          Clip shapes to bounds. Slower, produces
                                       smaller files (default: clip).
       -x, --no-viewbox                Draw SVG without a ViewBox. May improve
@@ -268,6 +269,30 @@ few visible changes. Inputs below 20 often produce highly abstracted results.
 
     svgis draw --simplify 75 in.shp -o out.svg
     svgis draw -s 25 in.shp -o out.svg
+
+precision
+^^^^^^^^^^^
+
+By default, the svg coordinates in drawings are rounded to five decimal places.
+The ``precision`` option allows for control over this rounding. Large values
+will create clunky and hard-to-use files. Small values (0 is the minimum) will yield
+smaller but possibly distorted files.
+
+.. code:: bash
+
+    svgis draw --precision 10 in.geojson -o out.svg
+    svgis draw --precision 0 in.geojson -o out.svg
+
+This will produce output like this (respectively):
+
+.. code:: xml
+
+    <polyline points="2.7182818284,3.1415926535 1.0000000000,1.0000000000">
+
+.. code:: xml
+
+    <polyline points="3,3 1,1">
+
 
 inline
 ^^^^^^

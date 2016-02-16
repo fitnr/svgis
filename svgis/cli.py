@@ -60,6 +60,12 @@ inp = click.argument('layer', default=sys.stdin, type=click.File('rb'))
 outp = click.argument('output', default=sys.stdout, type=click.File('wb'))
 
 
+def posint(i):
+    I = int(i)
+    if I < 0:
+        raise ValueError('Must be a positive integer')
+    return I
+
 # Base
 @click.group(**CLICKARGS)
 @click.version_option(version=__version__, message='%(prog)s %(version)s')
@@ -133,6 +139,7 @@ def bounds(layer, crs):
 @click.option('-a', '--class-fields', type=str, default='', metavar='FIELDS', multiple=True, help='Geodata fields to use as class (comma-separated)')
 @click.option('-j', '--crs', default='local', metavar='KEYWORD', type=str, help=crs_help)
 @click.option('-s', '--simplify', **simplifykwargs)
+@click.option('-P', '--precision', metavar='INTEGER', type=posint, default=5, help='Rounding precision for coordinates (default: 5)')
 @click.option('--clip/--no-clip', ' /-n', **clipkwargs)
 @click.option('--viewbox/--no-viewbox', ' /-x', default=True, help='Draw SVG with or without a ViewBox. Drawing without may improve compatibility')
 @click.option('--inline/--no-inline', '-l/ ', **csskwargs)

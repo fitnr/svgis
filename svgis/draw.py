@@ -136,14 +136,14 @@ def geometrycollection(collection, bbox, precision, **kwargs):
     return svg.group(geoms, fill_rule="evenodd", id=ID)
 
 
-def geometry(geom, bbox=None, precision=3, **kwargs):
+def geometry(geom, bbox=None, precision=None, **kwargs):
     '''
     Draw a geometry. Will return either a single geometry or a group.
 
     Args:
         geom (object): A GeoJSON-like geometry object. Coordinates must be 2-dimensional.
         bbox (tuple): An optional bounding minimum bounding box
-        precision (int): Rounding precision. precision=None disables rounding.
+        precision (int): Rounding precision, must be 0 or greater (default: no rounding).
         kwargs (object): keyword args to be passed onto the created elements (e.g. class, id, style).
 
     Returns:
