@@ -11,7 +11,6 @@
 from __future__ import unicode_literals
 import unittest
 import functools
-import collections
 from svgis import convert
 
 
@@ -35,17 +34,15 @@ class ConvertTestCase(unittest.TestCase):
     def testConvertBbox(self):
         bounds = (-100, -100, 100, 100)
 
-        assert convert.extend_bbox(bounds, ext=100) == (-200, -200, 200, 200)
-        assert convert.extend_bbox(bounds, ext=10) == (-110, -110, 110, 110)
+        self.assertSequenceEqual(convert.extend_bbox(bounds, ext=100), (-200, -200, 200, 200))
+        self.assertSequenceEqual(convert.extend_bbox(bounds, ext=10), (-110, -110, 110, 110))
 
     def testSimplify(self):
         a = convert.simplifier(None)
-        assert a.__name__ == '<lambda>'
-        assert isinstance(a, collections.Callable)
+        assert a is None
 
         b = convert.simplifier(100)
-        assert b.__name__ == '<lambda>'
-        assert isinstance(b, collections.Callable)
+        assert b is None
 
         c = convert.simplifier(50)
 
@@ -53,21 +50,21 @@ class ConvertTestCase(unittest.TestCase):
             import visvalingamwyatt
             assert isinstance(c, functools.partial)
         except ImportError:
-            assert c.__name__ == '<lambda>'
+            assert c is None
 
     def test_bbox_covers(self):
         b1 = (0, 0, 10, 10)
         b2 = (0, 0, 20, 10)
         b3 = (0, 0, 5, 11)
 
-        assert convert.bbox_covers(b1, b2) is False
-        assert convert.bbox_covers(b2, b1) is True
-        assert convert.bbox_covers(b1, b3) is False
-        assert convert.bbox_covers(b3, b1) is False
-        assert convert.bbox_covers(b3, b3) is True
+        self.assertFalse(convert.bbox_covers(b1, b2))
+        self.assertTrue(convert.bbox_covers(b2, b1))
+        self.assertFalse(convert.bbox_covers(b1, b3))
+        self.assertFalse(convert.bbox_covers(b3, b1))
+        self.assertTrue(convert.bbox_covers(b3, b3))
 
     def testbounds_to_ring(self):
-        fix = [
+        fix=[
             (0, 0), (0, 0.6), (0, 1.2), (0, 1.7999999999999998), (0, 2.4), (0, 3.0),
             (0, 3.6), (0, 4.2), (0, 4.8), (0, 5.3999999999999995), (0, 5.999999999999999),
             (0.6, 6), (1.2, 6), (1.7999999999999998, 6), (2.4, 6), (3.0, 6), (3.6, 6), (4.2, 6),
@@ -77,7 +74,7 @@ class ConvertTestCase(unittest.TestCase):
             (3.6, 0), (3.0, 0), (2.4, 0), (1.7999999999999998, 0), (1.2, 0), (0.6, 0), (0, 0)
         ]
 
-        r = convert.bounds_to_ring(0, 0, 6, 6)
+        r=convert.bounds_to_ring(0, 0, 6, 6)
         self.assertSequenceEqual(r, fix)
 
 

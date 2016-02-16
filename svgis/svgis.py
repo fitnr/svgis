@@ -73,7 +73,8 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
         style=styles,
         clip=kwargs.pop('clip', True),
         id_field=kwargs.pop('id_field', None),
-        class_fields=class_fields
+        class_fields=class_fields,
+        simplify=kwargs.pop('simplify', None)
     ).compose(**kwargs)
 
     return drawing
@@ -140,6 +141,8 @@ class SVGIS(object):
     _projected_bounds = (None, None, None, None)
 
     in_crs = None
+
+    simplifier = None
 
     def __init__(self, files, bounds=None, out_crs=None, **kwargs):
         if isinstance(files, basestring):

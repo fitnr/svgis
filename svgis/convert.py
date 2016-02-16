@@ -92,7 +92,7 @@ def simplifier(ratio):
         return partial(simplify, ratio=ratio/100.)
 
     except (TypeError, ValueError, NameError):
-        return lambda g: g
+        return None
 
 
 def bbox_covers(b1, b2):
