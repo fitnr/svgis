@@ -6,7 +6,7 @@ SVGIS
 
 Create SVG drawings from vector geodata files (SHP, geoJSON, etc).
 
-SVGIS is good for: creating small multiples, combining lots of datasets in a sensible projections, and drawing maps with  basic styles based on classes in the source data.
+SVGIS is good for: creating small multiples, combining lots of datasets in a sensible projections, and drawing maps with  basic styles based on classes in the source data. It's perfect for creating base maps for editing in a drawing program, and its CSS-based styling gives great flexibility for styling.
 
 ```
 svgis draw input.shp -o out.svg
