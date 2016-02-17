@@ -14,7 +14,7 @@ import logging
 import click
 from . import projection
 from . import graticule as _graticule, style as _style, svgis, __version__
-
+from .utils import posint
 
 none = {
     'flag_value': None,
@@ -60,11 +60,6 @@ inp = click.argument('layer', default=sys.stdin, type=click.File('rb'))
 outp = click.argument('output', default=sys.stdout, type=click.File('wb'))
 
 
-def posint(i):
-    I = int(i)
-    if I < 0:
-        raise ValueError('Must be a positive integer')
-    return I
 
 # Base
 @click.group(**CLICKARGS)

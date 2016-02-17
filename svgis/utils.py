@@ -11,6 +11,14 @@ from __future__ import division
 from math import ceil, floor
 
 
+def posint(i):
+    '''Fake class for positive integers only'''
+    I = int(i)
+    if I < 0:
+        raise ValueError('Must be a positive integer')
+    return I
+
+
 def isinf(x):
     inf = float('inf')
     return x == inf or x == inf * -1
