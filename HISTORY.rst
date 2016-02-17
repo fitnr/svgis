@@ -1,3 +1,8 @@
+0.3.7
+-----
+
+* Add precision argument for `svgis draw`
+
 0.3.6
 -----
 
