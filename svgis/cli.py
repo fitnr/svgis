@@ -107,10 +107,10 @@ def scale(layer, output, **kwargs):
 crs_help = ('Specify a map projection. '
                 'Accepts either an EPSG code (e.g. epsg:4456), '
                 'a proj4 string, '
-                'a file containing a proj4, '
+                'a file containing a proj4 string, '
                 '"utm" (use local UTM), '
                 '"file" (use existing), '
-                '"local" (generate a local projection).')
+                '"local" (generate a local projection)')
 
 
 @main.command()
@@ -168,9 +168,9 @@ def project(bounds, method):
 crs_help2 = ('Specify a map projection. '
                 'Accepts either an EPSG code (e.g. epsg:4456), '
                 'a proj4 string, '
-                'a file containing a proj4, '
+                'a file containing a proj4 string, '
                 '"utm" (use local UTM), '
-                '"local" (generate a local projection).')
+                '"local" (generate a local projection)')
 
 
 # Graticule

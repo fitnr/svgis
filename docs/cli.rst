@@ -26,9 +26,9 @@ Draw SVGs from input geodata.
                                       separated)
       -j, --crs KEYWORD               Specify a map projection. Accepts either an
                                       EPSG code (e.g. epsg:4456), a proj4 string,
-                                      a file containing a proj4, "utm" (use local
-                                      UTM), "file" (use existing), "local"
-                                      (generate a local projection).
+                                      a file containing a proj4 string, "utm" (use
+                                      local UTM), "file" (use existing), "local"
+                                      (generate a local projection)
       -s, --simplify FACTOR           Simplify geometries. Accepts an integer
                                       between 1 and 100, the percentage points in
                                       each geometry to retain
@@ -413,8 +413,8 @@ getting confused:
       -s, --step FLOAT       Step between lines (in projected units)  [required]
       -j, --crs TEXT         Specify a map projection. Accepts either an EPSG code
                              (e.g. epsg:4456), a proj4 string, a file containing a
-                             proj4, "utm" (use local UTM), "local" (generate a
-                             local projection).
+                             proj4 string, "utm" (use local UTM), "local"
+                             (generate a local projection)
       -o, --output FILENAME  Defaults to stdout.
       -h, --help             Show this message and exit.
 
