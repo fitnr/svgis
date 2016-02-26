@@ -10,6 +10,7 @@
 from types import GeneratorType
 try:
     from shapely.geometry import shape, mapping
+    from shapely.geos import TopologicalError
     import numpy as np
 except ImportError:
     pass
@@ -73,7 +74,12 @@ def prepare(bbox):
         def func(geometry):
             # This is technically only needed in Py3, but whatever.
             geom = expand_geom(geometry)
-            clipped = bbox.intersection(shape(geom))
+
+            try:
+                clipped = bbox.intersection(shape(geom))
+            except TopologicalError:
+                return geometry
+
             return mapping(clipped)
 
     except NameError:
