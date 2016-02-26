@@ -10,8 +10,8 @@ SVGIS is good for: creating small multiples, combining lots of datasets in a sen
 
 ```
 svgis draw input.shp -o out.svg
-svgis draw --project utm south_dakota.shp north_dakota.geojson -o dakota.svg
-svgis draw --style my.css england.shp scotland.shp wales.shp -o great_britain.svg
+svgis draw south_dakota.shp north_dakota.geojson -o dakota.svg
+svgis draw --style gb.css england.shp scotland.shp wales.shp -o great_britain.svg
 ````
 
 Documentation: http://pythonhosted.org/svgis
@@ -20,23 +20,24 @@ Documentation: http://pythonhosted.org/svgis
 
 Requires [fiona](http://pypi.python.org/pypi/fiona), which in turn requires GDAL.
 
-Before installing, run the following on OS X: `brew install gdal`.
-On Linux: `sudo apt-get -qq install libgdal1-dev`.
+To instal gdal:
+On OS X: `brew install gdal` (requires [Homebrew](http://brew.sh))
+On Linux: `sudo apt-get -qq install libgdal1-dev`
+On Windows: see [OSGeo4W](https://trac.osgeo.org/osgeo4w/wiki)
 
 Then:
 ```
 pip install svgis
 ```
 
-An additional feature is available if you want to download more prerequisites:
+To support clipping output shapes, download GEOS and install with a slightly different command:
 ````
-# Clip output shapes to the bounding box (smaller files)
 brew install geos # os x
 sudo yum/apt-get geos # linux
 pip install svgis[clip]
 ````
 
-## Command line tool
+## Commands
 
 The `svgis` command line tool includes several utilities. The most important is `svgis draw`, which draws SVG maps based on input geodata layers.
 
