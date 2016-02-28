@@ -162,7 +162,10 @@ def inline(svg, style=None):
 
         if not style:
             path = './' + dom.ns('defs') + '/' + dom.ns('style')
-            style = doc.findall(path).pop().text
+            try:
+                style = doc.findall(path).pop().text
+            except IndexError:
+                style = ''
 
         stylesheet = _parse_css(style)
 
