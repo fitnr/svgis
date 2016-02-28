@@ -464,6 +464,8 @@ class SVGIS(object):
         if any([isinf(b) for b in bounds]):
             self.log.warning('Drawing has infinite bounds, consider changing projection or bounding box.')
 
+        bounds = tuple(b or 0.0 for b in bounds)
+
         try:
             return [i * float(scalar) for i in bounds]
 
