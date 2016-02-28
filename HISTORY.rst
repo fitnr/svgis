@@ -1,3 +1,10 @@
+0.3.8
+-----
+
+* Make inlined styles default
+* Handle empty files without complaining
+* ignore topological errors when clipping
+
 0.3.7
 -----
 

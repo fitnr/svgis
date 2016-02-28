@@ -50,10 +50,10 @@ CLICKARGS = {
 
 csskwargs = {
     'flag_value': True,
-    'default': False,
+    'default': True,
     'help': ('Inline CSS styles to each element. '
              'Slightly slower, but required by some clients (e.g. Adobe) '
-             '(default: do not inline).'),
+             '(default: inline).'),
 }
 
 inp = click.argument('layer', default=sys.stdin, type=click.File('rb'))
