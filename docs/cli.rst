@@ -85,7 +85,7 @@ crs
 ^^^^^^^
 
 The ``crs`` argument accepts a particular projection or a keyword that
-helps SVGIS pick a projection for you.
+helps SVGIS pick a projection for you. It accepts:
 
 -  `EPSG <http://epsg.io>`__ code
 -  Proj4 string
@@ -294,13 +294,15 @@ This will produce output like this (respectively):
     <polyline points="3,3 1,1">
 
 
-inline
-^^^^^^
+no-inline
+^^^^^^^^^
 
-Run with this option to add style information onto each element.
-Some SVG clients (Adobe Illustrator) prefer inline styles.
+Run with this option to prevent svgis from adding style attributes
+onto each element. This will be quicker than the default, which
+requires parsing the CSS and examining each element. Some SVG clients
+(Adobe Illustrator) prefer inline styles.
 
-When ``--inline`` is given, SVG elements will look like:
+Without ``--no-inline`` (or with ``--inline``), SVG elements will look like:
 
 .. code:: xml
 

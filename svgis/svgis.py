@@ -48,7 +48,7 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
         class_fields (Sequence): A comma-separated string or list of class names to
                                  use the SVG drawing.
         id_field (string): Field to use to determine id of each element in the drawing.
-        inline (bool): If True, try to move CSS declarations into each element.
+        inline (bool): If False, do not move CSS declarations into each element.
 
     Returns:
         String (unicode in Python 2) containing an entire SVG document.
@@ -355,7 +355,7 @@ class SVGIS(object):
                             Defaults to True.
             precision (float): Round coordinates to this precision [default: 0].
             simplify (float): Must be between 0 and 1. Fraction of removable coordinates to keep.
-            inline (bool): If True, try to run CSS into each element.
+            inline (bool): If False, do not add CSS style attributes to each element.
 
         Returns:
             String (unicode in Python 2) containing an entire SVG document.
@@ -366,7 +366,7 @@ class SVGIS(object):
         drgs = {
             'style': kwargs.pop('style', ''),
             'viewbox': kwargs.pop('viewbox', True),
-            'inline': kwargs.pop('inline', False),
+            'inline': kwargs.pop('inline', True),
         }
 
         if bounds:
