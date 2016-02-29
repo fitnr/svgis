@@ -130,8 +130,13 @@ class CssTestCase(unittest.TestCase):
 
         self.assertEqual(style.sanitize(1), u'_1')
 
-        self.assertEqual(style.sanitize('foo\.bar'), u'foo\.bar')
-        self.assertEqual(style.sanitize(u'foo\.bar'), u'foo\.bar')
+        self.assertEqual(style.sanitize('foo.bar'), u'foobar')
+        self.assertEqual(style.sanitize(u'fooba.r'), u'foobar')
+
+        self.assertEqual(style.sanitize(u'foo#bar'), u'foobar')
+        self.assertEqual(style.sanitize(u'foobar#'), u'foobar')
+
+        self.assertEqual(style.sanitize(u'x \t'), 'x_')
 
 
 if __name__ == '__main__':

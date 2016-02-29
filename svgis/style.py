@@ -42,7 +42,7 @@ def sanitize(string):
     try:
         string = re.sub(r'\s+', u'_', unicode(string))
         string = string if string[0] in ('_-' + ascii_letters) else '_' + string
-        return unicode(string)
+        return unicode(re.sub(r'(\.|#)', '', string))
 
     except (AttributeError, IndexError):
         return u''

@@ -222,10 +222,10 @@ The result will include something like:
 .. code:: xml
 
     <g id="ne_110m_admin_0_countries" class="scalerank featurecla labelrank ...">
-        <g id="Afghanistan" class="ne_110m_admin_0_countries continent_Asia income_grp_5._Low_income">/* Afghanistan */</g>
-        <g id="Angola" class="ne_110m_admin_0_countries continent_Africa income_grp_3._Upper_middle_income">/* Angola */</g>
+        <g id="Afghanistan" class="ne_110m_admin_0_countries continent_Asia income_grp_5_Low_income">/* Afghanistan */</g>
+        <g id="Angola" class="ne_110m_admin_0_countries continent_Africa income_grp_3_Upper_middle_income">/* Angola */</g>
         /* ... */
-        <g id="Zimbabwe" class="ne_110m_admin_0_countries continent_Africa income_grp_5._Low_income">/* Zimbabwe */</g>
+        <g id="Zimbabwe" class="ne_110m_admin_0_countries continent_Africa income_grp_5_Low_income">/* Zimbabwe */</g>
     </g>
 
 Note that each layer is always wrapped in a group with ``id`` set to the its name,
@@ -237,14 +237,22 @@ particular layers easier, given that some implementations of SVG don't
 properly implement css rules with ids (e.g. Adobe Illustrator, ImageMagick).
 
 Note that the ``income\_grp`` field contains values like "5. Low income",
-which resultes in a class like ``income_grp_5._Low_income``. Classes
-like this can be used in CSS by escaping the period with a backslash (``\``):
+which resultes in a class like ``income_grp_5_Low_income``. Whitespace is replaced
+with underscores, periods and number signs (``#``) are removed. Missing values be
+represented with the Pythonic "None".
+
+Additionally, CSS classes and IDs technically must begin with ascii letters,
+underscores or dashes. Classes and IDs that begin with other characters are
+prefixed with an underscore (``_``).
 
 .. code::
 
-    .income_grp_5\._Low_income {
+    .income_grp_5_Low_income {
         fill: teal;
         stroke: none;
+    }
+    .income_grp_None {
+        fill: gray;
     }
 
 The ``class-fields`` argument can be provided multiple times.
