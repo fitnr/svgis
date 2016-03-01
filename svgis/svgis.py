@@ -272,7 +272,7 @@ class SVGIS(object):
                 # self._projected_bounds will continue to be updated.
                 self._extend_bounds(layer.crs, bounds)
 
-            transforms = [
+            kwargs['transforms'] = [
                 self._reprojector(layer.crs),
                 partial(fionautil.scale.geometry, factor=scalar),
                 # Get clipping function based on a slightly extended version of _projected_bounds.
@@ -282,53 +282,43 @@ class SVGIS(object):
 
             # Correct for OGR's lack of creativity for GeoJSONs.
             if layer.name == 'OGRGeoJSON':
-                kwargs['_file_name'] = os.path.splitext(os.path.basename(filename))[0]
+                kwargs['layer'] = os.path.splitext(os.path.basename(filename))[0]
             else:
-                kwargs['_file_name'] = layer.name
+                kwargs['layer'] = layer.name
 
             # A list of class names to get from layer properties.
             cf = kwargs.pop('class_fields', self.class_fields)
-            classes = _get_classes(cf, layer.schema['properties'], kwargs['_file_name'])
+            kwargs['classes'] = _get_classes(cf, layer.schema['properties'], kwargs['layer'])
 
             # Remove the id field if it doesn't appear in the properties.
             id_field = kwargs.pop('id_field', self.id_field)
             layer_classes = tuple(layer.schema['properties'].keys())
             kwargs['id_field'] = id_field if id_field in layer_classes else None
 
-            group = [self._feature(f, transforms, classes, **kwargs) for _, f in layer.items(bbox=bounds)]
+            group = [self._feature(f, **kwargs) for _, f in layer.items(bbox=bounds)]
 
         gargs = {
-            'id': kwargs['_file_name'],
-            'class': ' '.join(_style.sanitize(c) for c in layer_classes)
+            'id': kwargs['layer'],
+            'class': tuple(_style.sanitize(c) for c in layer_classes)
         }
 
         return svg.group(group, **gargs)
 
-    def _feature(self, feature, transforms, classes, id_field, **kwargs):
+    def _feature(self, feature, transforms, classes, id_field=None, **kwargs):
         '''
         Draw a single feature.
 
         Args:
             feature (dict): A GeoJSON like feature dict produced by Fiona.
             transforms (list): Functions to apply to the geometry.
-            classes (list): Names of fields to apply as classes in the output element.
-            id_field (string): Field to use as id of the output element.
+            classes (list): Names (unsanitized) of fields to apply as classes in the output element.
+            id_field (str): Field to use as id of the output element.
             kwargs: Additional properties to apply to the element.
 
         Returns:
             unicode
         '''
-        file_name = kwargs.pop('_file_name', '?')
-
-        # Apply transformations to the geometry.
-        try:
-            geom = feature['geometry']
-            for t in [x for x in transforms if x is not None]:
-                geom = t(geom)
-
-        except ValueError as e:
-            self.log.warning("error drawing feature %s of %s: %s", file_name, feature.get('id', '?'), e)
-            return u''
+        layer = kwargs.pop('layer', '?')
 
         # Set up the element's properties.
         kwargs['class'] = _construct_classes(classes, feature['properties'])
@@ -337,10 +327,25 @@ class SVGIS(object):
             kwargs['id'] = _style.sanitize(feature['properties'].get(id_field))
 
         try:
+            geom = feature['geometry']
+
+            # Apply transformations to the geometry.
+            for t in transforms:
+                if t is not None:
+                    geom = t(geom)
+
             return draw.geometry(geom, **kwargs)
 
+        except KeyError as e:
+            self.log.warning("no geometry found for feature %s of %s: %s", kwargs.get('id', feature.get('id', '?')), layer, e)
+            return u''
+
+        except ValueError as e:
+            self.log.warning("error transforming feature %s of %s: %s", kwargs.get('id', feature.get('id', '?')), layer, e)
+            return u''
+
         except errors.SvgisError as e:
-            self.log.warning("error drawing %s: %s", file_name, e)
+            self.log.warning("error drawing feature  %s of %s: %s", kwargs.get('id', feature.get('id', '?')), layer, e)
             return u''
 
     def compose(self, scalar=None, bounds=None, **kwargs):
