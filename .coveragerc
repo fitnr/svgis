@@ -1,5 +1,4 @@
 [run]
-source = svgis
 branch = True
 
 [report]

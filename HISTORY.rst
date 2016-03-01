@@ -1,3 +1,10 @@
+0.3.9
+-----
+
+* Remove periods and number signs from classes and ids.
+* Refactor classing functions to svgis.style
+* Improve error messages when drawing features.
+
 0.3.8
 -----
 

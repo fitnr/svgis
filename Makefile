@@ -17,7 +17,7 @@ README.rst: README.md
 
 .PHONY: all test cov deploy clean
 
-docs.zip: $(wildcard docs/*.rst docs/*/*.rst)
+docs.zip: $(wildcard docs/*.rst docs/*/*.rst) svgis/__init__.py
 	$(MAKE) -C $(<D) html
 	cd $(<D)/_build/html; \
 	zip -qr ../../../$@ . -x '*/.DS_Store' .DS_Store
@@ -28,7 +28,7 @@ profile: tests/profile.py
 	grep -E '(svgis|draw|css|projection|svg|cli|clip|convert|errors).py'
 
 test: tests/test_data/cb_2014_us_nation_20m.shp tests/test_data/test.svg
-	coverage run --include='svgis/*','build/lib/*' setup.py $(QUIET) test
+	coverage run --include='svgis/*','build/lib/svgis/*' setup.py $(QUIET) test
 	coverage report
 	coverage html
 

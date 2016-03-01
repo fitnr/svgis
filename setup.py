@@ -15,10 +15,13 @@ try:
 except IOError:
     readme = ''
 
+with open('svgis/__init__.py') as i:
+    version = next(r for r in i.readlines() if '__version__' in r).split('=')[1].strip('"\' \n')
+
 setup(
     name='svgis',
 
-    version='0.3.8',
+    version=version,
 
     description='Draw geodata in SVG',
 
