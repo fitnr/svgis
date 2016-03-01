@@ -38,7 +38,7 @@ def linestring(coordinates, **kwargs):
 
 @_applyid
 def multilinestring(coordinates, **kwargs):
-    return [linestring(coords, **kwargs) for coords in coordinates]
+    return (linestring(coords, **kwargs) for coords in coordinates)
 
 
 def lines(geom, **kwargs):
@@ -103,7 +103,7 @@ def polygon(coordinates, **kwargs):
 
 @_applyid
 def multipolygon(coordinates, **kwargs):
-    return [polygon(coords, **kwargs) for coords in coordinates]
+    return (polygon(coords, **kwargs) for coords in coordinates)
 
 
 def points(geom, **kwargs):
@@ -127,12 +127,12 @@ def points(geom, **kwargs):
 
 @_applyid
 def multipoint(coordinates, **kwargs):
-    return [svg.circle((pt[0], pt[1]), **kwargs) for pt in coordinates]
+    return (svg.circle((pt[0], pt[1]), **kwargs) for pt in coordinates)
 
 
 def geometrycollection(collection, bbox, precision, **kwargs):
     ID = kwargs.pop('id', None)
-    geoms = [geometry(g, bbox=bbox, precision=precision, **kwargs) for g in collection['geometries']]
+    geoms = (geometry(g, bbox=bbox, precision=precision, **kwargs) for g in collection['geometries'])
     return svg.group(geoms, fill_rule="evenodd", id=ID)
 
 

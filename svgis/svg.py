@@ -123,7 +123,7 @@ def path(coordinates, precision=None, **kwargs):
         str
     '''
     fmt = _fmtcoord(precision)
-    coords = [i if _isstr(i) else fmt.format(i) for i in coordinates]
+    coords = (i if _isstr(i) else fmt.format(i) for i in coordinates)
     return _element(u'path', d=' '.join(coords), **kwargs)
 
 
@@ -197,7 +197,7 @@ def group(members=None, **kwargs):
         unicode
     '''
     members = members or ''
-    return _wrap(u'g', ''.join(members), **kwargs)
+    return _wrap(u'g', u''.join(members), **kwargs)
 
 
 def drawing(size, members, viewbox=None, style=None):
