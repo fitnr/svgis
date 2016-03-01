@@ -238,8 +238,8 @@ properly implement css rules with ids (e.g. Adobe Illustrator, ImageMagick).
 
 Note that the ``income\_grp`` field contains values like "5. Low income",
 which resultes in a class like ``income_grp_5_Low_income``. Whitespace is replaced
-with underscores, periods and number signs (``#``) are removed. Missing values be
-represented with the Pythonic "None".
+with underscores, periods and number signs (``#``) are removed. Missing values will
+be represented with the Pythonic "None".
 
 Additionally, CSS classes and IDs technically must begin with ascii letters,
 underscores or dashes. Classes and IDs that begin with other characters are

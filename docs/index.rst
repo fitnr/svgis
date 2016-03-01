@@ -18,12 +18,12 @@ With SVGIS, a command like this:
 
 .. code:: bash
 
-    svgis draw --style ".ne_10m_admin_0_countries {fill: tan;} .Germany { fill: purple }" \
+    svgis draw ne_10m_admin_0_countries.shp \
     --bounds -13 35 35 62 \
     --project EPSG:102013 \
     --scale 1000 \
     --id-field name \
-    ne_10m_admin_0_countries.shp
+    --style ".ne_10m_admin_0_countries {fill: tan;} .Germany { fill: purple }" \
 
 
 Generates a map like this:
@@ -31,7 +31,7 @@ Generates a map like this:
 .. image:: _static/germany.png
 
 SVGIS is built on top of `GDAL/OGR <http://www.gdal.org>`_, so it can read just
-about any geodata format you throw at it.
+about any geodata file format you throw at it.
 
 This documentation assumes some familiarity with 
 `CSS <https://developer.mozilla.org/en-US/docs/Web/CSS>`_, how map projections

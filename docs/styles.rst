@@ -86,8 +86,19 @@ To style all polygons, use the ``.polygon`` class:
     }
 
 
-Style a specific feature
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Styling with data
+^^^^^^^^^^^^^^^^^
+
+The SVGIS ``class-fields`` and ``id-field`` options can be used to add ``class``
+and ``id`` attributes to the output SVG. These, in turn, can be used to style
+the map based on the data.
+
+Note that the SVGIS has to do minor clean up on the data. Whitespace is replaced
+with underscores, periods (``.``) and number signs (``#``) are removed. Missing 
+values are represented with the Pythonic "None".
+
+Style a specific element
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 To style just Germany in the `Natural Earth <http://naturalearthdata.com>`_
 countries layer, use the ``id-field`` option to set the ID of all
@@ -121,22 +132,22 @@ have an ID field.
     }
 
 
-Style based on data
-^^^^^^^^^^^^^^^^^^^^
+Styling groups of elements
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Use the ``class-fields`` option to add classes to data based on their data.
 In this example, the ``income_grp`` field in the admin-0 data set it used.
 This is ideal of SVGIS, since the data is already broken into bins. These bins
-have names like "5. Low Income", which SVGIS is partially sanitized to
-``5._Low_Income``. The period can be escaped with a ``\``.
+have names like "5. Low Income", which SVGIS is sanitized to
+``5_Low_Income``.
 
 .. code:: css
 
     /* style.css */
-    .income_grp_5\._Low_income {
+    .income_grp_5_Low_income {
         fill: blue;
     }
-    .income_grp_3\._Upper_middle_income {
+    .income_grp_3_Upper_middle_income {
         fill: green;
     }
 
@@ -144,6 +155,5 @@ have names like "5. Low Income", which SVGIS is partially sanitized to
 
     svgis draw --style style.css \
     --class-fields income_grp \
-    --project EPSG:54030 \
     ne_110m_admin_0_countries.shp \
     -o out.svg
