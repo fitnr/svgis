@@ -80,41 +80,6 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
     return drawing
 
 
-def _property(prop, properties):
-    '''
-    Map a prop name to either prop_value or prop.
-
-    Args:
-        prop (unicode): Unicode property name
-        properties (dict): Contains only unicode
-    '''
-    if prop in properties:
-        try:
-            return u'' + prop + u'_' + properties[prop]
-        except TypeError:
-            return unicode(prop) + u'_' + unicode(properties[prop])
-
-    return prop
-
-
-def _construct_classes(classes, properties):
-    if isinstance(classes, basestring):
-        classes = [classes]
-
-    props = {unicode(k): unicode(v) for k, v in properties.items()}
-
-    classes = [_style.sanitize(_property(unicode(x), props)) for x in classes]
-    return (u' '.join(classes)).strip()
-
-
-def _get_classes(classlist, properties, name=None):
-    '''Create a list of classes that also appear in the properties'''
-    classes = [c for c in classlist if c in properties]
-    if name:
-        classes.insert(0, name)
-    return classes
-
-
 class SVGIS(object):
 
     """
@@ -287,8 +252,10 @@ class SVGIS(object):
                 kwargs['layer'] = layer.name
 
             # A list of class names to get from layer properties.
-            cf = kwargs.pop('class_fields', self.class_fields)
-            kwargs['classes'] = _get_classes(cf, layer.schema['properties'], kwargs['layer'])
+            kwargs['classes'] = [x for x in kwargs.pop('class_fields', self.class_fields)
+                                 if x in layer.schema['properties']]
+            # Add the layer name to the class list.
+            kwargs['classes'].insert(0, kwargs['layer'])
 
             # Remove the id field if it doesn't appear in the properties.
             id_field = kwargs.pop('id_field', self.id_field)
@@ -321,7 +288,7 @@ class SVGIS(object):
         layer = kwargs.pop('layer', '?')
 
         # Set up the element's properties.
-        kwargs['class'] = _construct_classes(classes, feature['properties'])
+        kwargs['class'] = _style.construct_classes(classes, feature['properties'])
 
         if id_field:
             kwargs['id'] = _style.sanitize(feature['properties'].get(id_field))

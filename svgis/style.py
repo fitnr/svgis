@@ -42,10 +42,29 @@ def sanitize(string):
     try:
         string = re.sub(r'\s+', u'_', unicode(string))
         string = string if string[0] in ('_-' + ascii_letters) else '_' + string
-        return unicode(re.sub(r'(\.|#)', '', string))
+        return unicode(re.sub(r'(\.|#)', '', string)).strip()
 
     except (AttributeError, IndexError):
         return u''
+
+
+def construct_classes(classes, properties):
+    '''
+    Build a class string for an element using the properties. Class names
+    take the form CLASS_PROPERTY. If a given class isn't found in properties,
+    the class name is added (e.g. CLASS).
+
+    Args:
+        classes (Sequence): Column names to include in the class list
+        properties (dict): A single feature's properties.
+
+    Returns:
+        str (unicode in Python 2)
+    '''
+    f = u'{}_{}'
+    classed = (f.format(p, properties[p]) if p in properties else p for p in classes)
+    sanitized = (sanitize(w) for w in classed)
+    return u' '.join(sanitized)
 
 
 def pick(style):

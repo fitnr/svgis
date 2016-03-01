@@ -41,6 +41,14 @@ class CssTestCase(unittest.TestCase):
 
     file = 'tests/test_data/test.svg'
 
+    classes = ('apple', 'potato')
+
+    properties = {
+        'apple': 'fruit',
+        'pear': 1,
+        'kale': 'leafy green',
+    }
+
     def testInlineCSS(self):
         inlined = style.inline(self.svg, self.css)
         self.assertNotEqual(inlined, self.svg)
@@ -137,6 +145,32 @@ class CssTestCase(unittest.TestCase):
         self.assertEqual(style.sanitize(u'foobar#'), u'foobar')
 
         self.assertEqual(style.sanitize(u'x \t'), 'x_')
+
+    def testConstructClasses(self):
+        self.assertEqual(style.construct_classes(('foo',), {'foo': 'bar'}), 'foo_bar')
+        self.assertEqual(style.construct_classes(['foo'], {'foo': 'bar'}), 'foo_bar')
+
+        self.assertEqual(style.construct_classes(['foo'], {'foo': None}), 'foo_None')
+
+    def testCreateClasses(self):
+        classes = style.construct_classes(self.classes, self.properties)
+        self.assertEqual(classes, u'apple_fruit potato')
+
+        classes = style.construct_classes(self.classes, {'apple': u'fruit'})
+        self.assertEqual(classes, u'apple_fruit potato')
+
+        classes = style.construct_classes(self.classes, {'apple': u'früit'})
+        self.assertEqual(classes, u'apple_früit potato')
+
+        classes = style.construct_classes(self.classes, {'apple': 1})
+        self.assertEqual(classes, u'apple_1 potato')
+
+    def testCreateClassesMissing(self):
+        classes = style.construct_classes(self.classes, {'apple': ''})
+        self.assertEqual(classes, 'apple_ potato')
+
+        classes = style.construct_classes(self.classes, {'apple': None})
+        self.assertEqual(classes, 'apple_None potato')
 
 
 if __name__ == '__main__':
