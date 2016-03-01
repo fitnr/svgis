@@ -13,17 +13,23 @@ Create string versions of SVG elements.
 '''
 
 
-def _wrap(tag, contents=None, **kwargs):
-    '''Wrap contents in a tag'''
+def _element(tag, contents=None, **kwargs):
+    '''
+    Draw an element, optionally wrapping contents.
+
+    Args:
+        tag (str): tag name
+        contents (str): contents to be wrapped in the tag
+        kwargs: to be transformed into attributes
+
+    Returns:
+        str (unicode in Python 2)
+    '''
     attribs = toattribs(**kwargs)
     if contents:
         return u'<{0}{1}>{2}</{0}>'.format(tag, attribs, contents)
     else:
         return u'<{0}{1}/>'.format(tag, attribs)
-
-
-def _element(tag, **kwargs):
-    return u'<{}{}/>'.format(tag, toattribs(**kwargs))
 
 
 def _round(i, precision):
@@ -66,7 +72,7 @@ def text(string, start, precision=None, **kwargs):
         str
     '''
     start = [_round(i, precision) for i in start]
-    return _wrap(u'text', string, x=start[0], y=start[1], **kwargs)
+    return _element(u'text', string, x=start[0], y=start[1], **kwargs)
 
 
 def rect(start, width, height, precision=None, **kwargs):
@@ -163,9 +169,9 @@ def toattribs(**kwargs):
     attribs = u' '.join(u'{}="{}"'.format(k, v) for k, v in kwargs.items() if v is not None)
 
     if len(attribs) > 0:
-        attribs = ' ' + attribs
-
-    return attribs
+        return ' ' + attribs
+    else:
+        return attribs
 
 
 def defstyle(style=None):
@@ -197,7 +203,7 @@ def group(members=None, **kwargs):
         unicode
     '''
     members = members or ''
-    return _wrap(u'g', u''.join(members), **kwargs)
+    return _element(u'g', u''.join(members), **kwargs)
 
 
 def drawing(size, members, viewbox=None, style=None):
@@ -221,4 +227,4 @@ def drawing(size, members, viewbox=None, style=None):
         kwargs['viewBox'] = '{},{},{},{}'.format(*viewbox)
 
     contents = defstyle(style) + u''.join(members)
-    return _wrap(u'svg', contents, **kwargs)
+    return _element(u'svg', contents, **kwargs)
