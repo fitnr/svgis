@@ -141,10 +141,14 @@ class CssTestCase(unittest.TestCase):
         self.assertEqual(style.sanitize('foo.bar'), u'foobar')
         self.assertEqual(style.sanitize(u'fooba.r'), u'foobar')
 
+        self.assertEqual(style.sanitize('.foo'), u'foo')
+
         self.assertEqual(style.sanitize(u'foo#bar'), u'foobar')
         self.assertEqual(style.sanitize(u'foobar#'), u'foobar')
 
         self.assertEqual(style.sanitize(u'x \t'), 'x_')
+
+        self.assertEqual(style.sanitize(u'"huh"'), u'huh')
 
     def testConstructClasses(self):
         self.assertEqual(style.construct_classes(('foo',), {'foo': 'bar'}), 'foo_bar')

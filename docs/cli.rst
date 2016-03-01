@@ -205,7 +205,8 @@ class-fields and id-field
 
 Use these options to specify fields in the source geodata file to use to
 determine the class or id attributes of the output SVG features. In the
-output fields, spaces will be replaced with underscores.
+output fields, whitespace is be replaced with underscores. See :doc:`styles`
+for details.
 
 For example, the `Natural Earth
 admin\_0 <http://www.naturalearthdata.com/downloads/110m-cultural-vectors/>`__
@@ -240,10 +241,6 @@ Note that the ``income\_grp`` field contains values like "5. Low income",
 which resultes in a class like ``income_grp_5_Low_income``. Whitespace is replaced
 with underscores, periods and number signs (``#``) are removed. Missing values will
 be represented with the Pythonic "None".
-
-Additionally, CSS classes and IDs technically must begin with ascii letters,
-underscores or dashes. Classes and IDs that begin with other characters are
-prefixed with an underscore (``_``).
 
 .. code::
 

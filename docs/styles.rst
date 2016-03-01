@@ -94,8 +94,12 @@ and ``id`` attributes to the output SVG. These, in turn, can be used to style
 the map based on the data.
 
 Note that the SVGIS has to do minor clean up on the data. Whitespace is replaced
-with underscores, periods (``.``) and number signs (``#``) are removed. Missing 
-values are represented with the Pythonic "None".
+with underscores, and periods, numbers signs and double-quote characters (``.#"``)
+are removed. Null values are represented with the Pythonic "None".
+
+Additionally, CSS classes and IDs technically must begin with ascii letters,
+underscores or dashes. Classes and IDs that begin with other characters (after
+stripping illegal characters) are prefixed with an underscore (``_``).
 
 Style a specific element
 ~~~~~~~~~~~~~~~~~~~~~~~~

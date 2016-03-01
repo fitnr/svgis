@@ -41,8 +41,9 @@ def sanitize(string):
     '''
     try:
         string = re.sub(r'\s+', u'_', unicode(string))
+        string = re.sub(r'(\.|#|")', '', string)
         string = string if string[0] in ('_-' + ascii_letters) else '_' + string
-        return unicode(re.sub(r'(\.|#)', '', string)).strip()
+        return unicode(string).strip()
 
     except (AttributeError, IndexError):
         return u''
