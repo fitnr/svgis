@@ -14,6 +14,13 @@ from svgis import utils
 
 class UtilsTestCase(unittest.TestCase):
 
+    def testPosInt(self):
+        with self.assertRaises(ValueError):
+            utils.posint(-1)
+        assert utils.posint(1) == 1
+        assert utils.posint(111) == 111
+        assert utils.posint(1.11) == 1
+
     def test_isinf(self):
         assert utils.isinf(float('inf')) is True
         assert utils.isinf(float('-inf')) is True

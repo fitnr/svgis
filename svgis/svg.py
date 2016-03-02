@@ -8,6 +8,8 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
+from . import utils
+
 '''
 Create string versions of SVG elements.
 '''
@@ -32,13 +34,6 @@ def _element(tag, contents=None, **kwargs):
         return u'<{0}{1}/>'.format(tag, attribs)
 
 
-def _round(i, precision):
-    if precision is None:
-        return i
-    else:
-        return round(i, precision)
-
-
 def _fmtcoord(precision):
     if precision is None:
         return u'{0[0]},{0[1]}'
@@ -57,7 +52,7 @@ def circle(point, precision=None, **kwargs):
     Returns:
         str
     '''
-    return _element(u'circle', cx=_round(point[0], precision), cy=_round(point[1], precision), **kwargs)
+    return _element(u'circle', cx=utils.rnd(point[0], precision), cy=utils.rnd(point[1], precision), **kwargs)
 
 
 def text(string, start, precision=None, **kwargs):
@@ -71,7 +66,7 @@ def text(string, start, precision=None, **kwargs):
     Returns:
         str
     '''
-    start = [_round(i, precision) for i in start]
+    start = [utils.rnd(i, precision) for i in start]
     return _element(u'text', string, x=start[0], y=start[1], **kwargs)
 
 
@@ -88,9 +83,9 @@ def rect(start, width, height, precision=None, **kwargs):
     Returns:
         str
     '''
-    start = [_round(i, precision) for i in start]
-    width = _round(width, precision)
-    height = _round(height, precision)
+    start = [utils.rnd(i, precision) for i in start]
+    width = utils.rnd(width, precision)
+    height = utils.rnd(height, precision)
 
     return _element(u'rect', x=start[0], y=start[1], width=width, height=height, **kwargs)
 
@@ -107,14 +102,10 @@ def line(start, end, precision=None, **kwargs):
     Returns:
         str
     '''
-    start = [_round(i, precision) for i in start]
-    end = [_round(i, precision) for i in end]
+    start = [utils.rnd(i, precision) for i in start]
+    end = [utils.rnd(i, precision) for i in end]
 
     return _element(u'line', x1=start[0], y1=start[1], x2=end[0], y2=end[1], **kwargs)
-
-
-def _isstr(x):
-    return isinstance(x, basestring)
 
 
 def path(coordinates, precision=None, **kwargs):
@@ -129,7 +120,7 @@ def path(coordinates, precision=None, **kwargs):
         str
     '''
     fmt = _fmtcoord(precision)
-    coords = (i if _isstr(i) else fmt.format(i) for i in coordinates)
+    coords = (i if utils.isstr(i) else fmt.format(i) for i in coordinates)
     return _element(u'path', d=' '.join(coords), **kwargs)
 
 

@@ -51,3 +51,14 @@ def modfloor(inp, mod):
 def modceil(inp, mod):
     i = inp + mod - (inp % mod)
     return int(ceil(i))
+
+
+def rnd(i, precision):
+    if precision is None:
+        return i
+    else:
+        return round(i, precision)
+
+
+def isstr(x):
+    return isinstance(x, basestring)
