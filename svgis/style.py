@@ -12,10 +12,7 @@ import re
 from string import ascii_letters
 import os.path
 import logging
-try:
-    import xml.etree.cElementTree as ElementTree
-except ImportError:
-    import xml.etree.ElementTree as ElementTree
+import xml.etree.ElementTree as ElementTree
 import tinycss
 from . import dom
 
@@ -23,9 +20,9 @@ from . import dom
 Utilities for messing with SVG styling.
 '''
 
-
 def _register():
     ElementTree.register_namespace('', dom.SVG_NS)
+    ElementTree._serialize_xml = ElementTree._serialize['xml'] = dom._serialize_xml
 
 
 def sanitize(string):
@@ -145,15 +142,15 @@ def add_style(svgfile, style, replace=False):
 
         if not replace:
             # Append CSS.
-            existing = style_element.text or ''
-            style = dom.cdata(existing + ' ' + style)
-            style_element.text = ''
+            style = (style_element.text or '') + ' ' + style
+
+        style_element.text = ''
 
     else:
         style_element = ElementTree.Element(dom.ns('style'))
         defs.append(style_element)
 
-    style_element.text = dom.cdata(style)
+    style_element.append(dom.cdata(style))
 
     return ElementTree.tostring(svg, encoding='utf-8').decode('utf-8')
 
@@ -162,7 +159,7 @@ def inline(svg, style=None):
     '''
     Inline the CSS rules in an SVG. This is a very rough operation,
     and full css precedence rules won't be respected. Ignores sibling
-    operators (``~``, ``+``), psuedo-selectors (e.g. ``:first-child``), and
+    operators (``~``, ``+``), pseudo-selectors (e.g. ``:first-child``), and
     attribute selectors (e.g. ``.foo[name=bar]``). Works best with rules like:
 
     * ``.class``
@@ -196,7 +193,7 @@ def inline(svg, style=None):
 
     # Return plain old SVG.
     except (AttributeError, NameError) as e:
-        logging.getLogger('svgis').warning("Unable to inline CSS becuase: %s", e)
+        logging.getLogger('svgis').warning("Unable to inline CSS: %s", e)
         return svg
 
 

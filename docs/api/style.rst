@@ -1,4 +1,4 @@
-Styling SVG
+style
 ===========
 
 .. automodule:: svgis.style

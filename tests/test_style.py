@@ -13,7 +13,8 @@ import re
 import os
 from io import BytesIO, StringIO
 from xml.dom import minidom
-from svgis import style
+import xml.etree.ElementTree as ElementTree
+from svgis import dom, style
 
 
 class CssTestCase(unittest.TestCase):
@@ -72,6 +73,11 @@ class CssTestCase(unittest.TestCase):
         result = minidom.parseString(new).getElementsByTagName('defs').item(0).getElementsByTagName('style').item(0)
         assert self.css in result.toxml()
 
+    def test_replace_style(self):
+        new = style.add_style(self.file, self.css, replace=True)
+        result = minidom.parseString(new).getElementsByTagName('defs').item(0).getElementsByTagName('style').item(0)
+        assert self.css in result.toxml()
+
     def test_add_style_missing_def(self):
         with open(self.file) as f:
             replaced_svg = re.sub(r'<defs></defs>', '', f.read())
@@ -83,7 +89,7 @@ class CssTestCase(unittest.TestCase):
 
         new = style.add_style(io_svg, self.css)
         result = minidom.parseString(new).getElementsByTagName('defs').item(0).getElementsByTagName('style').item(0)
-        assert self.css in result.toxml()
+        self.assertIn(self.css, result.toxml())
 
     def testReScale(self):
         result = style.rescale('tests/test_data/test.svg', 1.37)
@@ -175,6 +181,24 @@ class CssTestCase(unittest.TestCase):
 
         classes = style.construct_classes(self.classes, {'apple': None})
         self.assertEqual(classes, 'apple_None potato')
+
+    def testCDATA(self):
+        
+        xml = """<?xml version='1.0' encoding='utf-8'?><text>hi</text>"""
+        content = 'this is some text & > <'
+
+        style._register()
+        et = ElementTree.fromstring(xml)
+        e = ElementTree.Element("data")
+        cd = dom.cdata(content)
+        e.append(cd)
+        et.append(e)
+
+        string = ElementTree.tostring(et, encoding='utf-8')
+
+        assert content in string
+
+
 
 
 if __name__ == '__main__':

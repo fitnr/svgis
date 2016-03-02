@@ -8,17 +8,28 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 import logging
+import xml.etree.ElementTree as ElementTree
 
 '''
 Utilities for manipulating the DOM and applying styles to same.
 '''
 
 SVG_NS = 'http://www.w3.org/2000/svg'
+ElementTree._original_serialize_xml = ElementTree._serialize_xml
 
 
-def cdata(text):
+def cdata(content=None):
     '''Wrap text in CDATA section.'''
-    return '<![CDATA[' + text + ']]>'
+    element = ElementTree.Element('![CDATA[')
+    element.text = content
+    return element
+
+
+def _serialize_xml(write, elem, *args, **kwargs):
+    if elem.tag == '![CDATA[':
+        write("<{}{}]]>".format(elem.tag, elem.text))
+        return
+    return ElementTree._original_serialize_xml(write, elem, *args, **kwargs)
 
 
 def ns(tag):
