@@ -70,6 +70,8 @@ class ExpandTestCase(unittest.TestCase):
 
         self.assertSequenceEqual([tuple(x) for x in expanded], self.coords[0])
 
+        self.assertSequenceEqual(expanded, clip.expand(expanded))
+
     def testExpandGeometry(self):
         geom = {
             "type": "LineString",

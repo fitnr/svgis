@@ -9,9 +9,9 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
 import unittest
+import re
 import six
 from svgis import draw, errors, svgis
-
 
 
 class DrawTestCase(unittest.TestCase):
@@ -110,6 +110,13 @@ class DrawTestCase(unittest.TestCase):
         drawn = draw.multipolygon(self.multipolygon['geometry']['coordinates'])
 
         assert isinstance(drawn, six.string_types)
+
+    def testDrawMultiPoint(self):
+        points = draw.multipoint(self.lis1, id='foo')
+
+        self.assertIn('cy="35.1"', points)
+        self.assertIn('cx="-110.6"', points)
+        assert re.search(r'<g[^>]*id="foo"', points)
 
     def testAddClass(self):
         geom = {
