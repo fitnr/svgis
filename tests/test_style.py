@@ -196,9 +196,7 @@ class CssTestCase(unittest.TestCase):
 
         string = ElementTree.tostring(et, encoding='utf-8')
 
-        assert content in string
-
-
+        self.assertIn(content.encode('utf8'), string)
 
 
 if __name__ == '__main__':
