@@ -206,8 +206,9 @@ class SVGIS(object):
         Args:
             filename (string): path to a fiona-readable file
             scalar (int): map scale
-            unprojected_bounds (tuple): (minx, maxx, miny, maxy) in the layer's coordinate system. 'None' values are OK.
-                                        "Unprojected" here refers to the fact that we haven't transformed these bounds yet.
+            unprojected_bounds (tuple): (minx, maxx, miny, maxy) in the layer's coordinate system.
+                                        'None' values are OK. "Unprojected" here refers to
+                                        the fact that we haven't transformed these bounds yet.
                                         They may well, in fact, be in a projection.
             simplifier (function): Simplification function. Defaults to self.simplify.
             class_fields (sequence): Fields to turn in the element classes (default: self.class_fields).
@@ -230,7 +231,11 @@ class SVGIS(object):
                 self._project_bounds(layer.crs, unprojected_bounds)
                 # Get the bounds to use here from the projected bounds.
                 # If None, the unprojected bounds are our best bet.
-                bounds = self._get_local_projected_bounds(layer.crs) or unprojected_bounds or self._unprojected_bounds
+                bounds = (
+                            self._get_local_projected_bounds(layer.crs) or
+                            unprojected_bounds or
+                            self._unprojected_bounds
+                         )
 
             else:
                 # Using bounds from all the input layers.
@@ -304,15 +309,18 @@ class SVGIS(object):
             return draw.geometry(geom, **kwargs)
 
         except KeyError as e:
-            self.log.warning("no geometry found for feature %s of %s: %s", kwargs.get('id', feature.get('id', '?')), layer, e)
+            self.log.warning("no geometry found for feature %s of %s: %s",
+                             kwargs.get('id', feature.get('id', '?')), layer, e)
             return u''
 
         except ValueError as e:
-            self.log.warning("error transforming feature %s of %s: %s", kwargs.get('id', feature.get('id', '?')), layer, e)
+            self.log.warning("error transforming feature %s of %s: %s",
+                             kwargs.get('id', feature.get('id', '?')), layer, e)
             return u''
 
         except errors.SvgisError as e:
-            self.log.warning("error drawing feature  %s of %s: %s", kwargs.get('id', feature.get('id', '?')), layer, e)
+            self.log.warning("error drawing feature  %s of %s: %s",
+                             kwargs.get('id', feature.get('id', '?')), layer, e)
             return u''
 
     def compose(self, scalar=None, bounds=None, **kwargs):
@@ -443,4 +451,5 @@ class SVGIS(object):
             return [i * float(scalar) for i in bounds]
 
         except ValueError:
-            raise ValueError('Problem calculating drawing dimensions. Are bounds are in minx, miny, maxx, maxy order?')
+            raise ValueError('Problem calculating drawing dimensions. '
+                             'Are bounds are in minx, miny, maxx, maxy order?')

@@ -60,7 +60,6 @@ inp = click.argument('layer', default=sys.stdin, type=click.File('rb'))
 outp = click.argument('output', default=sys.stdout, type=click.File('wb'))
 
 
-
 # Base
 @click.group(**CLICKARGS)
 @click.version_option(version=__version__, message='%(prog)s %(version)s')
@@ -105,12 +104,12 @@ def scale(layer, output, **kwargs):
 
 
 crs_help = ('Specify a map projection. '
-                'Accepts either an EPSG code (e.g. epsg:4456), '
-                'a proj4 string, '
-                'a file containing a proj4 string, '
-                '"utm" (use local UTM), '
-                '"file" (use existing), '
-                '"local" (generate a local projection)')
+            'Accepts either an EPSG code (e.g. epsg:4456), '
+            'a proj4 string, '
+            'a file containing a proj4 string, '
+            '"utm" (use local UTM), '
+            '"file" (use existing), '
+            '"local" (generate a local projection)')
 
 
 @main.command()
@@ -126,17 +125,23 @@ def bounds(layer, crs):
 @main.command()
 @click.argument('layer', nargs=-1, type=str, required=True)
 @click.option('-o', '--output', default=sys.stdout, type=click.File('wb'), help="Defaults to stdout")
-@click.option('-b', '--bounds', nargs=4, type=float, metavar="minx, miny, maxx, maxy", help='In the same coordinate system as the input layers', default=None)
+@click.option('-b', '--bounds', nargs=4, type=float, metavar="minx, miny, maxx, maxy",
+              help='In the same coordinate system as the input layers', default=None)
 @click.option('-c', '--style', type=str, metavar='CSS', help="CSS file or string", multiple=True)
-@click.option('-f', '--scale', type=int, default=None, help='Scale for the map (units are divided by this number)')
-@click.option('-p', '--padding', type=int, default=None, required=None, help='Buffer the map (in projection units)')
+@click.option('-f', '--scale', type=int, default=None,
+              help='Scale for the map (units are divided by this number)')
+@click.option('-p', '--padding', type=int, default=None, required=None,
+              help='Buffer the map (in projection units)')
 @click.option('-i', '--id-field', type=str, metavar='FIELD', help='Geodata field to use as ID')
-@click.option('-a', '--class-fields', type=str, default='', metavar='FIELDS', multiple=True, help='Geodata fields to use as class (comma-separated)')
+@click.option('-a', '--class-fields', type=str, default='', metavar='FIELDS', multiple=True,
+              help='Geodata fields to use as class (comma-separated)')
 @click.option('-j', '--crs', default='local', metavar='KEYWORD', type=str, help=crs_help)
 @click.option('-s', '--simplify', **simplifykwargs)
-@click.option('-P', '--precision', metavar='INTEGER', type=posint, default=5, help='Rounding precision for coordinates (default: 5)')
+@click.option('-P', '--precision', metavar='INTEGER', type=posint, default=5,
+              help='Rounding precision for coordinates (default: 5)')
 @click.option('--clip/--no-clip', ' /-n', **clipkwargs)
-@click.option('--viewbox/--no-viewbox', ' /-x', default=True, help='Draw SVG with or without a ViewBox. Drawing without may improve compatibility')
+@click.option('--viewbox/--no-viewbox', ' /-x', default=True,
+              help='Draw SVG with or without a ViewBox. Drawing without may improve compatibility')
 @click.option('--inline/--no-inline', '-l/ ', **csskwargs)
 @click.option('-q', '--quiet', default=False, flag_value=True, help='Ignore warnings')
 @click.option('-v', '--verbose', default=False, flag_value=True, help='Talk a lot')
@@ -166,11 +171,11 @@ def project(bounds, method):
 
 
 crs_help2 = ('Specify a map projection. '
-                'Accepts either an EPSG code (e.g. epsg:4456), '
-                'a proj4 string, '
-                'a file containing a proj4 string, '
-                '"utm" (use local UTM), '
-                '"local" (generate a local projection)')
+             'Accepts either an EPSG code (e.g. epsg:4456), '
+             'a proj4 string, '
+             'a file containing a proj4 string, '
+             '"utm" (use local UTM), '
+             '"local" (generate a local projection)')
 
 
 # Graticule
@@ -182,4 +187,3 @@ crs_help2 = ('Specify a map projection. '
 def graticule(bounds, step, crs, output):
     '''Generate a GeoJSON containing a graticule. Accepts a bounding box in longitude and latitude (WGS84).'''
     click.echo(_graticule.geojson(bounds, step, crs), file=output)
-    

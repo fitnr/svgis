@@ -52,7 +52,8 @@ def circle(point, precision=None, **kwargs):
     Returns:
         str
     '''
-    return _element(u'circle', cx=utils.rnd(point[0], precision), cy=utils.rnd(point[1], precision), **kwargs)
+    return _element(u'circle', cx=utils.rnd(point[0], precision),
+                    cy=utils.rnd(point[1], precision), **kwargs)
 
 
 def text(string, start, precision=None, **kwargs):

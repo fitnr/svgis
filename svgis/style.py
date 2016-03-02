@@ -20,6 +20,7 @@ from . import dom
 Utilities for messing with SVG styling.
 '''
 
+
 def _register():
     ElementTree.register_namespace('', dom.SVG_NS)
     ElementTree._serialize_xml = ElementTree._serialize['xml'] = dom._serialize_xml

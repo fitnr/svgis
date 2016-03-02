@@ -132,7 +132,8 @@ def multipoint(coordinates, **kwargs):
 
 def geometrycollection(collection, bbox, precision, **kwargs):
     ID = kwargs.pop('id', None)
-    geoms = (geometry(g, bbox=bbox, precision=precision, **kwargs) for g in collection['geometries'])
+    geoms = (geometry(g, bbox=bbox, precision=precision, **kwargs)
+             for g in collection['geometries'])
     return svg.group(geoms, fill_rule="evenodd", id=ID)
 
 
@@ -144,7 +145,8 @@ def geometry(geom, bbox=None, precision=None, **kwargs):
         geom (object): A GeoJSON-like geometry object. Coordinates must be 2-dimensional.
         bbox (tuple): An optional bounding minimum bounding box
         precision (int): Rounding precision, must be 0 or greater (default: no rounding).
-        kwargs (object): keyword args to be passed onto the created elements (e.g. class, id, style).
+        kwargs (object): keyword args to be passed onto the created
+                         elements (e.g. class, id, style).
 
     Returns:
         unicode representation of SVG element(s) of the given geometry.

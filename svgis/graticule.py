@@ -55,11 +55,11 @@ def graticule(bounds, step, crs=None):
     frange = partial(utils.frange, cover=True)
 
     for i, X in enumerate(frange(minx, maxx + step, step), 1):
-        coords = unproject(*zip(*[(X, y) for y in frange(miny, maxy + step, step/2)]))
+        coords = unproject(*zip(*[(X, y) for y in frange(miny, maxy + step, step / 2)]))
         yield _feature(i, zip(*coords), axis='x', coord=X)
 
-    for i, Y in enumerate(frange(miny, maxy + step, step), i+1):
-        coords = unproject(*zip(*[(x, Y) for x in frange(minx, maxx + step, step/2)]))
+    for i, Y in enumerate(frange(miny, maxy + step, step), i + 1):
+        coords = unproject(*zip(*[(x, Y) for x in frange(minx, maxx + step, step / 2)]))
         yield _feature(i, zip(*coords), axis='y', coord=Y)
 
 

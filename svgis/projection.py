@@ -90,6 +90,14 @@ def choosecrs(in_crs, bounds, proj_method=None):
 def transform_bounds(in_crs, out_crs, bounds):
     '''
     Project a bounding box, taking care to not slice off the sides.
+
+    Args:
+        in_crs (dict): Fiona-type proj4 mapping representing input projection.
+        out_crs (dict): Fiona-type proj4 mapping representing output projection.
+        bounds (tuple): bounding box to transform.
+
+    Returns:
+        tuple
     '''
     if in_crs is None:
         raise TypeError('Need input CRS, not None')
@@ -117,7 +125,8 @@ def layer_bounds(layer, crs=None):
     Args:
         layer (str): path to a geodata file.
         crs (str): (optional) Any of the crs specs typically accepted
-                   by SVGIS (An EPSG code, a proj4 string, a file containing a proj4, 'local' or 'utm')
+                   by SVGIS (An EPSG code, a proj4 string, a file containing
+                   a proj4, 'local' or 'utm')
 
     Returns:
         tuple
@@ -135,7 +144,7 @@ def layer_bounds(layer, crs=None):
 
 def pick(project):
     '''
-        Pick a projection or projection method to use.
+    Pick a projection or projection method to use.
 
     Returns:
         tuple: (projection method, crs)
