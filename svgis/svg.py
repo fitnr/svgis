@@ -206,7 +206,7 @@ def group(members=None, **kwargs):
     return _element(u'g', u''.join(members), **kwargs)
 
 
-def drawing(size, members, viewbox=None, style=None):
+def drawing(size, members, precision=None, viewbox=None, style=None):
     '''
     Create an SVG element.
 
@@ -223,8 +223,14 @@ def drawing(size, members, viewbox=None, style=None):
         'version': '1.1',
         'xmlns': 'http://www.w3.org/2000/svg',
     }
+
+    if precision:
+        fmt = ('{:.{precision}f}',)
+    else:
+        fmt = ('{:f}',)
+
     if viewbox:
-        kwargs['viewBox'] = '{},{},{},{}'.format(*viewbox)
+        kwargs['viewBox'] = (','.join(fmt * 4)).format(*viewbox, precision=precision)
 
     contents = defstyle(style) + u''.join(members)
     return _element(u'svg', contents, **kwargs)

@@ -353,7 +353,7 @@ class SVGIS(object):
         else:
             kwargs['simplifier'] = self.simplifier
 
-        kwargs['precision'] = kwargs.get('precision', 0)
+        kwargs['precision'] = drgs['precision'] = kwargs.get('precision', 0)
 
         # Draw files
         with fiona.drivers():
@@ -390,6 +390,7 @@ class SVGIS(object):
         }
 
         svgargs = {
+            'precision': kwargs.pop('precision', 0),
             'style': self.style + (kwargs.pop('style', '') or '')
         }
 
