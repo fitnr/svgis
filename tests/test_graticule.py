@@ -37,7 +37,10 @@ class GraticuleTestCase(unittest.TestCase):
         a = graticule.layer([0, 0, 5, 5], 1)
         assert isinstance(a, dict)
         assert isinstance(a['features'], list)
-        assert isinstance(a['features'][0]['geometry']['coordinates'], list)
+        try:
+            self.assertIsInstance(a['features'][0]['geometry']['coordinates'], list)
+        except AssertionError:
+            self.assertIsInstance(a['features'][0]['geometry']['coordinates'], zip)
 
     def testgraticule(self):
         g = graticule.graticule((0, 0, 2, 2), 1)
@@ -45,8 +48,8 @@ class GraticuleTestCase(unittest.TestCase):
         fixture1 = [(0, i / 2.) for i in range(9)]
         fixture2 = [(1, i / 2.) for i in range(9)]
 
-        self.assertSequenceEqual(next(g).get('geometry').get('coordinates'), fixture1)
-        self.assertSequenceEqual(next(g).get('geometry').get('coordinates'), fixture2)
+        self.assertSequenceEqual(list(next(g).get('geometry').get('coordinates')), fixture1)
+        self.assertSequenceEqual(list(next(g).get('geometry').get('coordinates')), fixture2)
 
 
 if __name__ == '__main__':

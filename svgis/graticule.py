@@ -67,7 +67,7 @@ def _feature(i, coords, axis=None, coord=None):
     return {
         'geometry': {
             'type': 'LineString',
-            'coordinates': coords
+            'coordinates': list(coords)
         },
         'properties': {
             'axis': axis,
