@@ -9,9 +9,9 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
 try:
-    from svgis import svgis
-except ImportError:
     from build.lib.svgis import svgis
+except ImportError:
+    from svgis import svgis
 
 if __name__ == '__main__':
     shp = 'tests/test_data/cb_2014_us_nation_20m.shp'

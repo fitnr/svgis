@@ -21,7 +21,7 @@ def _expand_np(coordinates):
 
 
 def _expand_py(coordinates):
-    return list(coordinates)
+    return tuple(coordinates)
 
 
 def expand(ring):
@@ -36,16 +36,16 @@ def expand(ring):
 
 def expand_rings(rings):
     try:
-        return [_expand_np(ring) for ring in rings]
+        return tuple(_expand_np(ring) for ring in rings)
     except NameError:
-        return [_expand_py(ring) for ring in rings]
+        return tuple(_expand_py(ring) for ring in rings)
 
 
 def expand_geom(geom):
     '''Expand generators in a geometry's coordinates.'''
 
     if geom['type'] == 'MultiPolygon':
-        geom['coordinates'] = [expand_rings(rings) for rings in geom['coordinates']]
+        geom['coordinates'] = tuple(expand_rings(rings) for rings in geom['coordinates'])
 
     elif geom['type'] in ('Polygon', 'MultiLineString'):
         geom['coordinates'] = expand_rings(geom['coordinates'])
@@ -54,7 +54,7 @@ def expand_geom(geom):
         geom['coordinates'] = expand(geom['coordinates'])
 
     elif geom['type'] == 'GeometryCollection':
-        geom['geometries'] = [expand_geom(g) for g in geom['geometries']]
+        geom['geometries'] = tuple(expand_geom(g) for g in geom['geometries'])
 
     else:
         raise NotImplementedError("Unsupported geometry type " + geom['type'])

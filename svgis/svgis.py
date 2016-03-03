@@ -281,7 +281,7 @@ class SVGIS(object):
                                          simplifier=kwargs.pop('simplifier', None),
                                          class_fields=kwargs.pop('class_fields', None))
 
-            group = [self._feature(f, **kwargs) for _, f in layer.items(bbox=bounds)]
+            group = tuple(self._feature(f, **kwargs) for _, f in layer.items(bbox=bounds))
 
         return {
             'members': group,

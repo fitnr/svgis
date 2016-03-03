@@ -9,7 +9,7 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
 from __future__ import division
-import fionautil.measure
+from fionautil import measure
 from . import clip, svg
 from .errors import SvgisError
 
@@ -82,23 +82,22 @@ def polygon(coordinates, **kwargs):
 
     # This is trickier because drawing holes in SVG.
     # We go clockwise on the first ring, then counterclockwise
-    if fionautil.measure.counterclockwise(coordinates[0]):
+    if measure.counterclockwise(coordinates[0]):
         coordinates[0] = coordinates[0][::-1]
 
     kwargs['class'] = ('polygon ' + kwargs.pop('class', '')).strip()
 
-    instructions = ['M'] + list(coordinates[0]) + ['z']
+    instructions = ['M']
+    instructions.extend(coordinates[0])
+    instructions.append('z')
 
     for ring in coordinates[1:]:
         # make all interior run the counter-clockwise
-        if fionautil.measure.clockwise(ring):
-            ring = ring[::-1]
+        instructions.append('M')
+        instructions.extend(ring[::-1] if measure.clockwise(ring) else ring)
+        instructions.append('z')
 
-        instructions.extend(['M'] + list(ring) + ['z'])
-
-    pth = svg.path(instructions, fill_rule='evenodd', **kwargs)
-
-    return pth
+    return svg.path(instructions, fill_rule='evenodd', **kwargs)
 
 
 @_applyid
