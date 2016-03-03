@@ -1,3 +1,11 @@
+0.3.10
+------
+
+* Fix CDATA bug with svgis style
+* refactoring, PEP 8 formatting
+* Fix bug that ignored precision
+* Correctly identify and use projections in projected files
+
 0.3.9
 -----
 
