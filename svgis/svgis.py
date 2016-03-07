@@ -199,52 +199,53 @@ class SVGIS(object):
         if layer_crs != self._unprojected_bounds_crs:
             return projection.transform_bounds(self.out_crs, layer_crs, self._projected_bounds)
 
-    def _prepare_layer(self, layer, filename, bounds, scalar, class_fields=None, simplifier=None):
+    def _prepare_layer(self, layer, filename, bounds, scalar, **kwargs):
         '''
         Prepare the keyword args for draing a layer
         '''
-        kwargs = {}
-
-        class_fields = class_fields or self.class_fields
-
-        kwargs['transforms'] = [
-            self._reprojector(layer.crs),
-            partial(fionautil.scale.geometry, factor=scalar),
-            # Get clipping function based on a slightly extended version of _projected_bounds.
-            self._get_clipper(layer.bounds, bounds, scalar=scalar),
-            simplifier
-        ]
+        result = {
+            'transforms': [
+                self._reprojector(layer.crs),
+                partial(fionautil.scale.geometry, factor=scalar),
+                # Get clipping function based on a slightly extended version of _projected_bounds.
+                self._get_clipper(layer.bounds, bounds, scalar=scalar),
+                kwargs.pop('simplifier', None)
+            ]
+        }
 
         # Correct for OGR's lack of creativity for GeoJSONs.
         if layer.name == 'OGRGeoJSON':
-            kwargs['layer'] = os.path.splitext(os.path.basename(filename))[0]
+            result['layer'] = os.path.splitext(os.path.basename(filename))[0]
         else:
-            kwargs['layer'] = layer.name
+            result['layer'] = layer.name
 
         # A list of class names to get from layer properties.
-        kwargs['classes'] = [x for x in class_fields if x in layer.schema['properties']]
+        class_fields = kwargs.pop('class_fields', None) or self.class_fields
+        result['classes'] = [x for x in class_fields if x in layer.schema['properties']]
 
         # Add the layer name to the class list.
-        kwargs['classes'].insert(0, kwargs['layer'])
+        result['classes'].insert(0, result['layer'])
 
         # Remove the id field if it doesn't appear in the properties.
         id_field = kwargs.pop('id_field', self.id_field)
 
-        kwargs['id_field'] = id_field if id_field in layer.schema['properties'].keys() else None
+        result['id_field'] = id_field if id_field in layer.schema['properties'].keys() else None
 
-        return kwargs
+        result.update(kwargs)
 
-    def _compose_file(self, filename, scalar, unprojected_bounds=None, **kwargs):
+        return result
+
+    def _compose_file(self, filename, unprojected_bounds=None, **kwargs):
         '''
         Draw fiona file to an SVG group.
 
         Args:
             filename (string): path to a fiona-readable file
-            scalar (int): map scale
             unprojected_bounds (tuple): (minx, maxx, miny, maxy) in the layer's coordinate system.
                                         'None' values are OK. "Unprojected" here refers to
                                         the fact that we haven't transformed these bounds yet.
                                         They may well, in fact, be in a projection.
+            scalar (int): map scale
             simplifier (function): Simplification function. Defaults to self.simplify.
             class_fields (sequence): Fields to turn in the element classes (default: self.class_fields).
             id_field (string): Field to use as element ID (default: self.id_field).
@@ -277,10 +278,7 @@ class SVGIS(object):
                 # self._projected_bounds will continue to be updated.
                 self._extend_bounds(layer.crs, bounds)
 
-            kwargs = self._prepare_layer(layer, filename, bounds, scalar,
-                                         simplifier=kwargs.pop('simplifier', None),
-                                         class_fields=kwargs.pop('class_fields', None))
-
+            kwargs = self._prepare_layer(layer, filename, bounds, **kwargs)
             group = tuple(self._feature(f, **kwargs) for _, f in layer.items(bbox=bounds))
 
         return {
@@ -378,7 +376,7 @@ class SVGIS(object):
 
         # Draw files
         with fiona.drivers():
-            members = [svg.group(**self._compose_file(f, scalar, unprojected_bounds=bounds, **kwargs))
+            members = [svg.group(**self._compose_file(f, bounds, scalar=scalar, **kwargs))
                        for f in self.files]
 
         self.log.info('composing drawing')
