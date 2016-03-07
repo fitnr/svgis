@@ -12,7 +12,9 @@ import unittest
 import sys
 import os
 import io
+import re
 import functools
+import fionautil
 from xml.dom import minidom
 
 import click.testing
@@ -27,6 +29,7 @@ class CliTestCase(unittest.TestCase):
     fixture = 'tests/test_data/test.svg'
 
     shp = 'tests/test_data/cb_2014_us_nation_20m.shp'
+    dc = 'tests/test_data/tl_2015_11_place.shp'
     css = 'polygon{fill:green}'
 
     def setUp(self):
@@ -84,6 +87,26 @@ class CliTestCase(unittest.TestCase):
 
             for r, f in zip(result_vb, fixture_vb):
                 self.assertAlmostEqual(r, f, 5)
+
+        finally:
+            os.remove('tmp.svg')
+
+    def testDrawProjected(self):
+        self.invoke(['draw', self.dc, '-v', '-o', 'tmp.svg', '-P', '10'])
+        try:
+            with open('tmp.svg') as f:
+                svg = f.read()
+                match = re.search(r'points="([^"]+)"', svg)
+                assert match
+
+            result = match.groups()[0]
+            points = [[float(x) for x in p.split(',')] for p in result.split(' ')]
+
+            ring = fionautil.layer.first(self.dc)['geometry']['coordinates'][0]
+
+            for points in zip(ring, points):
+                for z in zip(*points):
+                    self.assertAlmostEqual(*z)
 
         finally:
             os.remove('tmp.svg')

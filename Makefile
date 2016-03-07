@@ -4,7 +4,8 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
-
+TIGER = http://www2.census.gov/geo/tiger
+tigers = $(addprefix tests/test_data/,tl_2015_11_place.shp cb_2014_us_nation_20m.shp)
 PROJECTION = +proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs
 QUIET ?= -q
 PYTHONFLAGS = -W ignore
@@ -27,7 +28,7 @@ profile: tests/profile.py
 	@python $(PYTHONFLAGS) -m cProfile -s tottime $< | \
 	grep -E '(svgis|draw|css|projection|svg|cli|clip|convert|errors).py'
 
-test: tests/test_data/cb_2014_us_nation_20m.shp tests/test_data/test.svg
+test: $(tigers) tests/test_data/test.svg
 	coverage run --include='svgis/*','build/lib/svgis/*' setup.py $(QUIET) test
 	coverage report
 	coverage html
@@ -47,13 +48,19 @@ tests/test_data/test.svg: tests/test_data/cb_2014_us_nation_20m.shp
 	- svgis draw -j '$(PROJECTION)' -f 1000 -c "polygon { fill: blue }" --bounds -124 20.5 -64 49 $< -o $@
 	@touch $@
 
-.PRECIOUS: tests/test_data/cb_2014_us_nation_20m.shp
+.PRECIOUS: tests/test_data/cb_2014_us_nation_20m.shp tests/test_data/tl_2015_11_place.zip
+tests/test_data/tl_2015_11_place.shp: tests/test_data/tl_2015_11_place.zip
+	ogr2ogr $@ /vsizip/$</$(@F) -t_srs EPSG:102686
+
 tests/test_data/cb_2014_us_nation_20m.shp: tests/test_data/cb_2014_us_nation_20m.zip
 	unzip -q -o $< -d $(@D)
 	@touch $@
 
-tests/test_data/cb_2014_us_nation_20m.zip: tests/test_data
-	curl -s -o $@ http://www2.census.gov/geo/tiger/GENZ2014/shp/cb_2014_us_nation_20m.zip
+tests/test_data/cb_2014_us_nation_20m.zip: | tests/test_data
+	curl -s -o $@ $(TIGER)/GENZ2014/shp/cb_2014_us_nation_20m.zip
+
+tests/test_data/tl_2015_11_place.zip: | tests/test_data
+	curl -s -o $@ $(TIGER)/TIGER2015/PLACE/tl_2015_11_place.zip
 
 tests/test_data: ; mkdir -p $@
 

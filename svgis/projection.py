@@ -67,6 +67,13 @@ def generatecrs(minx, miny, maxx, maxy, proj_method=None):
         return tm_proj4(x0, miny, maxy)
 
 
+def _is_latlong(crs):
+    '''Test if CRS is in lat/long coordinates'''
+    if crs.get('proj') == 'longlat' or pyproj.Proj(**crs).is_latlong():
+        return True
+    return False
+
+
 def choosecrs(in_crs, bounds, proj_method=None):
     '''Choose a projection. If the layer is projected, use that.
     Otherwise, create use a passed projection or create a custom transverse mercator.
@@ -79,7 +86,7 @@ def choosecrs(in_crs, bounds, proj_method=None):
     Returns:
         fiona-type proj4 dict.
     '''
-    if (proj_method is None or proj_method == 'file') and not pyproj.Proj(**in_crs).is_latlong():
+    if proj_method == 'file' or (proj_method is None and not _is_latlong(in_crs)):
         # it's projected already, so noop.
         return in_crs
 
@@ -152,7 +159,8 @@ def pick(project):
     proj_method, out_crs = None, None
 
     if project is None:
-        project = 'local'
+        # Protect future option of using file or picking
+        return None, None
 
     if project.lower() in ('local', 'utm'):
         proj_method = project.lower()
