@@ -60,12 +60,19 @@ class DomTestCase(unittest.TestCase):
         dom.apply_rule(document, self.rules[0])
 
         polygon = document.find('.//{http://www.w3.org/2000/svg}polygon')
-        self.assertIn('fill:orange', polygon.attrib['style'])
 
         dom.apply_rule(document, self.rules[6])
 
         polyline = document.find(".//*[@id='meow']")
-        self.assertIn('stroke-opacity:0.50', polyline.attrib.get('style', ''))
+
+        try:
+            self.assertIn('fill:orange', polygon.attrib['style'])
+            self.assertIn('stroke-opacity:0.50', polyline.attrib.get('style', ''))
+
+        except AssertionError:
+            print(ElementTree.tostring(polygon, encoding='utf-8'))
+            print(ElementTree.tostring(polyline, encoding='utf-8'))
+            raise
 
     def testProcessTokens(self):
         document = self.document()

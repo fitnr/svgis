@@ -39,8 +39,11 @@ def ns(tag):
 
 def apply_rule(doc, rule):
     '''
-    Apply a tinycss Rule to an ElementTree.Element
-    (only tested on documents created by SVGIS).
+    Apply a tinycss Rule to an ElementTree.Element (only tested on documents created by SVGIS).
+
+    Args:
+        doc (ElementTree.Element): The svg document to scan.
+        rule (tinycss rule): Rule to apply.
     '''
     tokenlist = _build_tokenlist(rule.selector)
 
@@ -77,6 +80,9 @@ def _style_string(declaration):
 
 def _match_classes(elem_classes, rule_classes):
     '''Check if rule_classes all fall in elem_classes.'''
+    if isinstance(elem_classes, str):
+        elem_classes = elem_classes.split(' ')
+
     return all([c in elem_classes for c in rule_classes])
 
 

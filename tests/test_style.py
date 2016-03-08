@@ -28,7 +28,7 @@ class CssTestCase(unittest.TestCase):
                     <polyline id="baz" class="foo" points="3,2 -2,6 8,-1"></polyline>
                 </g>
                 <g id="cat">
-                    <polyline id="meow" points="3,2 -2,6 8,-1"></polyline>
+                    <polyline id="meow" class="long-class-name" points="3,2 -2,6 8,-1"></polyline>
                 </g>
             </g>
         </svg>"""
@@ -39,6 +39,8 @@ class CssTestCase(unittest.TestCase):
                 .test, #baz { stroke-width: 2; }
                 #test ~ #foo { fill: purple; }
                 #cat polyline { fill: red }"""
+
+    css1 = '''.class-name { fill: orange;}'''
 
     file = 'tests/test_data/test.svg'
 
@@ -198,6 +200,16 @@ class CssTestCase(unittest.TestCase):
 
         self.assertIn(content.encode('utf8'), string)
 
+    def testPartialStyleName(self):
+        doc = ElementTree.fromstring(self.svg).find('./' + dom.ns('g'))
+        ruleset = style._parse_css(self.css1)
+
+        dom.apply_rule(doc, ruleset.rules[0])
+        svg = ElementTree.tostring(doc, encoding='utf-8').decode('utf-8')
+        self.assertNotIn('orange', svg)
+
+        inlined = style.inline(self.svg, self.css1)
+        self.assertNotIn('orange', inlined)
 
 if __name__ == '__main__':
     unittest.main()
