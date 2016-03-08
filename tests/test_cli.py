@@ -14,9 +14,8 @@ import os
 import io
 import re
 import functools
-import fionautil
 from xml.dom import minidom
-
+import fionautil
 import click.testing
 import svgis.cli
 
@@ -80,6 +79,7 @@ class CliTestCase(unittest.TestCase):
 
         try:
             result = minidom.parse('tmp.svg').getElementsByTagName('svg').item(0)
+
             fixture = minidom.parse(self.fixture).getElementsByTagName('svg').item(0)
 
             result_vb = [float(x) for x in result.attributes.get('viewBox').value.split(',')]
