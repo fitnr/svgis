@@ -416,7 +416,7 @@ class SVGIS(object):
             'style': self.style + (kwargs.pop('style', '') or '')
         }
 
-        x0, y0, x1, y1 = self._corners(scalar, unprojected_bounds=bounds)
+        x0, y0, x1, y1 = self._corners(scalar)
 
         # width and height
         size = [
@@ -439,30 +439,21 @@ class SVGIS(object):
 
         return drawing
 
-    def _corners(self, scalar, unprojected_bounds=None):
+    def _corners(self, scalar):
         '''
-        Calculate the bounds in svg coordinates.
-        By default, uses self's minimum bounding rectangle.
+        Calculate the bounds in svg coordinates. Uses self's projected bounding rectangle.
 
         Args:
-            scalar (int): Map scale
-            bounds (Sequence): Optional bounds to calculate with (in output coordinates)
+            scalar (numeric): Map scale
 
         Returns:
             tuple representing minx, miny, maxx, maxy in output coordinates
         '''
-        if unprojected_bounds is None:
-            bounds = self._projected_bounds
-        else:
-            bounds = projection.transform_bounds(self.in_crs, self.out_crs, unprojected_bounds)
-
-        if any([isinf(b) for b in bounds]):
+        if any([isinf(b) for b in self._projected_bounds]):
             self.log.warning('Drawing has infinite bounds, consider changing projection or bounding box.')
 
-        bounds = tuple(b or 0.0 for b in bounds)
-
         try:
-            return [i * float(scalar) for i in bounds]
+            return [float(b or 0.) * scalar for b in self._projected_bounds]
 
         except ValueError:
             raise ValueError('Problem calculating drawing dimensions. '
