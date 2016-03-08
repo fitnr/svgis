@@ -16,6 +16,25 @@ except ImportError:
 from . import utils
 
 
+def check_bounds(bounds):
+    '''Check if bounds are valid.'''
+    # Refuse to set these more than once
+    try:
+        if bounds is None or len(bounds) != 4 or not all(bounds):
+            raise ValueError
+
+    except (AttributeError, ValueError):
+        return False
+
+    if bounds[0] > bounds[2]:
+        bounds = bounds[2], bounds[1], bounds[0], bounds[3]
+
+    if bounds[1] > bounds[3]:
+        bounds = bounds[0], bounds[3], bounds[2], bounds[1]
+
+    return bounds
+
+
 def updatebounds(old, new):
     '''
     Extend old with any more distant values from newpoints.

@@ -126,7 +126,7 @@ def bounds(layer, crs):
 @click.argument('layer', nargs=-1, type=str, required=True)
 @click.option('-o', '--output', default=sys.stdout, type=click.File('wb'), help="Defaults to stdout")
 @click.option('-b', '--bounds', nargs=4, type=float, metavar="minx, miny, maxx, maxy",
-              help='In the same coordinate system as the input layers', default=None)
+              help='In the same coordinate system as the first input layer', default=None)
 @click.option('-c', '--style', type=str, metavar='CSS', help="CSS file or string", multiple=True)
 @click.option('-f', '--scale', type=int, default=None,
               help='Scale for the map (units are divided by this number)')
