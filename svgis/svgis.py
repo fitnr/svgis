@@ -23,11 +23,11 @@ Draw geodata layers into SVGs.
 """
 
 
-STYLE = ('polyline, line, rect, path, polygon, .polygon {'
-         ' fill: none;'
-         ' stroke: #000;'
-         ' stroke-width: 1px;'
-         ' stroke-linejoin: round;'
+STYLE = ('polyline,line,rect,path,polygon,.polygon{'
+         'fill:none;'
+         'stroke:#000;'
+         'stroke-width:1px;'
+         'stroke-linejoin:round;'
          '}')
 
 
@@ -409,10 +409,7 @@ class SVGIS(object):
         Returns:
             String (unicode in Python 2) containing an entire SVG document.
         '''
-        groupargs = {
-            'transform': 'scale(1, -1) translate({},{})'.format(self.padding, -self.padding),
-            'fill_rule': 'evenodd'
-        }
+        transform = 'scale(1,-1) translate({},{})'.format(self.padding, -self.padding)
 
         svgargs = {
             'precision': kwargs.pop('precision', 0),
@@ -430,10 +427,10 @@ class SVGIS(object):
         if kwargs.pop('viewbox', True):
             svgargs['viewbox'] = [x0, -y1] + size
         else:
-            groupargs['transform'] += ' translate({}, {})'.format(-x0, -y1)
+            transform += ' translate({},{})'.format(-x0, -y1)
 
         # Create container and then SVG
-        container = svg.group(members, **groupargs)
+        container = svg.group(members, fill_rule='evenodd', transform=transform)
         drawing = svg.drawing(size, [container], **svgargs)
 
         if kwargs.pop('inline', False):
