@@ -30,6 +30,8 @@ STYLE = ('polyline, line, rect, path, polygon, .polygon {'
          ' stroke-linejoin: round;'
          '}')
 
+WGS84 = {'init': 'epsg:4269', 'no_defs': True, 'proj': 'longlat'}
+
 
 def map(layers, bounds=None, scale=None, padding=0, **kwargs):
     '''
@@ -97,15 +99,12 @@ class SVGIS(object):
     """
 
     # The bounding box in input coordinates.
-    _unprojected_bounds = None
-
-    # The crs of these bounds
-    _unprojected_bounds_crs = None
+    _unprojected_bounds = (None,) * 4
 
     # The bounding box in output coordinates, to be determined as we draw.
-    _projected_bounds = (None, None, None, None)
+    _projected_bounds = (None,) * 4
 
-    in_crs = None
+    _in_crs, _out_crs = None, None
 
     simplifier = None
 
@@ -117,10 +116,9 @@ class SVGIS(object):
         else:
             raise ValueError("'files' must be a file name or list of file names")
 
-        if bounds and len(bounds) == 4:
-            self._unprojected_bounds = bounds
+        self.set_unprojected_bounds(bounds)
 
-        self.out_crs = out_crs
+        self._out_crs = out_crs
 
         self.proj_method = kwargs.pop('proj_method', None)
 
@@ -143,6 +141,68 @@ class SVGIS(object):
 
     def __repr__(self):
         return ('SVGIS(files={0.files}, out_crs={0.out_crs})').format(self)
+
+    @property
+    def in_crs(self):
+        return self._in_crs
+
+    def set_in_crs(self, crs):
+        if not self.in_crs and crs:
+            self.in_crs = crs
+
+        if not crs:
+            # Assume input CRS is WGS 84
+            self._in_crs = WGS84
+            self.log.warn('Found no input coordinate system, '
+                          'assuming WGS84 (long/lat) coordinates.')
+
+    @property
+    def out_crs(self):
+        return self._out_crs
+
+    def set_out_crs(self, bounds):
+        '''Set the output CRS, if not yet set.'''
+        if self.out_crs:
+            return
+
+        # Determine projection transformation:
+        # either use something passed in, a non latlong layer projection,
+        # the local UTM, or customize local TM
+        self._out_crs = projection.choosecrs(self.in_crs, bounds, proj_method=self.proj_method)
+
+    @property
+    def unprojected_bounds(self):
+        if not all(self._unprojected_bounds):
+            return None
+        return self._unprojected_bounds
+
+    @property
+    def projected_bounds(self):
+        if not all(self._projected_bounds):
+            return None
+        return self._projected_bounds
+
+    def set_unprojected_bounds(self, bounds):
+        # Refuse to set these more than once
+        if all(self._unprojected_bounds):
+            return
+        try:
+            if len(bounds) != 4 or not all(bounds):
+                raise ValueError
+        except (AttributeError, ValueError):
+            self.log.warn("ignoring invalid bounds: %s", bounds)
+            return
+
+        self._unprojected_bounds = bounds
+
+        return True
+
+    def project_bounds(self, in_crs, bounds):
+        '''Project unprojected bounds, extending projected_bounds bbox with self.padding.'''
+        # This may happen many times if we were passed bounds, but it's a cheap operation.
+        projected = projection.transform_bounds(in_crs, self.out_crs, bounds)
+        self._projected_bounds = convert.extend_bbox(projected, self.padding)
+        return self._projected_bounds
 
     def _get_clipper(self, layer_bounds, out_bounds, scalar=None):
         '''
@@ -167,41 +227,28 @@ class SVGIS(object):
         '''Return a reprojection transform from in_crs to self.out_crs.'''
         if self.out_crs != in_crs:
             self.log.info('set up reprojection')
+            self.log.debug('projecting from: %s', in_crs)
+            self.log.debug('projecting to: %s', self.out_crs)
             return partial(fiona.transform.transform_geom, in_crs, self.out_crs)
 
         else:
             return None
 
-    def set_crs(self, layer_crs, bounds):
-        '''Set the output CRS, if not yet set. Also update internal mbr.'''
-        if not self.in_crs:
-            self.in_crs = layer_crs
-
-        if not self.out_crs:
-            # Determine projection transformation:
-            # either use something passed in, a non latlong layer projection,
-            # the local UTM, or customize local TM
-            self.out_crs = projection.choosecrs(layer_crs, bounds, proj_method=self.proj_method)
-
-    def _project_bounds(self, in_crs, passed_bounds):
-        '''Set projected bounds, but only once.'''
-        if passed_bounds and not any(self._projected_bounds):
-            self._projected_bounds = projection.transform_bounds(in_crs, self.out_crs, passed_bounds)
-            self._unprojected_bounds_crs = in_crs
-
-    def _extend_bounds(self, in_crs, layer_bounds):
-        '''Extend projected bounds, used when calculating bounds as we go.'''
-        projected = projection.transform_bounds(in_crs, self.out_crs, layer_bounds)
-        self._projected_bounds = convert.updatebounds(self._projected_bounds, projected)
-
-    def _get_local_projected_bounds(self, layer_crs):
-        '''Get the projected bounds in local terms.'''
-        if layer_crs != self._unprojected_bounds_crs:
-            return projection.transform_bounds(self.out_crs, layer_crs, self._projected_bounds)
-
     def _prepare_layer(self, layer, filename, bounds, scalar, **kwargs):
         '''
-        Prepare the keyword args for draing a layer
+        Prepare the keyword args for drawing a layer.
+
+        Args:
+            layer (fiona.layer): input layer
+            filename (str): Name of file, used for group id attribute.
+            bounds (tuple): Bounding box (in layer.crs).
+            scalar (int): Map scale
+            simplifier (function): simplication function
+            id_field (str): Field to use for element id attribute.
+            class_fields (list): Fields to use for element class attribute.
+
+        Returns:
+            (dict) Arguments for self._feature
         '''
         result = {
             'transforms': [
@@ -235,16 +282,12 @@ class SVGIS(object):
 
         return result
 
-    def _compose_file(self, filename, unprojected_bounds=None, **kwargs):
+    def _compose_file(self, filename, **kwargs):
         '''
         Draw fiona file to an SVG group.
 
         Args:
             filename (string): path to a fiona-readable file
-            unprojected_bounds (tuple): (minx, maxx, miny, maxy) in the layer's coordinate system.
-                                        'None' values are OK. "Unprojected" here refers to
-                                        the fact that we haven't transformed these bounds yet.
-                                        They may well, in fact, be in a projection.
             scalar (int): map scale
             simplifier (function): Simplification function. Defaults to self.simplify.
             class_fields (sequence): Fields to turn in the element classes (default: self.class_fields).
@@ -255,28 +298,26 @@ class SVGIS(object):
         '''
         self.log.info('starting %s', filename)
         with fiona.open(filename, "r") as layer:
+            # Set the input CRS, if not yet set.
+            self.set_in_crs(layer.crs)
 
-            bounds = unprojected_bounds or self._unprojected_bounds or layer.bounds
+            # Set the output CRS, if not yet set, using passed bounds or this layer's bounds.
+            self.set_out_crs(self.unprojected_bounds or layer.bounds)
 
-            # Set the output CRS, if not yet set.
-            self.set_crs(layer.crs, bounds)
+            # Set the bounds for this layer, in layer.crs.
+            # When we have passed bounds:
+            if self.unprojected_bounds:
+                # If we haven't set the projected bounds yet, do that.
+                if not self.projected_bounds:
+                    self.project_bounds(WGS84, self.unprojected_bounds)
 
-            if unprojected_bounds or self._unprojected_bounds:
-                # Use the passed bounds, if they exist.
-                # This sets self._projected_bounds, and prevents it from being altered
-                self._project_bounds(layer.crs, unprojected_bounds)
-                # Get the bounds to use here from the projected bounds.
-                # If None, the unprojected bounds are our best bet.
-                bounds = (
-                            self._get_local_projected_bounds(layer.crs) or
-                            unprojected_bounds or
-                            self._unprojected_bounds
-                         )
+                # Convert global bounds to layer.crs.
+                bounds = projection.transform_bounds(self.out_crs, layer.crs, self.projected_bounds)
 
+            # When we have no passed bounds:
             else:
-                # Using bounds from all the input layers.
-                # self._projected_bounds will continue to be updated.
-                self._extend_bounds(layer.crs, bounds)
+                self.project_bounds(layer.crs, layer.bounds)
+                bounds = layer.bounds
 
             kwargs = self._prepare_layer(layer, filename, bounds, **kwargs)
             group = tuple(self._feature(f, **kwargs) for _, f in layer.items(bbox=bounds))
@@ -360,11 +401,13 @@ class SVGIS(object):
             'inline': kwargs.pop('inline', True),
         }
 
+        # If passed bounds here, cache self's bounds for later use.
         if bounds:
-            reset_bounds = True
+            reset_bounds = self.unprojected_bounds
+            self._unprojected_bounds = (None,) * 4
+            self.set_unprojected_bounds(bounds)
         else:
             reset_bounds = False
-            bounds = self._unprojected_bounds
 
         if 'simplify' in kwargs:
             self.log.info('setting up simplifier with factor: %s', kwargs['simplify'])
@@ -376,7 +419,7 @@ class SVGIS(object):
 
         # Draw files
         with fiona.drivers():
-            members = [svg.group(**self._compose_file(f, bounds, scalar=scalar, **kwargs))
+            members = [svg.group(**self._compose_file(f, scalar=scalar, **kwargs))
                        for f in self.files]
 
         self.log.info('composing drawing')
@@ -384,7 +427,10 @@ class SVGIS(object):
 
         # Reset bounds so that self can be used again fresh. This is hacky.
         if reset_bounds:
-            self._projected_bounds = (None, None, None, None)
+            self._unprojected_bounds = reset_bounds
+
+        # Always reset projected bounds
+        self._projected_bounds = (None,) * 4
 
         return drawing
 
