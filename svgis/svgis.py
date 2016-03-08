@@ -312,12 +312,20 @@ class SVGIS(object):
         try:
             geom = feature['geometry']
 
+            if geom is None:
+                raise KeyError('NULL geometry')
+
             # Apply transformations to the geometry.
             for t in transforms:
                 if t is not None:
                     geom = t(geom)
 
             return draw.geometry(geom, **kwargs)
+
+        except TypeError as e:
+            self.log.warning("drawing problem for feature %s of %s: %s",
+                             kwargs.get('id', feature.get('id', '?')), layer, e)
+            return u''
 
         except KeyError as e:
             self.log.warning("no geometry found for feature %s of %s: %s",
