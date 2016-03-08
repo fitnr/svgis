@@ -41,6 +41,15 @@ def _fmtcoord(precision):
         return u'{{0[0]:.{0}f}},{{0[1]:.{0}f}}'.format(precision)
 
 
+def _poly(name):
+    def poly(coordinates, precision=None, **kwargs):
+        fmt = _fmtcoord(precision)
+        points = utils.dedupe(fmt.format(c) for c in coordinates)
+        return _element(name(), points=u' '.join(points), **kwargs)
+
+    return poly
+
+
 def circle(point, precision=None, **kwargs):
     '''
     Create a svg circle element. Keyword arguments are mapped to attributes.
@@ -121,11 +130,12 @@ def path(coordinates, precision=None, **kwargs):
         str
     '''
     fmt = _fmtcoord(precision)
-    coords = (i if utils.isstr(i) else fmt.format(i) for i in coordinates)
+    coords = utils.dedupe(i if utils.isstr(i) else fmt.format(i) for i in coordinates)
     return _element(u'path', d=' '.join(coords), **kwargs)
 
 
-def polyline(coordinates, precision=None, **kwargs):
+@_poly
+def polyline():
     '''
     Create an svg polyline element
 
@@ -136,12 +146,11 @@ def polyline(coordinates, precision=None, **kwargs):
     Returns:
         str
     '''
-    fmt = _fmtcoord(precision)
-    points = u' '.join(fmt.format(c) for c in coordinates)
-    return _element(u'polyline', points=points, **kwargs)
+    return u'polyline'
 
 
-def polygon(coordinates, precision=None, **kwargs):
+@_poly
+def polygon():
     '''
     Create an svg polygon element
 
@@ -152,9 +161,7 @@ def polygon(coordinates, precision=None, **kwargs):
     Returns:
         str
     '''
-    fmt = _fmtcoord(precision)
-    points = u' '.join(fmt.format(c) for c in coordinates)
-    return _element(u'polygon', points=points, **kwargs)
+    return u'polygon'
 
 
 def toattribs(**kwargs):

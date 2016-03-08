@@ -9,6 +9,7 @@
 
 from __future__ import division
 from math import ceil, floor
+from itertools import groupby
 
 
 def posint(i):
@@ -62,3 +63,16 @@ def rnd(i, precision):
 
 def isstr(x):
     return isinstance(x, basestring)
+
+
+def dedupe(array):
+    '''
+    Use itertools.groupby to remove duplicates in a list.
+    '''
+    try:
+        array = array.tolist()
+    except AttributeError:
+        pass
+
+    for g in groupby(array):
+        yield g[0]

@@ -55,5 +55,15 @@ class UtilsTestCase(unittest.TestCase):
         assert utils.modceil(10, 3) == 12
         assert utils.modceil(17, 4) == 20
 
+    def test_dedupe(self):
+        test = [1, 2, 2, 3, 4, 5, 4]
+        fixture = [1, 2, 3, 4, 5, 4]
+        self.assertSequenceEqual(list(utils.dedupe(test)), fixture)
+
+        test = [(1, 2), (3, 4), (3, 4), (5, 4), 'M', (3, 4)]
+        fixture = [(1, 2), (3, 4), (5, 4), 'M', (3, 4)]
+
+        self.assertSequenceEqual(list(utils.dedupe(test)), fixture)
+
 if __name__ == '__main__':
     unittest.main()
