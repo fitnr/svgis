@@ -305,11 +305,11 @@ class SVGIS(object):
 
         # Set up the element's properties.
         kwargs['class'] = _style.construct_classes(classes, feature['properties'])
-
         if id_field:
             kwargs['id'] = _style.sanitize(feature['properties'].get(id_field))
 
         try:
+            # Check if geometry exists (a bit unpythonic, but cleaner errs this way).
             geom = feature['geometry']
 
             if geom is None:
@@ -320,25 +320,22 @@ class SVGIS(object):
                 if t is not None:
                     geom = t(geom)
 
-            return draw.geometry(geom, **kwargs)
-
-        except TypeError as e:
-            self.log.warning("drawing problem for feature %s of %s: %s",
-                             kwargs.get('id', feature.get('id', '?')), layer, e)
-            return u''
-
         except KeyError as e:
-            self.log.warning("no geometry found for feature %s of %s: %s",
+            self.log.warning('no geometry found for feature %s of %s: %s',
                              kwargs.get('id', feature.get('id', '?')), layer, e)
             return u''
 
         except ValueError as e:
-            self.log.warning("error transforming feature %s of %s: %s",
+            self.log.warning('error transforming feature %s of %s: %s',
                              kwargs.get('id', feature.get('id', '?')), layer, e)
             return u''
 
-        except errors.SvgisError as e:
-            self.log.warning("error drawing feature  %s of %s: %s",
+        try:
+            # Draw the geometry.
+            return draw.geometry(geom, **kwargs)
+
+        except (TypeError, errors.SvgisError) as e:
+            self.log.warning('unable to draw feature %s of %s: %s',
                              kwargs.get('id', feature.get('id', '?')), layer, e)
             return u''
 

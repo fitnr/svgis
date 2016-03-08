@@ -60,6 +60,7 @@ class ProjectionDrawTestCase(unittest.TestCase):
         s = svgis.SVGIS(self.files, crs={'init': 'epsg:2790', 'no_defs': True})
         a = s.compose()
 
+        self.assertIn('points', a)
         i = a.index('points')
         self.assertIn('points', a[i:])
 
