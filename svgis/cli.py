@@ -115,10 +115,15 @@ crs_help = ('Specify a map projection. '
 @main.command()
 @click.argument('layer', default=sys.stdin, type=click.Path(exists=True))
 @click.option('-j', '--crs', type=str, metavar='KEYWORD', default=None, help=crs_help)
-def bounds(layer, crs):
+@click.option('--latlon', default=False, flag_value=True, help='Print bounds in latitude, longitude order')
+def bounds(layer, crs, latlon=False):
     '''Return the bounds for a given layer.'''
     a = projection.layer_bounds(layer, crs)
-    click.echo('{} {} {} {}'.format(*a), file=sys.stdout)
+    if latlon:
+        fmt = '{1} {0} {3} {2}'
+    else:
+        fmt = '{0} {1} {2} {3}'
+    click.echo(fmt.format(*a), file=sys.stdout)
 
 
 # Draw
