@@ -30,7 +30,8 @@ STYLE = ('polyline,line,rect,path,polygon,.polygon{'
          'stroke-linejoin:round;'
          '}')
 
-WGS84 = {'init': 'epsg:4269', 'no_defs': True, 'proj': 'longlat'}
+# WGS 84
+DEFAULT_PROJECTION = {'init': 'epsg:4269', 'no_defs': True, 'proj': 'longlat'}
 
 
 def map(layers, bounds=None, scale=None, padding=0, **kwargs):
@@ -135,6 +136,8 @@ class SVGIS(object):
 
         self.padding = kwargs.pop('padding', 0) or 0
 
+        self.precision = kwargs.pop('precision', None)
+
         self.clip = kwargs.pop('clip', True)
 
         self.simplifier = convert.simplifier(kwargs.pop('simplify', None))
@@ -156,7 +159,7 @@ class SVGIS(object):
 
         if not crs:
             # Assume input CRS is WGS 84
-            self._in_crs = WGS84
+            self._in_crs = DEFAULT_PROJECTION
             self.log.warn('Found no input coordinate system, '
                           'assuming WGS84 (long/lat) coordinates.')
 
@@ -176,21 +179,33 @@ class SVGIS(object):
 
     @property
     def unprojected_bounds(self):
+        '''Returns None if projected bounds aren't set'''
         if not all(self._unprojected_bounds):
             return None
         return self._unprojected_bounds
 
     @property
     def projected_bounds(self):
+        '''Returns None if projected bounds aren't (yet) set'''
         if not all(self._projected_bounds):
             return None
         return self._projected_bounds
 
-    def project_bounds(self, in_crs, bounds):
-        '''Project unprojected bounds, extending projected_bounds bbox with self.padding.'''
+    def update_projected_bounds(self, in_crs, out_crs, bounds, padding=None):
+        '''
+        Extend projected_bounds bbox with self.padding.
+
+        Args:
+            in_crs (dict): CRS of bounds.
+            out_crs (dict) desired output CRS.
+            bounds (tuple): bounding box.
+
+        Returns:
+            (tuple) bounding box in out_crs coordinates.
+        '''
         # This may happen many times if we were passed bounds, but it's a cheap operation.
-        projected = projection.transform_bounds(in_crs, self.out_crs, bounds)
-        self._projected_bounds = convert.extend_bbox(projected, self.padding)
+        projected = projection.transform_bounds(in_crs, out_crs, bounds)
+        self._projected_bounds = convert.extend_bbox(projected, padding or 0)
         return self._projected_bounds
 
     def _get_clipper(self, layer_bounds, out_bounds, scalar=None):
@@ -271,7 +286,7 @@ class SVGIS(object):
 
         return result
 
-    def _compose_file(self, filename, unprojected_bounds=None, **kwargs):
+    def _compose_file(self, filename, unprojected_bounds=None, padding=None, **kwargs):
         '''
         Draw fiona file to an SVG group.
 
@@ -281,6 +296,7 @@ class SVGIS(object):
                                         'None' values are OK. "Unprojected" here refers to
                                         the fact that we haven't transformed these bounds yet.
                                         They may well, in fact, be in a projection.
+            padding (int): Number of map units by which to pad output bounds.
             scalar (int): map scale
             simplifier (function): Simplification function. Defaults to self.simplify.
             class_fields (sequence): Fields to turn in the element classes (default: self.class_fields).
@@ -290,11 +306,13 @@ class SVGIS(object):
             unicode
         '''
         self.log.info('starting %s', filename)
+
+        padding = padding or self.padding
+
         with fiona.open(filename, "r") as layer:
             # Set the input CRS, if not yet set.
             self.set_in_crs(layer.crs)
 
-            # Set the bounds for this layer, in layer.crs.
             # When we have passed bounds:
             if unprojected_bounds:
                 # Set the output CRS, if not yet set, using unprojected bounds.
@@ -302,7 +320,7 @@ class SVGIS(object):
 
                 # If we haven't set the projected bounds yet, do that.
                 if not self.projected_bounds:
-                    self.project_bounds(self.in_crs, unprojected_bounds)
+                    self.update_projected_bounds(self.in_crs, self.out_crs, unprojected_bounds, padding)
 
                 # Convert global bounds to layer.crs.
                 bounds = projection.transform_bounds(self.out_crs, layer.crs, self.projected_bounds)
@@ -310,10 +328,10 @@ class SVGIS(object):
             # When we have no passed bounds:
             else:
                 # Set the output CRS, if not yet set, using this layer's bounds.
-                unprojected = projection.transform_bounds(layer.crs, WGS84, layer.bounds)
-                self.set_out_crs(unprojected, method=self.proj_method)
+                self.set_out_crs(layer.bounds, method=self.proj_method)
 
-                self.project_bounds(layer.crs, layer.bounds)
+                # Extend projection_bounds
+                self.update_projected_bounds(layer.crs, self.out_crs, layer.bounds, padding)
                 bounds = layer.bounds
 
             kwargs = self._prepare_layer(layer, filename, bounds, **kwargs)
@@ -386,6 +404,7 @@ class SVGIS(object):
             bounds (Sequence): Map bounding box in WGS84 (longlat) coordinates.
                                Defaults to map data bounds.
             style (str): CSS to append to parent object CSS.
+            padding (int): Number of (projected) units to pad bounds by.
             viewbox (bool): If True, draw SVG with a viewbox. If False, translate coordinates
                             to the frame. Defaults to True.
             precision (float): Round coordinates to this precision [default: 0].
@@ -411,7 +430,7 @@ class SVGIS(object):
         else:
             kwargs['simplifier'] = self.simplifier
 
-        kwargs['precision'] = drgs['precision'] = kwargs.get('precision', 0)
+        kwargs['precision'] = drgs['precision'] = kwargs.get('precision', self.precision)
 
         # Draw files
         with fiona.drivers():
