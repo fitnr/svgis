@@ -95,28 +95,6 @@ class SvgisTestCase(unittest.TestCase):
         self.assertIn('id="meow"', drawn)
         self.assertIn('class="foo_bar"', drawn)
 
-    def testDims(self):
-        bbox = 0, 0, 10, 10
-
-        self.svgis_obj.in_crs = {'init': 'epsg:4269'}
-        self.svgis_obj.out_crs = {'init': 'epsg:4269'}
-
-        a = self.svgis_obj._corners(1, bbox)
-        self.assertSequenceAlmostEqual(a, (0, 0, 10, 10))
-
-        b = self.svgis_obj._corners(0.5, bbox)
-        self.assertSequenceAlmostEqual(b, (0, 0, 5, 5))
-
-        self.svgis_obj.padding = 10
-        c = self.svgis_obj._corners(0.25, bbox)
-        self.assertSequenceAlmostEqual(c, (0, 0, 2.5, 2.5))
-
-        with self.assertRaises((TypeError, ValueError)):
-            self.svgis_obj._corners(0.5, (1, 2, 3))
-
-        d = self.svgis_obj._corners(0.5, None)
-        self.assertSequenceAlmostEqual(d, (0, 0, 0, 0))
-
     def testSvgisComposeType(self):
         a = self.svgis_obj.compose(inline_css=True)
         b = self.svgis_obj.compose(inline_css=False)

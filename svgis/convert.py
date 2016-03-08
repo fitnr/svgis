@@ -58,7 +58,10 @@ def extend_bbox(bbox, ext=100):
     '''
     Widen the bounding box just a little bit. Assumes the bbox is in feet or meters or something.
     '''
-    return bbox[0] - ext, bbox[1] - ext, bbox[2] + ext, bbox[3] + ext
+    try:
+        return bbox[0] - ext, bbox[1] - ext, bbox[2] + ext, bbox[3] + ext
+    except TypeError:
+        return bbox
 
 
 def bounds_to_ring(minx, miny, maxx, maxy):

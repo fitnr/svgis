@@ -186,13 +186,19 @@ class SVGIS(object):
     def _project_bounds(self, in_crs, passed_bounds):
         '''Set projected bounds, but only once.'''
         if passed_bounds and not any(self._projected_bounds):
-            self._projected_bounds = projection.transform_bounds(in_crs, self.out_crs, passed_bounds)
+            projected = projection.transform_bounds(in_crs, self.out_crs, passed_bounds)
+            self.log.info((projected))
+            self._projected_bounds = convert.extend_bbox(projected, self.padding)
+            self.log.info('extended bbox %s', self.padding)
+            self.log.info((self._projected_bounds))
             self._unprojected_bounds_crs = in_crs
 
     def _extend_bounds(self, in_crs, layer_bounds):
         '''Extend projected bounds, used when calculating bounds as we go.'''
         projected = projection.transform_bounds(in_crs, self.out_crs, layer_bounds)
-        self._projected_bounds = convert.updatebounds(self._projected_bounds, projected)
+        padded_bounds = convert.extend_bbox(self._projected_bounds, self.padding)
+        self.log.info('extended bbox %s', self.padding)
+        self._projected_bounds = convert.updatebounds(padded_bounds, projected)
 
     def _get_local_projected_bounds(self, layer_crs):
         '''Get the projected bounds in local terms.'''
@@ -385,7 +391,7 @@ class SVGIS(object):
                        for f in self.files]
 
         self.log.info('composing drawing')
-        drawing = self._draw(members, bounds, scalar, **drgs)
+        drawing = self._draw(members, scalar, **drgs)
 
         # Reset bounds so that self can be used again fresh. This is hacky.
         if reset_bounds:
@@ -393,13 +399,12 @@ class SVGIS(object):
 
         return drawing
 
-    def _draw(self, members, bounds, scalar, **kwargs):
+    def _draw(self, members, scalar, **kwargs):
         '''
         Combine drawn layers into an SVG drawing.
 
         Args:
             members (list): unicode representations of SVG groups.
-            bounds (Sequence): Map bounding box in input units. If None, uses map data bounds.
             scalar (int): factor by which to scale the data, generally a small number (1/map scale).
             style (str): CSS to append to parent object CSS.
             viewbox (bool): If True, draw SVG with a viewbox. If False, translate coordinates to
@@ -409,20 +414,20 @@ class SVGIS(object):
         Returns:
             String (unicode in Python 2) containing an entire SVG document.
         '''
-        transform = 'scale(1,-1) translate({},{})'.format(self.padding, -self.padding)
+        transform = 'scale(1,-1)'
 
         svgargs = {
             'precision': kwargs.pop('precision', 0),
             'style': self.style + (kwargs.pop('style', '') or '')
         }
 
-        x0, y0, x1, y1 = self._corners(scalar)
+        if any([isinf(b) for b in self._projected_bounds]):
+            self.log.warning('Drawing has infinite bounds, consider changing projection or bounding box.')
+
+        x0, y0, x1, y1 = [float(b or 0.) * scalar for b in self._projected_bounds]
 
         # width and height
-        size = [
-            x1 - x0 + (self.padding * 2),
-            y1 - y0 + (self.padding * 2)
-        ]
+        size = [x1 - x0, y1 - y0]
 
         if kwargs.pop('viewbox', True):
             svgargs['viewbox'] = [x0, -y1] + size
@@ -438,23 +443,3 @@ class SVGIS(object):
             drawing = _style.inline(drawing, svgargs['style'])
 
         return drawing
-
-    def _corners(self, scalar):
-        '''
-        Calculate the bounds in svg coordinates. Uses self's projected bounding rectangle.
-
-        Args:
-            scalar (numeric): Map scale
-
-        Returns:
-            tuple representing minx, miny, maxx, maxy in output coordinates
-        '''
-        if any([isinf(b) for b in self._projected_bounds]):
-            self.log.warning('Drawing has infinite bounds, consider changing projection or bounding box.')
-
-        try:
-            return [float(b or 0.) * scalar for b in self._projected_bounds]
-
-        except ValueError:
-            raise ValueError('Problem calculating drawing dimensions. '
-                             'Are bounds are in minx, miny, maxx, maxy order?')
