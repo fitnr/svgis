@@ -165,7 +165,7 @@ def polygon():
 
 
 def toattribs(**kwargs):
-    attribs = u' '.join(u'{}="{}"'.format(k, v) for k, v in kwargs.items() if v is not None)
+    attribs = u' '.join(u'{}="{}"'.format(k, v) for k, v in kwargs.items() if v is not None and v != '')
 
     if len(attribs) > 0:
         return ' ' + attribs
