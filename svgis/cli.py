@@ -144,14 +144,17 @@ def bounds(layer, crs):
               help='Draw SVG with or without a ViewBox. Drawing without may improve compatibility')
 @click.option('--inline/--no-inline', '-l/ ', **csskwargs)
 @click.option('-q', '--quiet', default=False, flag_value=True, help='Ignore warnings')
-@click.option('-v', '--verbose', default=False, flag_value=True, help='Talk a lot')
+@click.option('-v', '--verbose', default=False, count=True, help='Talk a lot')
 def draw(layer, output, **kwargs):
     '''Draw SVGs from input geodata'''
     log = logging.getLogger('svgis')
 
-    if kwargs.pop('verbose', None):
-        log.handlers[0].setLevel(logging.INFO)
-        log.setLevel(logging.INFO)
+    verbose = kwargs.pop('verbose', None)
+    if verbose:
+        level = logging.DEBUG if verbose > 1 else logging.INFO
+        log.setLevel(level)
+        for h in log.handlers:
+            h.setLevel(level)
 
     if kwargs.pop('quiet', None):
         log.handlers[0].setLevel(logging.ERROR)
