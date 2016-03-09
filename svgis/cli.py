@@ -12,7 +12,8 @@ import sys
 from signal import signal, SIGPIPE, SIG_DFL
 import logging
 import click
-from . import projection
+from fionautil.layer import meta_complete
+from . import bounding, projection
 from . import graticule as _graticule, style as _style, svgis, __version__
 from .utils import posint
 
@@ -118,12 +119,19 @@ crs_help = ('Specify a map projection. '
 @click.option('--latlon', default=False, flag_value=True, help='Print bounds in latitude, longitude order')
 def bounds(layer, crs, latlon=False):
     '''Return the bounds for a given layer.'''
-    a = projection.layer_bounds(layer, crs)
-    if latlon:
-        fmt = '{1} {0} {3} {2}'
+    meta = meta_complete(layer)
+
+    if crs:
+        _, crs = projection.pick(crs)
+        result = bounding.transform(meta['crs'], crs, meta['bounds'])
     else:
-        fmt = '{0} {1} {2} {3}'
-    click.echo(fmt.format(*a), file=sys.stdout)
+        result = meta['bounds']
+
+    if latlon:
+        fmt = '{0[1]} {0[0]} {0[3]} {0[2]}'
+    else:
+        fmt = '{0[0]} {0[1]} {0[2]} {0[3]}'
+    click.echo(fmt.format(result), file=sys.stdout)
 
 
 # Draw

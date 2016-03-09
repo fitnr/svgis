@@ -9,12 +9,10 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 import os.path
-from fiona import transform
+import fiona.transform
 import fiona.crs
-import fionautil.layer
 import pyproj
 import utm
-from . import bounding
 
 
 def tm_proj4(x0, y0, y1):
@@ -23,24 +21,30 @@ def tm_proj4(x0, y0, y1):
             '+units=m +no_defs').format(x0=x0, y0=y0, y1=y1)
 
 
-def utm_proj4(x, y):
-    '''Generate the proj4 string for a given (lon, lat) coordinate.'''
+def utm_proj4(lon, lat):
+    '''
+    Generate the proj4 string for the UTM projection at a given (lon, lat) coordinate.
+
+    Args:
+        lon (float): longitude
+        lat (float): latitude
+
+    Returns:
+        (str) proj4 string
+    '''
     try:
-        _, _, zonenumber, zoneletter = utm.from_latlon(y, x)
-        return zonetoproj4(zonenumber, zoneletter)
+        _, _, zonenumber, zoneletter = utm.from_latlon(lat, lon)
+
+        if zoneletter in 'ZYXWVUTSRQPN':
+            hemisphere = 'north'
+
+        elif zoneletter in 'MLKJHGFEDCBA':
+            hemisphere = 'south'
+
+        return '+proj=utm +zone={} +{} +datum=WGS84 +units=m +no_defs'.format(zonenumber, hemisphere)
 
     except utm.error.OutOfRangeError as e:
         raise ValueError(e)
-
-
-def zonetoproj4(zonenumber, zoneletter):
-    if zoneletter in 'ZYXWVUTSRQPN':
-        hemisphere = 'north'
-
-    elif zoneletter in 'MLKJHGFEDCBA':
-        hemisphere = 'south'
-
-    return '+proj=utm +zone={} +{} +datum=WGS84 +units=m +no_defs'.format(zonenumber, hemisphere)
 
 
 def generatecrs(minx, miny, maxx, maxy, proj_method=None):
@@ -88,30 +92,6 @@ def choosecrs(in_crs, bounds, proj_method=None):
 
     else:
         return fiona.crs.from_string(generatecrs(*bounds, proj_method=proj_method))
-
-
-def layer_bounds(layer, crs=None):
-    '''
-    Get the bounds of a layer, optionally transforming them into a given CRS (or local or utm).
-
-    Args:
-        layer (str): path to a geodata file.
-        crs (str): (optional) Any of the crs specs typically accepted
-                   by SVGIS (An EPSG code, a proj4 string, a file containing
-                   a proj4, 'local' or 'utm')
-
-    Returns:
-        tuple
-    '''
-    meta = fionautil.layer.meta_complete(layer)
-
-    if crs:
-        _, crs = pick(crs)
-        result = transform_bounds(meta['crs'], crs, meta['bounds'])
-    else:
-        result = meta['bounds']
-
-    return result
 
 
 def pick(project):

@@ -24,12 +24,6 @@ class ProjectionTestCase(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection.utm_proj4(-200, 100)
 
-    def testlayer_bounds(self):
-        assert projection.layer_bounds(SHP) == (-179.174265, 17.913769, 179.773922, 71.352561)
-        fix = (-9183694.888482913, -2282590.8349678256, 9343945.82964409, 10263876.62548214)
-        for a in zip(fix, projection.layer_bounds(SHP, 'EPSG:102009')):
-            self.assertAlmostEqual(*a)
-
     def testLocalTm(self):
         fixture = ('+proj=lcc +lon_0=0 +lat_1=0 +lat_2=0 +lat_0=0'
                    '+x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0'
