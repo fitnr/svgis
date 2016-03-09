@@ -1,22 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+'''Utilities for working with bounding boxes'''
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
-
-from functools import partial
-
-try:
-    import visvalingamwyatt as vw
-except ImportError:
-    pass
 from . import utils
 
 
-def check_bounds(bounds):
+def check(bounds):
     '''Check if bounds are valid.'''
     # Refuse to set these more than once
     try:
@@ -35,7 +31,7 @@ def check_bounds(bounds):
     return bounds
 
 
-def updatebounds(old, new):
+def update(old, new):
     '''
     Extend old with any more distant values from newpoints.
     Also replace any missing min/max points in old with values from new.
@@ -73,19 +69,19 @@ def updatebounds(old, new):
     return bounds
 
 
-def extend_bbox(bbox, ext=100):
+def pad(bounds, ext=100):
     '''
-    Widen the bounding box just a little bit. Assumes the bbox is in feet or meters or something.
+    Pad a bounding box. Works best when input is in feet or meters or something.
     '''
     try:
-        return bbox[0] - ext, bbox[1] - ext, bbox[2] + ext, bbox[3] + ext
+        return bounds[0] - ext, bounds[1] - ext, bounds[2] + ext, bounds[3] + ext
     except TypeError:
-        return bbox
+        return bounds
 
 
-def bounds_to_ring(minx, miny, maxx, maxy):
-    """Convert min, max points to a boundary ring."""
-
+def ring(bounds):
+    '''Convert min, max points to a boundary ring.'''
+    minx, miny, maxx, maxy = bounds
     xs, ys = list(utils.between(minx, maxx)), list(utils.between(miny, maxy))
 
     left_top = [(minx, y) for y in ys] + [(x, maxy) for x in xs][1:]
@@ -96,28 +92,7 @@ def bounds_to_ring(minx, miny, maxx, maxy):
     return left_top + [(maxx, y) for y in ys] + [(x, miny) for x in xs]
 
 
-def simplifier(ratio):
-    '''
-    Create a simplification function, if visvalingamwyatt is available.
-    Otherwise, return a noop function.
-
-    Args:
-        ratio (int): Between 1 and 99
-    '''
-    try:
-        # put this first to get NameError out of the way
-        simplify = vw.simplify_geometry
-
-        if ratio is None or ratio >= 100 or ratio < 1:
-            raise ValueError
-
-        return partial(simplify, ratio=ratio / 100.)
-
-    except (TypeError, ValueError, NameError):
-        return None
-
-
-def bbox_covers(b1, b2):
+def covers(b1, b2):
     '''
     Return True if b1 covers b2.
 

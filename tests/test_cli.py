@@ -75,7 +75,7 @@ class CliTestCase(unittest.TestCase):
 
     def testCliDraw(self):
         self.invoke(['draw', '-j', PROJECTION, '-f', '1000', self.shp,
-                     '-o', 'tmp.svg', '--bounds'] + [str(b) for b in BOUNDS])
+                     '-o', 'tmp.svg', '--viewbox', '--bounds'] + [str(b) for b in BOUNDS])
 
         try:
             result = minidom.parse('tmp.svg').getElementsByTagName('svg').item(0)

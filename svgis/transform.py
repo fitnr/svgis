@@ -1,17 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+'''Clip and simplify geometries'''
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
-
 from types import GeneratorType
+from functools import partial
 try:
     from shapely.geometry import shape, mapping
     from shapely.geos import TopologicalError
     import numpy as np
+except ImportError:
+    pass
+try:
+    import visvalingamwyatt as vw
 except ImportError:
     pass
 
@@ -96,3 +102,27 @@ def clip(geometry, bbox):
 
     except NameError:
         return geometry
+
+
+def simplifier(ratio):
+    '''
+    Create a simplification function, if visvalingamwyatt is available.
+    Otherwise, return a noop function.
+
+    Args:
+        ratio (int): Between 1 and 99
+
+    Returns:
+        simplification function
+    '''
+    try:
+        # put this first to get NameError out of the way
+        simplify = vw.simplify_geometry
+
+        if ratio is None or ratio >= 100 or ratio < 1:
+            raise ValueError
+
+        return partial(simplify, ratio=ratio / 100.)
+
+    except (TypeError, ValueError, NameError):
+        return None

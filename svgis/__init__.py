@@ -8,25 +8,25 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
 
-from . import clip
-from . import convert
+from . import bounding
 from . import draw
 from . import errors
 from . import projection
 from . import svg
 from . import style
 from . import svgis
+from . import transform
 from .svgis import map, SVGIS
 
 __version__ = '0.3.10'
 
 __all__ = [
-    'convert',
-    'clip',
+    'bounding',
     'draw',
     'errors',
     'projection',
     'style',
     'svg',
     'svgis',
+    'transform',
 ]

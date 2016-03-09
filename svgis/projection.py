@@ -14,7 +14,7 @@ import fiona.crs
 import fionautil.layer
 import pyproj
 import utm
-from . import convert
+from . import bounding
 
 
 def tm_proj4(x0, y0, y1):
@@ -108,7 +108,7 @@ def transform_bounds(in_crs, out_crs, bounds):
     if out_crs is None:
         raise TypeError('Need output CRS, not None')
 
-    ring = convert.bounds_to_ring(*bounds)
+    ring = bounding.ring(bounds)
 
     try:
         xs, ys = list(zip(*ring))

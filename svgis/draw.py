@@ -12,7 +12,7 @@
 
 from __future__ import division
 from fionautil import measure
-from . import clip, svg
+from . import svg, transform
 from .errors import SvgisError
 
 
@@ -150,7 +150,7 @@ def geometry(geom, bbox=None, precision=None, **kwargs):
         unicode representation of SVG element(s) of the given geometry.
     '''
     if bbox:
-        geom = clip.clip(geom, bbox)
+        geom = transform.clip(geom, bbox)
 
     if geom['type'] in ('Point', 'MultiPoint'):
         return points(geom, precision=precision, **kwargs)

@@ -8,7 +8,8 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
 import unittest
-from svgis import clip
+import functools
+from svgis import transform
 try:
     import shapely.geometry
 
@@ -39,17 +40,35 @@ try:
             self.assertSequenceEqual(result['coordinates'], self.expected)
 
         def testClip(self):
-            clipped = clip.clip({"type": "Polygon", "coordinates": self.coords}, self.bounds)
+            clipped = transform.clip({"type": "Polygon", "coordinates": self.coords}, self.bounds)
             self.assertSequenceEqual(clipped['coordinates'], self.expected)
 
         def testClipGeometry(self):
             geometry = {"type": "Polygon", "coordinates": self.coords}
-            clipped = clip.clip(geometry, self.bounds)
+            clipped = transform.clip(geometry, self.bounds)
 
             self.assertSequenceEqual(set(self.expected), set(clipped['coordinates']))
 
 except ImportError:
     pass
+
+
+class SimplifyTestCase(unittest.TestCase):
+
+    def testSimplify(self):
+        a = transform.simplifier(None)
+        assert a is None
+
+        b = transform.simplifier(100)
+        assert b is None
+
+        c = transform.simplifier(50)
+
+        try:
+            import visvalingamwyatt
+            assert isinstance(c, functools.partial)
+        except ImportError:
+            assert c is None
 
 
 class ExpandTestCase(unittest.TestCase):
@@ -61,7 +80,7 @@ class ExpandTestCase(unittest.TestCase):
         self.gen = (x for x in self.coords[0])
 
     def testExpand(self):
-        expanded = clip.expand(self.gen)
+        expanded = transform.expand(self.gen)
 
         try:
             expanded = expanded.tolist()
@@ -70,7 +89,7 @@ class ExpandTestCase(unittest.TestCase):
 
         self.assertSequenceEqual([tuple(x) for x in expanded], self.coords[0])
 
-        self.assertSequenceEqual(expanded, clip.expand(expanded))
+        self.assertSequenceEqual(expanded, transform.expand(expanded))
 
     def testExpandGeometry(self):
         geom = {
@@ -78,7 +97,7 @@ class ExpandTestCase(unittest.TestCase):
             "coordinates": self.gen
         }
 
-        expanded = clip.expand_geom(geom)
+        expanded = transform.expand_geom(geom)
 
         try:
             expanded['coordinates'] = expanded['coordinates'].tolist()
@@ -103,7 +122,7 @@ class ExpandTestCase(unittest.TestCase):
                 }
             ]
         }
-        a = clip.expand_geom(GC)
+        a = transform.expand_geom(GC)
 
         assert len(a['geometries']) == 2
 
@@ -117,7 +136,7 @@ class ExpandTestCase(unittest.TestCase):
 
     def testStrangeGeometry(self):
         with self.assertRaises(NotImplementedError):
-            clip.expand_geom({"type": "Magic", "coordinates": [], "geometries": []})
+            transform.expand_geom({"type": "Magic", "coordinates": [], "geometries": []})
 
 
 if __name__ == '__main__':

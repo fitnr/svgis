@@ -16,7 +16,7 @@ import logging
 import fiona
 import fiona.transform
 import fionautil.scale
-from . import convert, clip, draw, errors, projection, svg
+from . import bounding, draw, errors, projection, svg, transform
 from . import style as _style
 from .utils import isinf
 
@@ -119,7 +119,7 @@ class SVGIS(object):
 
         self.log.info('starting SVGIS, files: %s', ', '.join(self.files))
 
-        if convert.check_bounds(bounds):
+        if bounding.check(bounds):
             self._unprojected_bounds = bounds
         elif bounds:
             self.log.warn("ignoring invalid bounds: %s", bounds)
@@ -138,7 +138,7 @@ class SVGIS(object):
 
         self.clip = kwargs.pop('clip', True)
 
-        self.simplifier = convert.simplifier(kwargs.pop('simplify', None))
+        self.simplifier = transform.simplifier(kwargs.pop('simplify', None))
 
         self.id_field = kwargs.pop('id_field', None)
 
@@ -203,7 +203,7 @@ class SVGIS(object):
         '''
         # This may happen many times if we were passed bounds, but it's a cheap operation.
         projected = projection.transform_bounds(in_crs, out_crs, bounds)
-        self._projected_bounds = convert.extend_bbox(projected, padding or 0)
+        self._projected_bounds = bounding.pad(projected, padding or 0)
         return self._projected_bounds
 
     def _get_clipper(self, layer_bounds, out_bounds, scalar=None):
@@ -219,8 +219,8 @@ class SVGIS(object):
             None if in_bounds == out_bounds or clipping is off.
         '''
         scalar = scalar or self.scalar
-        if self.clip and not convert.bbox_covers(out_bounds, layer_bounds):
-            return clip.prepare([c * scalar for c in convert.extend_bbox(self._projected_bounds, 1000)])
+        if self.clip and not bounding.covers(out_bounds, layer_bounds):
+            return transform.prepare([c * scalar for c in bounding.pad(self._projected_bounds, 1000)])
 
         else:
             return None
@@ -417,7 +417,7 @@ class SVGIS(object):
         '''
         # Set up arguments
         scalar = scalar or self.scalar
-        unprojected_bounds = convert.check_bounds(bounds) or self.unprojected_bounds
+        unprojected_bounds = bounding.check(bounds) or self.unprojected_bounds
 
         drgs = {
             'style': kwargs.pop('style', ''),
@@ -427,7 +427,7 @@ class SVGIS(object):
 
         if 'simplify' in kwargs:
             self.log.info('setting up simplifier with factor: %s', kwargs['simplify'])
-            kwargs['simplifier'] = convert.simplifier(kwargs.pop('simplify'))
+            kwargs['simplifier'] = transform.simplifier(kwargs.pop('simplify'))
         else:
             kwargs['simplifier'] = self.simplifier
 
@@ -461,7 +461,7 @@ class SVGIS(object):
         Returns:
             String (unicode in Python 2) containing an entire SVG document.
         '''
-        transform = 'scale(1,-1)'
+        transform_attrib = 'scale(1,-1)'
 
         svgargs = {
             'precision': kwargs.pop('precision', 0),
@@ -480,11 +480,11 @@ class SVGIS(object):
             svgargs['viewbox'] = [x0, -y1] + size
             self.log.debug('drawing with viewbox')
         else:
-            transform += ' translate({},{})'.format(-x0, -y1)
+            transform_attrib += ' translate({},{})'.format(-x0, -y1)
             self.log.debug('translating contents to fit')
 
         # Create container and then SVG
-        container = svg.group(members, fill_rule='evenodd', transform=transform)
+        container = svg.group(members, fill_rule='evenodd', transform=transform_attrib)
         drawing = svg.drawing(size, [container], **svgargs)
 
         if kwargs.pop('inline', False):
