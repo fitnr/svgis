@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+'''Deal with projections'''
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
-
 import os.path
 from fiona import transform
 import fiona.crs
@@ -15,10 +15,6 @@ import fionautil.layer
 import pyproj
 import utm
 from . import convert
-
-'''
-Helpers for dealing with projections
-'''
 
 
 def tm_proj4(x0, y0, y1):

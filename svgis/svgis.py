@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+
+"""Draw SVG maps"""
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
@@ -17,10 +19,6 @@ import fionautil.scale
 from . import convert, clip, draw, errors, projection, svg
 from . import style as _style
 from .utils import isinf
-
-"""
-Draw geodata layers into SVGs.
-"""
 
 
 STYLE = ('polyline,line,rect,path,polygon,.polygon{'

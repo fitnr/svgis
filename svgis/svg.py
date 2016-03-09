@@ -1,18 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+'''Create string versions of SVG elements.'''
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
 from . import utils
-
-'''
-Create string versions of SVG elements.
-'''
 
 
 def _element(tag, contents=None, **kwargs):
@@ -165,6 +162,9 @@ def polygon():
 
 
 def toattribs(**kwargs):
+    '''
+    Convert keyword arguments to SVG attribute definitions.
+    '''
     attribs = u' '.join(u'{}="{}"'.format(k, v) for k, v in kwargs.items() if v is not None and v != '')
 
     if len(attribs) > 0:

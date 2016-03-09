@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+'''Utilities for manipulating the DOM and applying styles to same'''
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 
@@ -9,10 +11,6 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 import logging
 import xml.etree.ElementTree as ElementTree
-
-'''
-Utilities for manipulating the DOM and applying styles to same.
-'''
 
 SVG_NS = 'http://www.w3.org/2000/svg'
 ElementTree._original_serialize_xml = ElementTree._serialize_xml

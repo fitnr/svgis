@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+'''Draw geometries as SVG elements'''
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 
@@ -12,10 +14,6 @@ from __future__ import division
 from fionautil import measure
 from . import clip, svg
 from .errors import SvgisError
-
-"""
-Draw a geometries elements as SVG
-"""
 
 
 def _applyid(multifunc):
@@ -33,6 +31,7 @@ def _applyid(multifunc):
 
 
 def linestring(coordinates, **kwargs):
+    '''Draw a LineString'''
     return svg.polyline(coordinates, **kwargs)
 
 

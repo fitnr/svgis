@@ -1,23 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+'''Draw regular-interval graticules for a coordinate system'''
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://www.opensource.org/licenses/GNU General Public License v3 (GPLv3)-license
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
-
 from __future__ import division
 import json
 from functools import partial
 import fiona.transform
 from . import projection, utils
-
-
-"""
-Draw regular-interval graticules for a coordinate system
-"""
 
 
 def graticule(bounds, step, crs=None):

@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+'''Utilities for svgis'''
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 

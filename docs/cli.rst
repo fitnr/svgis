@@ -10,13 +10,15 @@ svgis draw
 Draw SVGs from input geodata.
 ::
 
-    Usage: svgis draw [OPTIONS] INPUT...
+    Usage: svgis draw [OPTIONS] LAYER...
+
+      Draw SVGs from input geodata
 
     Options:
-      -o, --output FILENAME           Defaults to stdout.
-      -b, --bounds minx, miny, maxx, maxy
-                                      In the same coordinate system as the input
-                                      layers
+      -o, --output FILENAME           Defaults to stdout
+      -b, --bounds minx miny maxx maxy
+                                      In the same coordinate system as the first
+                                      input layer
       -c, --style CSS                 CSS file or string
       -f, --scale INTEGER             Scale for the map (units are divided by this
                                       number)
@@ -29,19 +31,20 @@ Draw SVGs from input geodata.
                                       a file containing a proj4 string, "utm" (use
                                       local UTM), "file" (use existing), "local"
                                       (generate a local projection)
-      -s, --simplify FACTOR           Simplify geometries. Accepts an integer
-                                      between 1 and 100, the percentage points in
-                                      each geometry to retain
-      -P, --precision INTEGER         Rounding precision for coordinates
-      --clip / -n, --no-clip          Clip shapes to bounds. Slower, produces
-                                      smaller files (default: clip).
-      -x, --no-viewbox                Draw SVG without a ViewBox. May improve
-                                      compatibility.
-      -l, --inline / --no-inline      Inline CSS. Slightly slower, but required by
-                                      some clients (e.g. Adobe) (default: do not
-                                      inline).
-      -q, --quiet                     Ignore warnings.
-      -v, --verbose                   Talk a lot.
+      -s, --simplify FACTOR           Simplify geometries, accepts an integer
+                                      between 1 and 100, the percentage of each
+                                      geometry to retain.
+      -P, --precision INTEGER         Rounding precision for coordinates (default:
+                                      5)
+      --clip / -n, --no-clip          Clip shapes to bounds. Slightly slower,
+                                      produces smaller files (default: clip).
+      -l, --inline / --no-inline      Inline CSS styles to each element. Slightly
+                                      slower, but required by some clients (e.g.
+                                      Adobe) (default: inline).
+      --viewbox / -x, --no-viewbox    Draw SVG using a ViewBox (default: no
+                                      ViewBox)
+      -q, --quiet                     Ignore warnings
+      -v, --verbose                   Talk a lot
       -h, --help                      Show this message and exit.
 
 
@@ -375,8 +378,7 @@ Or, check what projection SVGIS will generate given a file:
     xargs -n 4 svgis project --
 
 Keep in mind that when converting between projections, ``svgis bounds`` is lazy.
-The returned bounding box will cover the geometry, but for certain extreme
-reprojections it may include extra space.
+The returned bounding box will cover the geometry, but may include extra space.
 
 ::
 
@@ -386,10 +388,11 @@ reprojections it may include extra space.
 
     Options:
       -j, --crs KEYWORD  Specify a map projection. Accepts either an EPSG code
-                     epsg:4456), a proj4 string, a file containing a proj4, "utm"
-                     (use local UTM), "file" (use existing), "local" (generate a
-                     local projection).
-      -h, --help     Show this message and exit.
+                         (e.g. epsg:4456), a proj4 string, a file containing a
+                         proj4 string, "utm" (use local UTM), "file" (use
+                         existing), "local" (generate a local projection)
+      --latlon           Print bounds in latitude, longitude order
+      -h, --help         Show this message and exit.
 
 
 
