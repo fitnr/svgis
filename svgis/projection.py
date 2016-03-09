@@ -81,8 +81,12 @@ def generatecrs(minx, miny, maxx, maxy, proj_method=None):
 
 def _is_latlong(crs):
     '''Test if CRS is in lat/long coordinates'''
-    if crs.get('proj') == 'longlat' or pyproj.Proj(**crs).is_latlong():
-        return True
+    try:
+        if crs.get('proj') == 'longlat' or pyproj.Proj(**crs).is_latlong():
+            return True
+    except RuntimeError:
+        pass
+
     return False
 
 

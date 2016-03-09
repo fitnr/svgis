@@ -16,7 +16,7 @@ from svgis import svgis, errors
 
 
 class SvgisTestCase(unittest.TestCase):
-    file = 'tests/test_data/cb_2014_us_nation_20m.shp'
+    file = 'tests/test_data/cb_2014_us_nation_20m.json'
 
     polygon = {
         "properties": {

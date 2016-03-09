@@ -27,8 +27,8 @@ BOUNDS = (-124.0, 20.5, -64.0, 49.0)
 class CliTestCase(unittest.TestCase):
     fixture = 'tests/test_data/test.svg'
 
-    shp = 'tests/test_data/cb_2014_us_nation_20m.shp'
-    dc = 'tests/test_data/tl_2015_11_place.shp'
+    shp = 'tests/test_data/cb_2014_us_nation_20m.json'
+    dc = 'tests/test_data/tl_2015_11_place.json'
     css = 'polygon{fill:green}'
 
     def setUp(self):
@@ -93,6 +93,7 @@ class CliTestCase(unittest.TestCase):
 
     def testDrawProjected(self):
         self.invoke(['draw', self.dc, '-v', '-o', 'tmp.svg', '-P', '10'])
+
         try:
             with open('tmp.svg') as f:
                 svg = f.read()

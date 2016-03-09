@@ -52,13 +52,6 @@ setup(
 
     packages=['svgis'],
 
-    package_data={
-        'svgis': [
-            'test_data/test.*',
-            'test_data/*.json'
-        ]
-    },
-
     install_requires=[
         'click>=6.2,<6.3',
         'pyproj>=1.9.5,<1.10',

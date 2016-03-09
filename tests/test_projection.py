@@ -11,7 +11,7 @@
 import unittest
 from svgis import projection
 
-SHP = 'tests/test_data/cb_2014_us_nation_20m.shp'
+SHP = 'tests/test_data/cb_2014_us_nation_20m.json'
 
 
 class ProjectionTestCase(unittest.TestCase):
