@@ -9,6 +9,7 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
+from fiona.transform import transform as fionatransform
 from . import utils
 
 
@@ -101,3 +102,32 @@ def covers(b1, b2):
         b2 (tuple): A bounding box
     '''
     return b1[0] <= b2[0] and b1[1] <= b2[1] and b1[2] >= b2[2] and b1[3] >= b2[3]
+
+
+def transform(in_crs, out_crs, bounds):
+    '''
+    Project a bounding box, taking care to not slice off the sides.
+
+    Args:
+        in_crs (dict): Fiona-type proj4 mapping representing input projection.
+        out_crs (dict): Fiona-type proj4 mapping representing output projection.
+        bounds (tuple): bounding box to transform.
+
+    Returns:
+        tuple
+    '''
+    if in_crs is None:
+        raise TypeError('Need input CRS, not None')
+
+    if out_crs is None:
+        raise TypeError('Need output CRS, not None')
+
+    try:
+        xs, ys = list(zip(*ring(bounds)))
+    except ValueError:
+        # file is likely empty
+        return float('-inf'), float('-inf'), float('inf'), float('inf')
+
+    xbounds, ybounds = fionatransform(in_crs, out_crs, xs, ys)
+
+    return min(xbounds), min(ybounds), max(xbounds), max(ybounds)

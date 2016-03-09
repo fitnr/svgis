@@ -36,22 +36,6 @@ class ProjectionTestCase(unittest.TestCase):
                    '+units=m +no_defs')
         self.assertEqual(projection.tm_proj4(0, 0, 0), fixture)
 
-    def testTransformBounds(self):
-        bounds = (-74, 42, -73, 43)
-
-        with self.assertRaises(TypeError):
-            projection.transform_bounds(None, {'init': 'epsg:4269'}, bounds)
-
-        with self.assertRaises(TypeError):
-            projection.transform_bounds({'init': 'epsg:4269'}, None, bounds)
-
-        a = projection.transform_bounds({'init': 'epsg:4269'}, {'init': 'epsg:3102'}, bounds)
-
-        fixture = (43332273.50269379, 15584115.894447982, 44004519.424246654, 16320640.928220816)
-
-        for z in zip(a, fixture):
-            self.assertAlmostEqual(*z)
-
     def testGenerateCRS(self):
         bounds = -82.2, 40.1, -78.9, 45.8
         a = projection.generatecrs(*bounds, proj_method='utm')

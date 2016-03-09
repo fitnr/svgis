@@ -12,7 +12,7 @@ from __future__ import division
 import json
 from functools import partial
 import fiona.transform
-from . import projection, utils
+from . import bounding, projection, utils
 
 
 def graticule(bounds, step, crs=None):
@@ -35,7 +35,7 @@ def graticule(bounds, step, crs=None):
         if method in ('local', 'utm'):
             out_crs = projection.generatecrs(*bounds, proj_method=method)
 
-        bounds = projection.transform_bounds({'init': u'epsg:4326'}, out_crs, bounds)
+        bounds = bounding.transform({'init': u'epsg:4326'}, out_crs, bounds)
         unproject = partial(fiona.transform.transform, out_crs, {'init': u'epsg:4326'})
 
     else:

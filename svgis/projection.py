@@ -90,37 +90,6 @@ def choosecrs(in_crs, bounds, proj_method=None):
         return fiona.crs.from_string(generatecrs(*bounds, proj_method=proj_method))
 
 
-def transform_bounds(in_crs, out_crs, bounds):
-    '''
-    Project a bounding box, taking care to not slice off the sides.
-
-    Args:
-        in_crs (dict): Fiona-type proj4 mapping representing input projection.
-        out_crs (dict): Fiona-type proj4 mapping representing output projection.
-        bounds (tuple): bounding box to transform.
-
-    Returns:
-        tuple
-    '''
-    if in_crs is None:
-        raise TypeError('Need input CRS, not None')
-
-    if out_crs is None:
-        raise TypeError('Need output CRS, not None')
-
-    ring = bounding.ring(bounds)
-
-    try:
-        xs, ys = list(zip(*ring))
-    except ValueError:
-        # file is likely empty
-        return 0.0, 0.0, 0.0, 0.0
-
-    xbounds, ybounds = transform.transform(in_crs, out_crs, xs, ys)
-
-    return min(xbounds), min(ybounds), max(xbounds), max(ybounds)
-
-
 def layer_bounds(layer, crs=None):
     '''
     Get the bounds of a layer, optionally transforming them into a given CRS (or local or utm).

@@ -202,7 +202,7 @@ class SVGIS(object):
             (tuple) bounding box in out_crs coordinates.
         '''
         # This may happen many times if we were passed bounds, but it's a cheap operation.
-        projected = projection.transform_bounds(in_crs, out_crs, bounds)
+        projected = bounding.transform(in_crs, out_crs, bounds)
         self._projected_bounds = bounding.pad(projected, padding or 0)
         return self._projected_bounds
 
@@ -318,7 +318,7 @@ class SVGIS(object):
                     self.update_projected_bounds(self.in_crs, self.out_crs, unprojected_bounds, padding)
 
                 # Convert global bounds to layer.crs.
-                bounds = projection.transform_bounds(self.out_crs, layer.crs, self.projected_bounds)
+                bounds = bounding.transform(self.out_crs, layer.crs, self.projected_bounds)
 
             # When we have no passed bounds:
             else:
