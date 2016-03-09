@@ -89,11 +89,14 @@ class SvgisTestCase(unittest.TestCase):
                 'cat': 'meow'
             }
         }
-        drawn = self.svgis_obj._feature(feat, [], classes=['foo'], id_field='cat')
+        drawn = self.svgis_obj._feature(feat, [], classes=['foo'], id_field='cat', name='quux')
         assert isinstance(drawn, six.string_types)
 
         self.assertIn('id="meow"', drawn)
-        self.assertIn('class="foo_bar"', drawn)
+        self.assertIn('class="quux foo_bar"', drawn)
+
+        drawn2 = self.svgis_obj._feature(feat, [], classes=['foo'], id_field='cat')
+        self.assertIn('class="foo_bar"', drawn2)
 
     def testSvgisComposeType(self):
         a = self.svgis_obj.compose(inline_css=True)
@@ -143,8 +146,8 @@ class SvgisTestCase(unittest.TestCase):
             assert 'stroke-linejoin:round' in style
 
     def testDrawWithClasses(self):
-        r0 = self.svgis_obj._feature(self.polygon, [], classes=['potato'], id_field=None)
-        assert 'class="potato"' in r0
+        r0 = self.svgis_obj._feature(self.polygon, [], classes=[], id_field=None, name='potato')
+        self.assertIn('class="potato"', r0)
 
         r1 = self.svgis_obj._feature(self.polygon, [], classes=['kale'], id_field='apple')
         assert 'kale_leafy_green' in r1

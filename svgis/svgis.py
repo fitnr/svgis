@@ -266,16 +266,13 @@ class SVGIS(object):
 
         # Correct for OGR's lack of creativity for GeoJSONs.
         if layer.name == 'OGRGeoJSON':
-            result['layer'] = os.path.splitext(os.path.basename(filename))[0]
+            result['name'] = os.path.splitext(os.path.basename(filename))[0]
         else:
-            result['layer'] = layer.name
+            result['name'] = layer.name
 
         # A list of class names to get from layer properties.
         class_fields = kwargs.pop('class_fields', None) or self.class_fields
         result['classes'] = [x for x in class_fields if x in layer.schema['properties']]
-
-        # Add the layer name to the class list.
-        result['classes'].insert(0, result['layer'])
 
         # Remove the id field if it doesn't appear in the properties.
         id_field = kwargs.pop('id_field', self.id_field)
@@ -339,7 +336,7 @@ class SVGIS(object):
 
         return {
             'members': group,
-            'id': kwargs['layer'],
+            'id': kwargs['name'],
             'class': u' '.join(_style.sanitize(c) for c in layer.schema['properties'].keys())
         }
 
@@ -353,21 +350,27 @@ class SVGIS(object):
             classes (list): Names (unsanitized) of fields to apply as classes in the output element.
             id_field (str): Field to use as id of the output element.
             kwargs: Additional properties to apply to the element.
+            name (str): layer name (usually basename of the input file).
 
         Returns:
             unicode
         '''
-        layer = kwargs.pop('layer', '?')
+        name = kwargs.pop('name', '?')
 
         # Set up the element's properties.
-        kwargs['class'] = _style.construct_classes(classes, feature['properties'])
+        classes = _style.construct_classes(classes, feature['properties'])
+        # Add the layer name to the class list.
+        if name != '?':
+            classes.insert(0, _style.sanitize(name))
+        kwargs['class'] = ' '.join(classes)
+
         if id_field:
             kwargs['id'] = _style.sanitize(feature['properties'].get(id_field))
 
         try:
-            # Check if geometry exists (a bit unpythonic, but cleaner errs this way).
             geom = feature['geometry']
 
+            # Check if geometry exists (a bit unpythonic, but cleaner errs this way).
             if geom is None:
                 raise KeyError('NULL geometry')
 
@@ -378,12 +381,12 @@ class SVGIS(object):
 
         except KeyError as e:
             self.log.warning('no geometry found for feature %s of %s: %s',
-                             kwargs.get('id', feature.get('id', '?')), layer, e)
+                             kwargs.get('id', feature.get('id', '?')), name, e)
             return u''
 
         except ValueError as e:
             self.log.warning('error transforming feature %s of %s: %s',
-                             kwargs.get('id', feature.get('id', '?')), layer, e)
+                             kwargs.get('id', feature.get('id', '?')), name, e)
             return u''
 
         try:
@@ -392,7 +395,7 @@ class SVGIS(object):
 
         except (TypeError, errors.SvgisError) as e:
             self.log.warning('unable to draw feature %s of %s: %s',
-                             kwargs.get('id', feature.get('id', '?')), layer, e)
+                             kwargs.get('id', feature.get('id', '?')), name, e)
             return u''
 
     def compose(self, scalar=None, bounds=None, **kwargs):

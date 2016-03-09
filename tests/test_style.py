@@ -159,30 +159,30 @@ class CssTestCase(unittest.TestCase):
         self.assertEqual(style.sanitize(u'"huh"'), u'huh')
 
     def testConstructClasses(self):
-        self.assertEqual(style.construct_classes(('foo',), {'foo': 'bar'}), 'foo_bar')
-        self.assertEqual(style.construct_classes(['foo'], {'foo': 'bar'}), 'foo_bar')
+        self.assertEqual(style.construct_classes(('foo',), {'foo': 'bar'}), [u'foo_bar'])
+        self.assertEqual(style.construct_classes(['foo'], {'foo': 'bar'}), [u'foo_bar'])
 
-        self.assertEqual(style.construct_classes(['foo'], {'foo': None}), 'foo_None')
+        self.assertEqual(style.construct_classes(['foo'], {'foo': None}), [u'foo_None'])
 
     def testCreateClasses(self):
         classes = style.construct_classes(self.classes, self.properties)
-        self.assertEqual(classes, u'apple_fruit potato')
+        self.assertEqual(classes, [u'apple_fruit'])
 
         classes = style.construct_classes(self.classes, {'apple': u'fruit'})
-        self.assertEqual(classes, u'apple_fruit potato')
+        self.assertEqual(classes, [u'apple_fruit'])
 
         classes = style.construct_classes(self.classes, {'apple': u'früit'})
-        self.assertEqual(classes, u'apple_früit potato')
+        self.assertEqual(classes, [u'apple_früit'])
 
         classes = style.construct_classes(self.classes, {'apple': 1})
-        self.assertEqual(classes, u'apple_1 potato')
+        self.assertEqual(classes, [u'apple_1'])
 
     def testCreateClassesMissing(self):
         classes = style.construct_classes(self.classes, {'apple': ''})
-        self.assertEqual(classes, 'apple_ potato')
+        self.assertEqual(classes, [u'apple_'])
 
         classes = style.construct_classes(self.classes, {'apple': None})
-        self.assertEqual(classes, 'apple_None potato')
+        self.assertEqual(classes, [u'apple_None'])
 
     def testCDATA(self):
         

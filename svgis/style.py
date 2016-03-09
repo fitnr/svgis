@@ -58,12 +58,10 @@ def construct_classes(classes, properties):
         properties (dict): A single feature's properties.
 
     Returns:
-        str (unicode in Python 2)
+        (list) class names
     '''
     f = u'{}_{}'
-    classed = (f.format(p, properties[p]) if p in properties else p for p in classes)
-    sanitized = (sanitize(w) for w in classed)
-    return u' '.join(sanitized)
+    return [sanitize(f.format(p, properties.get(p))) for p in classes if p in properties]
 
 
 def pick(style):
