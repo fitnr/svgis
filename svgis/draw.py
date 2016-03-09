@@ -11,6 +11,7 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
 from __future__ import division
+from functools import wraps
 from fionautil import measure
 from . import svg, transform
 from .errors import SvgisError
@@ -21,7 +22,7 @@ def _applyid(multifunc):
     This decorator applies the ID attribute to the group that
     contains multi-part geometries, rather than the elements of the group.
     '''
-
+    @wraps(multifunc)
     def func(coordinates, **kwargs):
         ID = kwargs.pop('id', None)
         result = svg.group(multifunc(coordinates, **kwargs), fill_rule="evenodd", id=ID)

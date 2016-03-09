@@ -9,6 +9,7 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
+from functools import wraps
 from . import utils
 
 
@@ -39,6 +40,7 @@ def _fmtcoord(precision):
 
 
 def _poly(name):
+    @wraps(name)
     def poly(coordinates, precision=None, **kwargs):
         fmt = _fmtcoord(precision)
         points = utils.dedupe(fmt.format(c) for c in coordinates)
