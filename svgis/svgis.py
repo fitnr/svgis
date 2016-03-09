@@ -105,6 +105,7 @@ class SVGIS(object):
 
     _in_crs, _out_crs = None, None
 
+    clipper = None
     simplifier = None
 
     def __init__(self, files, bounds=None, out_crs=None, **kwargs):
@@ -216,14 +217,18 @@ class SVGIS(object):
             scalar (float): Map scale.
 
         Returns:
-            None if in_bounds == out_bounds or clipping is off.
+            None if layer_bounds are inside out_bounds or clipping is off.
         '''
-        scalar = scalar or self.scalar
-        if self.clip and not bounding.covers(out_bounds, layer_bounds):
-            return transform.prepare([c * scalar for c in bounding.pad(self._projected_bounds, 1000)])
-
-        else:
+        if not self.clip or bounding.covers(out_bounds, layer_bounds):
             return None
+
+        scalar = scalar or self.scalar
+
+        if not self.clipper:
+            padded_bounds = bounding.pad(self.projected_bounds, 1000)
+            self.clipper = transform.clipper([c * scalar for c in padded_bounds])
+
+        return self.clipper
 
     def _reprojector(self, in_crs):
         '''Return a reprojection transform from in_crs to self.out_crs.'''

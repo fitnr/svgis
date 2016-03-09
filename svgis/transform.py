@@ -68,22 +68,31 @@ def expand_geom(geom):
     return geom
 
 
-def prepare(bbox):
+def clipper(bbox):
+    '''
+    Create a clipping function for a given bounding box.
+
+    Args:
+        bbox (tuple): bounding box
+
+    Returns:
+        function that will given geometries to input bounding box
+    '''
     minx, miny, maxx, maxy = bbox
     bounds = {
         "type": "Polygon",
         "coordinates": [[(minx, miny), (minx, maxy), (maxx, maxy), (maxx, miny), (minx, miny)]]
     }
     try:
-        bbox = shape(bounds)
+        bbox_shape = shape(bounds)
 
         def func(geometry):
             # This is technically only needed in Py3, but whatever.
             geom = expand_geom(geometry)
 
             try:
-                clipped = bbox.intersection(shape(geom))
-            except TopologicalError:
+                clipped = bbox_shape.intersection(shape(geom))
+            except (ValueError, TopologicalError):
                 return geometry
 
             return mapping(clipped)
@@ -95,10 +104,19 @@ def prepare(bbox):
     return func
 
 
-def clip(geometry, bbox):
-    '''Clip a geometry to a bounding box. BBOX may be a tuple or a shapely geometry object'''
+def clip(geometry, bounds):
+    '''
+    Clip a geometry to a bounding box. Equivalent to calling clipper(bounds)(geometry).
+
+    Args:
+        geometry (dict): geometry object
+        bounds (tuple): bounding box
+
+    Returns:
+        (dict) geometry
+    '''
     try:
-        return prepare(bbox)(geometry)
+        return clipper(bounds)(geometry)
 
     except NameError:
         return geometry
