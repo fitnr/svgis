@@ -480,8 +480,10 @@ class SVGIS(object):
 
         if kwargs.pop('viewbox', True):
             svgargs['viewbox'] = [x0, -y1] + size
+            self.log.debug('drawing with viewbox')
         else:
             transform += ' translate({},{})'.format(-x0, -y1)
+            self.log.debug('translating contents to fit')
 
         # Create container and then SVG
         container = svg.group(members, fill_rule='evenodd', transform=transform)
