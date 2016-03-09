@@ -6,4 +6,4 @@
 
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://www.opensource.org/licenses/GNU General Public License v3 (GPLv3)-license
-# Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
+# Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>

@@ -1,3 +1,18 @@
+0.4.0
+-----
+
+* Make --no-viewbox default in svgis draw
+* Refactor internal bounds handling, squashing a few bugs
+* Better handling for precision and padding in svgis.SVGIS
+* Filter out successive identical coordinates in geometries
+* Fix padding to truly be in output (projected) units
+* Warn, don't crash, when geometry is null
+* Additional verbose flags now provide more debugging infomation
+* Repair bug that sometimes added styles based on a class substring, rather than exact match
+* Put r attributes right on the element when inlining
+* Fix bug when layer contained a field with its name
+* Restructured modules: renamed 'clip' and 'convert' to 'transform' and 'bounding'
+
 0.3.10
 ------
 
