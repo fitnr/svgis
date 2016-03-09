@@ -11,3 +11,5 @@ API customization.
    svg
    draw
    style
+   bounding
+

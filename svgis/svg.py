@@ -58,7 +58,7 @@ def circle(point, precision=None, **kwargs):
         precision (int): rounding precision
 
     Returns:
-        str
+        str (unicode in Python 2)
     '''
     return _element(u'circle', cx=utils.rnd(point[0], precision),
                     cy=utils.rnd(point[1], precision), **kwargs)
@@ -90,7 +90,7 @@ def rect(start, width, height, precision=None, **kwargs):
         precision (int): rounding precision
 
     Returns:
-        str
+        str (unicode in Python 2)
     '''
     start = [utils.rnd(i, precision) for i in start]
     width = utils.rnd(width, precision)
@@ -109,7 +109,7 @@ def line(start, end, precision=None, **kwargs):
         precision (int): rounding precision
 
     Returns:
-        str
+        str (unicode in Python 2)
     '''
     start = [utils.rnd(i, precision) for i in start]
     end = [utils.rnd(i, precision) for i in end]
@@ -126,7 +126,7 @@ def path(coordinates, precision=None, **kwargs):
         precision (int): rounding precision
 
     Returns:
-        str
+        str (unicode in Python 2)
     '''
     fmt = _fmtcoord(precision)
     coords = utils.dedupe(i if utils.isstr(i) else fmt.format(i) for i in coordinates)
@@ -143,7 +143,7 @@ def polyline():
         precision (int): rounding precision
 
     Returns:
-        str
+        str (unicode in Python 2)
     '''
     return u'polyline'
 
@@ -158,7 +158,7 @@ def polygon():
         precision (int): rounding precision
 
     Returns:
-        str
+        str (unicode in Python 2)
     '''
     return u'polygon'
 
@@ -166,6 +166,9 @@ def polygon():
 def toattribs(**kwargs):
     '''
     Convert keyword arguments to SVG attribute definitions.
+
+    Returns:
+        str (unicode in Python 2)
     '''
     attribs = u' '.join(u'{}="{}"'.format(k, v) for k, v in kwargs.items() if v is not None and v != '')
 
@@ -183,7 +186,7 @@ def defstyle(style=None):
         style (string): A CSS string.
 
     Returns:
-        unicode
+        str (unicode in Python 2)
     '''
     if style:
         return u'<defs><style type="text/css"><![CDATA[{}]]></style></defs>'.format(style)
@@ -201,7 +204,7 @@ def group(members=None, **kwargs):
                         attributes of the group, i.e. key="value".
 
     Returns:
-        unicode
+        str (unicode in Python 2)
     '''
     members = members or ''
     return _element(u'g', u''.join(members), **kwargs)
@@ -216,6 +219,9 @@ def drawing(size, members, precision=None, viewbox=None, style=None):
         members (list): Strings to add to output.
         viewbox (Sequence): Four coordinates that describe an SVG viewBox.
         style (string): CSS string.
+
+    Returns:
+        str (unicode in Python 2)
     '''
     kwargs = {
         'width': size[0],

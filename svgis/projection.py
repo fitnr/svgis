@@ -16,6 +16,18 @@ import utm
 
 
 def tm_proj4(x0, y0, y1):
+    '''
+    Generate the proj4 string for a local Transverse Mercator projection
+    centered at a given longitude and between two latitudes.
+
+    Args:
+        x0 (float): longitude
+        y0 (float): latitude 0
+        y1 (float): latitude 1
+
+    Returns:
+        (str) proj4 string
+    '''
     return ('+proj=lcc +lon_0={x0} +lat_1={y1} +lat_2={y0} +lat_0={y1}'
             '+x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0'
             '+units=m +no_defs').format(x0=x0, y0=y0, y1=y1)
@@ -52,7 +64,7 @@ def generatecrs(minx, miny, maxx, maxy, proj_method=None):
     create a custom transverse mercator.
 
     Returns:
-        proj4 string
+        (str) proj4 string
     '''
     if proj_method == 'utm':
         midx = (minx + maxx) / 2
@@ -99,7 +111,9 @@ def pick(project):
     Pick a projection or projection method to use.
 
     Returns:
-        tuple: (projection method, crs)
+        (tuple) method, crs
+        method will be one of: None, 'local', 'utm'
+        crs will be None or a dict
     '''
     proj_method, out_crs = None, None
 
