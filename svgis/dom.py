@@ -60,6 +60,10 @@ def apply_rule(doc, rule):
             for el in els:
                 style = _style_dict(el.attrib.get('style'))
                 style.update(declaration)
+                # special case: add circle radius directly to the element
+                if 'r' in style:
+                    el.attrib['r'] = style['r']
+                    del style['r']
                 el.attrib['style'] = _style_string(style)
 
 
