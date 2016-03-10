@@ -3,7 +3,7 @@
 
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
-# Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
+# Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 PROJECTION = +proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs
 QUIET ?= -q
 PYTHONFLAGS = -W ignore
@@ -25,7 +25,7 @@ profile: tests/profile.py
 	grep -E '(svgis|draw|css|projection|svg|cli|clip|convert|errors).py'
 
 test: tests/test_data/cb_2014_us_nation_20m.json tests/test_data/tl_2015_11_place.json tests/test_data/test.svg
-	coverage run --include='svgis/*','build/lib/svgis/*' setup.py $(QUIET) test
+	coverage run --include='svgis/*' setup.py $(QUIET) test
 	coverage report
 	coverage html
 
@@ -45,10 +45,9 @@ tests/test_data/test.svg: tests/test_data/cb_2014_us_nation_20m.json
 	@touch $@
 
 deploy: docs.zip README.rst | clean
-	python setup.py register
-	python3 setup.py bdist_wheel
-	rm -rf build
-	python setup.py sdist bdist_wheel
+	python3 setup.py register
+	python3 setup.py sdist
+	python3 setup.py bdist_wheel --universal
 	twine upload dist/*
 	git push
 	git push --tags

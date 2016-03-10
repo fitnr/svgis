@@ -36,11 +36,8 @@ class GraticuleTestCase(unittest.TestCase):
     def test_layer(self):
         a = graticule.layer([0, 0, 5, 5], 1)
         assert isinstance(a, dict)
-        assert isinstance(a['features'], list)
-        try:
-            self.assertIsInstance(a['features'][0]['geometry']['coordinates'], list)
-        except AssertionError:
-            self.assertIsInstance(a['features'][0]['geometry']['coordinates'], zip)
+        assert isinstance(a['features'], (list, tuple))
+        self.assertIsInstance(a['features'][0]['geometry']['coordinates'], (list, tuple))
 
     def testgraticule(self):
         g = graticule.graticule((0, 0, 2, 2), 1)

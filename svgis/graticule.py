@@ -8,7 +8,6 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://www.opensource.org/licenses/GNU General Public License v3 (GPLv3)-license
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
-from __future__ import division
 import json
 from functools import partial
 import fiona.transform
@@ -48,19 +47,19 @@ def graticule(bounds, step, crs_or_method=None):
     frange = partial(utils.frange, cover=True)
 
     for i, X in enumerate(frange(minx, maxx + step, step), 1):
-        coords = unproject(*zip(*[(X, y) for y in frange(miny, maxy + step, step / 2)]))
-        yield _feature(i, zip(*coords), axis='x', coord=X)
+        coords = unproject(*list(zip(*[(X, y) for y in frange(miny, maxy + step, step / 2.)])))
+        yield _feature(i, tuple(zip(*coords)), axis='x', coord=X)
 
     for i, Y in enumerate(frange(miny, maxy + step, step), i + 1):
-        coords = unproject(*zip(*[(x, Y) for x in frange(minx, maxx + step, step / 2)]))
-        yield _feature(i, zip(*coords), axis='y', coord=Y)
+        coords = unproject(*list(zip(*[(x, Y) for x in frange(minx, maxx + step, step / 2.)])))
+        yield _feature(i, tuple(zip(*coords)), axis='y', coord=Y)
 
 
 def _feature(i, coords, axis=None, coord=None):
     return {
         'geometry': {
             'type': 'LineString',
-            'coordinates': list(coords)
+            'coordinates': coords
         },
         'properties': {
             'axis': axis,
@@ -80,7 +79,7 @@ def layer(bounds, step, crs=None):
                 "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
             },
         },
-        "features": list(graticule(bounds, step, crs))
+        "features": tuple(graticule(bounds, step, crs))
     }
 
 

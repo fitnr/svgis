@@ -61,11 +61,7 @@ class CliTestCase(unittest.TestCase):
     def testSvgProject(self):
         p = self.invoke(['project', '--', '-110.277906', '35.450777', '-110.000477', '35.649030'])
 
-        try:
-            self.assertEqual(p.exit_code, 0)
-        except AssertionError:
-            # print(p.exc_info)
-            raise
+        self.assertEqual(p.exit_code, 0)
 
         expected = set(u'+proj=lcc +lon_0=-111.0 +lat_1=35.64903 +lat_2=35.450777 '
                        '+lat_0 +y_0=0 +ellps=GRS80 '

@@ -7,8 +7,6 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
-
-from __future__ import division
 import os.path
 from collections import Iterable
 from functools import partial
@@ -16,9 +14,9 @@ import logging
 import fiona
 import fiona.transform
 import fionautil.scale
-from . import bounding, draw, errors, projection, svg, transform
+from six import string_types
+from . import bounding, draw, errors, projection, svg, transform, utils
 from . import style as _style
-from .utils import isinf, DEFAULT_GEOID
 
 
 STYLE = ('polyline,line,rect,path,polygon,.polygon{'
@@ -51,7 +49,7 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
     Returns:
         String (unicode in Python 2) containing an entire SVG document.
     '''
-    scale = (1 / scale) if scale else 1
+    scale = (1. / scale) if scale else 1.
     bounds = bounding.check(bounds)
 
     # Try to read style file(s)
@@ -105,7 +103,7 @@ class SVGIS(object):
     def __init__(self, files, bounds=None, out_crs=None, **kwargs):
         self.log = logging.getLogger('svgis')
 
-        if isinstance(files, basestring):
+        if isinstance(files, string_types):
             self.files = [files]
         elif isinstance(files, Iterable):
             self.files = files
@@ -154,7 +152,7 @@ class SVGIS(object):
 
         if not crs:
             # Assume input CRS is WGS 84
-            self._in_crs = DEFAULT_GEOID
+            self._in_crs = utils.DEFAULT_GEOID
             self.log.warn('Found no input coordinate system, '
                           'assuming WGS84 (long/lat) coordinates.')
 
@@ -472,7 +470,7 @@ class SVGIS(object):
             'style': self.style + (kwargs.pop('style', '') or '')
         }
 
-        if any([isinf(b) for b in self._projected_bounds]):
+        if any([utils.isinf(b) for b in self._projected_bounds]):
             self.log.warning('Drawing has infinite bounds, consider changing projection or bounding box.')
 
         x0, y0, x1, y1 = [float(b or 0.) * scalar for b in self.projected_bounds]

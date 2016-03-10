@@ -10,6 +10,7 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
 from functools import wraps
+from six import string_types
 from . import utils
 
 
@@ -34,9 +35,9 @@ def _element(tag, contents=None, **kwargs):
 
 def _fmtcoord(precision):
     if precision is None:
-        return u'{0[0]},{0[1]}'
+        return '{0[0]},{0[1]}'
     else:
-        return u'{{0[0]:.{0}f}},{{0[1]:.{0}f}}'.format(precision)
+        return '{{0[0]:.{0}f}},{{0[1]:.{0}f}}'.format(precision)
 
 
 def _poly(name):
@@ -44,7 +45,7 @@ def _poly(name):
     def poly(coordinates, precision=None, **kwargs):
         fmt = _fmtcoord(precision)
         points = utils.dedupe(fmt.format(c) for c in coordinates)
-        return _element(name(), points=u' '.join(points), **kwargs)
+        return _element(name(), points=' '.join(points), **kwargs)
 
     return poly
 
@@ -60,7 +61,7 @@ def circle(point, precision=None, **kwargs):
     Returns:
         str (unicode in Python 2)
     '''
-    return _element(u'circle', cx=utils.rnd(point[0], precision),
+    return _element('circle', cx=utils.rnd(point[0], precision),
                     cy=utils.rnd(point[1], precision), **kwargs)
 
 
@@ -76,7 +77,7 @@ def text(string, start, precision=None, **kwargs):
         str
     '''
     start = [utils.rnd(i, precision) for i in start]
-    return _element(u'text', string, x=start[0], y=start[1], **kwargs)
+    return _element('text', string, x=start[0], y=start[1], **kwargs)
 
 
 def rect(start, width, height, precision=None, **kwargs):
@@ -96,7 +97,7 @@ def rect(start, width, height, precision=None, **kwargs):
     width = utils.rnd(width, precision)
     height = utils.rnd(height, precision)
 
-    return _element(u'rect', x=start[0], y=start[1], width=width, height=height, **kwargs)
+    return _element('rect', x=start[0], y=start[1], width=width, height=height, **kwargs)
 
 
 def line(start, end, precision=None, **kwargs):
@@ -114,7 +115,7 @@ def line(start, end, precision=None, **kwargs):
     start = [utils.rnd(i, precision) for i in start]
     end = [utils.rnd(i, precision) for i in end]
 
-    return _element(u'line', x1=start[0], y1=start[1], x2=end[0], y2=end[1], **kwargs)
+    return _element('line', x1=start[0], y1=start[1], x2=end[0], y2=end[1], **kwargs)
 
 
 def path(coordinates, precision=None, **kwargs):
@@ -129,8 +130,8 @@ def path(coordinates, precision=None, **kwargs):
         str (unicode in Python 2)
     '''
     fmt = _fmtcoord(precision)
-    coords = utils.dedupe(i if utils.isstr(i) else fmt.format(i) for i in coordinates)
-    return _element(u'path', d=' '.join(coords), **kwargs)
+    coords = utils.dedupe(i if isinstance(i, string_types) else fmt.format(i) for i in coordinates)
+    return _element('path', d=' '.join(coords), **kwargs)
 
 
 @_poly
@@ -160,7 +161,7 @@ def polygon():
     Returns:
         str (unicode in Python 2)
     '''
-    return u'polygon'
+    return 'polygon'
 
 
 def toattribs(**kwargs):
@@ -170,7 +171,7 @@ def toattribs(**kwargs):
     Returns:
         str (unicode in Python 2)
     '''
-    attribs = u' '.join(u'{}="{}"'.format(k, v) for k, v in kwargs.items() if v is not None and v != '')
+    attribs = ' '.join('{}="{}"'.format(k, v) for k, v in kwargs.items() if v is not None and v != '')
 
     if len(attribs) > 0:
         return ' ' + attribs
@@ -207,7 +208,7 @@ def group(members=None, **kwargs):
         str (unicode in Python 2)
     '''
     members = members or ''
-    return _element(u'g', u''.join(members), **kwargs)
+    return _element('g', ''.join(members), **kwargs)
 
 
 def drawing(size, members, precision=None, viewbox=None, style=None):
@@ -240,4 +241,4 @@ def drawing(size, members, precision=None, viewbox=None, style=None):
         kwargs['viewBox'] = (','.join(fmt * 4)).format(*viewbox, precision=precision)
 
     contents = defstyle(style) + u''.join(members)
-    return _element(u'svg', contents, **kwargs)
+    return _element('svg', contents, **kwargs)

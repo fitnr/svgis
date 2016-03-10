@@ -53,6 +53,7 @@ setup(
     packages=['svgis'],
 
     install_requires=[
+        'six>=1.7.3,<2',
         'click>=6.2,<6.3',
         'pyproj>=1.9.5,<1.10',
         'fiona>=1.6.0,<2.0',
@@ -77,6 +78,4 @@ setup(
             'svgis=svgis.cli:main',
         ],
     },
-
-    use_2to3=True,
 )

@@ -31,17 +31,20 @@ def sanitize(string):
     or underscore (``_``), an underscore is added to the beginning.
 
     Args:
-        string (mixed): Input to sanitize. Will be immediately coerced to
-                        unicode. If that fails, returns an empty string.
+        string (mixed): Input to sanitize
+
+    Returns:
+        str
     '''
     try:
-        string = re.sub(r'\s+', u'_', unicode(string))
-        string = re.sub(r'(\.|#|")', '', string)
-        string = string if string[0] in ('_-' + ascii_letters) else '_' + string
-        return unicode(string).strip()
+        string = re.sub(r'(\.|#|")', '', re.sub(r'\s+', '_', string))
+        return string if string[:1] in ('_-' + ascii_letters) else '_' + string
+
+    except TypeError:
+        return sanitize(str(string))
 
     except (AttributeError, IndexError):
-        return u''
+        return ''
 
 
 def construct_classes(classes, properties):

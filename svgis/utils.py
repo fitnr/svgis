@@ -9,10 +9,9 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
-
-from __future__ import division
 from math import ceil, floor
 from itertools import groupby
+
 
 # WGS 84
 DEFAULT_GEOID = {'init': 'EPSG:4326', 'no_defs': True, 'proj': 'longlat'}
@@ -33,7 +32,7 @@ def isinf(x):
 
 def between(a, b, count=None):
     """Yield <count> points between two floats"""
-    jump = (b - a) / (count or 10)
+    jump = (b - a) / float(count or 10.)
 
     while a < b:
         yield a
@@ -65,10 +64,6 @@ def rnd(i, precision):
         return i
     else:
         return round(i, precision)
-
-
-def isstr(x):
-    return isinstance(x, basestring)
 
 
 def dedupe(array):
