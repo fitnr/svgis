@@ -134,7 +134,11 @@ class SVGIS(object):
 
         self.clip = kwargs.pop('clip', True)
 
-        self.simplifier = transform.simplifier(kwargs.pop('simplify', None))
+        simple = kwargs.pop('simplify', None)
+
+        if simple:
+            self.simplifier = transform.simplifier(simple)
+            self.log.debug('Simplifying with a factor of %d', simple)
 
         self.id_field = kwargs.pop('id_field', None)
 
@@ -173,6 +177,7 @@ class SVGIS(object):
         # either use something passed in, a non latlong layer projection,
         # the local UTM, or customize local TM
         self._out_crs = projection.pick(self._out_crs, bounds, self.in_crs)
+        self.log.debug('Set output crs to %s', projection.fake_to_string(self.out_crs))
 
     @property
     def unprojected_bounds(self):
@@ -232,8 +237,7 @@ class SVGIS(object):
         '''Return a reprojection transform from in_crs to self.out_crs.'''
         if self.out_crs != in_crs:
             self.log.info('set up reprojection')
-            self.log.debug('projecting from: %s', in_crs)
-            self.log.debug('projecting to: %s', self.out_crs)
+            self.log.debug('input crs: %s', projection.fake_to_string(in_crs))
             return partial(fiona.transform.transform_geom, in_crs, self.out_crs)
 
         else:
@@ -302,11 +306,11 @@ class SVGIS(object):
         Returns:
             unicode
         '''
-        self.log.info('starting %s', filename)
-
         padding = padding or self.padding
 
         with fiona.open(filename, "r") as layer:
+            self.log.info('starting %s', layer.name)
+
             # Set the input CRS, if not yet set.
             self.set_in_crs(layer.crs)
 
@@ -340,7 +344,7 @@ class SVGIS(object):
             'class': u' '.join(_style.sanitize(c) for c in layer.schema['properties'].keys())
         }
 
-    def _feature(self, feature, transforms, classes, precision=None, **kwargs):
+    def _feature(self, feature, transforms, classes, **kwargs):
         '''
         Draw a single feature.
 
@@ -357,6 +361,7 @@ class SVGIS(object):
         '''
         name = kwargs.pop('name', '?')
         geom = feature.get('geometry')
+        precision = kwargs.pop('precision', self.precision)
 
         try:
             # Check if geometry exists (a bit unpythonic, but cleaner errs this way).
@@ -388,7 +393,7 @@ class SVGIS(object):
 
         try:
             # Draw the geometry.
-            return draw.geometry(geom, precision=precision or self.precision, **drawargs)
+            return draw.geometry(geom, precision=precision, **drawargs)
 
         except (TypeError, errors.SvgisError) as e:
             self.log.warning('unable to draw feature %s of %s: %s',
@@ -416,16 +421,15 @@ class SVGIS(object):
         # Set up arguments
         scalar = kwargs.pop('scalar', self.scalar)
         bounds = bounding.check(bounds) or self.unprojected_bounds
-        precision = kwargs.pop('precision', self.precision)
 
         # Draw files
         with fiona.drivers():
-            members = [svg.group(**self._compose_file(f, bounds, scalar=scalar, precision=precision, **kwargs))
+            members = [svg.group(**self._compose_file(f, bounds, scalar=scalar, **kwargs))
                        for f in self.files]
 
         self.log.info('composing drawing')
-        drawing = self._draw(members, scalar, style=style or self.style,
-                             precision=precision, viewbox=viewbox, inline=inline)
+        drawing = self._draw(members, scalar, kwargs.get('precision', self.precision),
+                             style=style or self.style, viewbox=viewbox, inline=inline)
 
         # Always reset projected bounds.
         self._projected_bounds = (None,) * 4
