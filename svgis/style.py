@@ -43,9 +43,6 @@ def sanitize(string):
     except TypeError:
         return sanitize(str(string))
 
-    except (AttributeError, IndexError):
-        return ''
-
 
 def construct_classes(classes, properties):
     '''
@@ -89,15 +86,10 @@ def pick(style):
 
 def rescale(svgfile, factor):
     _register()
-    try:
-        svg = ElementTree.parse(svgfile)
-        scalar = 'scale({})'.format(factor)
-        g = svg.getroot().find(dom.ns('g'))
-        g.attrib['transform'] = (g.attrib.get('transform') + ' ' + scalar).strip()
-
-    except AttributeError:
-        raise
-
+    svg = ElementTree.parse(svgfile)
+    scalar = 'scale({})'.format(factor)
+    g = svg.getroot().find(dom.ns('g'))
+    g.attrib['transform'] = (g.attrib.get('transform') + ' ' + scalar).strip()
     return ElementTree.tostring(svg.getroot(), encoding='utf-8').decode('utf-8')
 
 
