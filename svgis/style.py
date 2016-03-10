@@ -26,7 +26,8 @@ def _register():
 def sanitize(string):
     '''
     Make input safe of use in an svg ID or class field.
-    Replaces blocks of whitespace with an underscore (``_``).
+    Replaces blocks of whitespace with an underscore (``_``),
+    deleted periods, number signs and double-quotes (``.#"``).
     If the first character isn't an ascii letter, dash (``-``)
     or underscore (``_``), an underscore is added to the beginning.
 
@@ -37,8 +38,8 @@ def sanitize(string):
         str
     '''
     try:
-        string = re.sub(r'(\.|#|")', '', re.sub(r'\s+', '_', string))
-        return string if string[:1] in ('_-' + ascii_letters) else '_' + string
+        string = re.sub(r'\s+', '_', re.sub(r'(\.|#|")', '', string))
+        return string if string[:1] in '_-' + ascii_letters else '_' + string
 
     except TypeError:
         return sanitize(str(string))
