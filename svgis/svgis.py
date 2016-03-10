@@ -27,7 +27,7 @@ STYLE = ('polyline,line,rect,path,polygon,.polygon{'
          '}')
 
 
-def map(layers, bounds=None, scale=None, padding=0, **kwargs):
+def map(layers, bounds=None, scale=None, **kwargs):
     '''
     Draw a geodata layer to SVG. This is shorthand for creating a :class:`SVGIS` instance
     and immediately runnning :class:`SVGIS.compose`.
@@ -45,6 +45,7 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
                                  use the SVG drawing.
         id_field (string): Field to use to determine id of each element in the drawing.
         inline (bool): If False, do not move CSS declarations into each element.
+        precision (int): Precision for rounding output coordinates.
 
     Returns:
         String (unicode in Python 2) containing an entire SVG document.
@@ -62,7 +63,6 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
         bounds=bounds,
         scalar=scale,
         out_crs=kwargs.pop('crs', None),
-        padding=padding,
         style=styles,
         clip=kwargs.pop('clip', True),
         id_field=kwargs.pop('id_field', None),
@@ -81,12 +81,15 @@ class SVGIS(object):
     Args:
         files (list): A list of files to draw.
         bounds (Sequence): An iterable with four float coordinates in (minx, miny, maxx, maxy) format
-        out_crs (dict): A proj-4 like mapping. Overrides proj_method.
-        proj_method (string): A keyword for picking a projection (file, utm or local).
+        out_crs (dict): A proj-4 like mapping, or a projection method keyword (file, local, utm).
         style (string): CSS to add to output file
         scalar (int): Map scale to use (output coordinate are divided by this)
-        padding (number): Buffer each edge by this many map units
-
+        style (str): CSS styles
+        padding (number): Buffer each edge by this many map units.
+        precision (int): Precision for rounding output coordinates.
+        simplify (int): Simplification factor (between 1 and 100).
+        id_field (str): Field in data to use for ID'ing elements.
+        class_fields (Sequence): Fields in data for added classes to elements.
     """
 
     # The bounding box in input coordinates.
@@ -120,8 +123,6 @@ class SVGIS(object):
         # This may return a keyword, which will require more updating.
         # If so, will update when files are open.
         self._out_crs = projection.pick(out_crs)
-
-        self.proj_method = kwargs.pop('proj_method', None)
 
         self.scalar = kwargs.pop('scalar', 1) or 1
 
@@ -260,7 +261,7 @@ class SVGIS(object):
                 partial(fionautil.scale.geometry, factor=scalar),
                 # Get clipping function based on a slightly extended version of _projected_bounds.
                 self._get_clipper(layer.bounds, bounds, scalar=scalar),
-                kwargs.pop('simplifier', None)
+                self.simplifier
             ]
         }
 
@@ -295,7 +296,6 @@ class SVGIS(object):
                                         They may well, in fact, be in a projection.
             padding (int): Number of map units by which to pad output bounds.
             scalar (int): map scale
-            simplifier (function): Simplification function. Defaults to self.simplify.
             class_fields (sequence): Fields to turn in the element classes (default: self.class_fields).
             id_field (string): Field to use as element ID (default: self.id_field).
 
@@ -403,57 +403,44 @@ class SVGIS(object):
                              kwargs.get('id', feature.get('id', '?')), name, e)
             return u''
 
-    def compose(self, scalar=None, bounds=None, **kwargs):
+    def compose(self, bounds=None, style=None, viewbox=True, inline=True, **kwargs):
         '''
         Draw files to svg.
 
         Args:
-            scalar (int): factor by which to scale the data, generally a small number (1/map scale).
             bounds (Sequence): Map bounding box in WGS84 (longlat) coordinates.
                                Defaults to map data bounds.
+            scalar (int): factor by which to scale the data, generally a small number (1/map scale).
             style (str): CSS to append to parent object CSS.
-            padding (int): Number of (projected) units to pad bounds by.
             viewbox (bool): If True, draw SVG with a viewbox. If False, translate coordinates
                             to the frame. Defaults to True.
-            precision (float): Round coordinates to this precision [default: 0].
-            simplify (float): Must be between 0 and 1. Fraction of removable coordinates to keep.
             inline (bool): If False, do not add CSS style attributes to each element.
+            padding (int): Number of (projected) units to pad bounds by.
+            precision (int): Precision for rounding output coordinates.
 
         Returns:
             String (unicode in Python 2) containing an entire SVG document.
         '''
         # Set up arguments
-        scalar = scalar or self.scalar
-        unprojected_bounds = bounding.check(bounds) or self.unprojected_bounds
-
-        drgs = {
-            'style': kwargs.pop('style', ''),
-            'viewbox': kwargs.pop('viewbox', True),
-            'inline': kwargs.pop('inline', True),
-        }
-
-        if 'simplify' in kwargs:
-            self.log.info('setting up simplifier with factor: %s', kwargs['simplify'])
-            kwargs['simplifier'] = transform.simplifier(kwargs.pop('simplify'))
-        else:
-            kwargs['simplifier'] = self.simplifier
-
-        kwargs['precision'] = drgs['precision'] = kwargs.get('precision', self.precision)
+        scalar = kwargs.pop('scalar', self.scalar)
+        bounds = bounding.check(bounds) or self.unprojected_bounds
+        precision = kwargs.pop('precision', self.precision)
 
         # Draw files
         with fiona.drivers():
-            members = [svg.group(**self._compose_file(f, unprojected_bounds, scalar=scalar, **kwargs))
+            members = [svg.group(**self._compose_file(f, bounds, scalar=scalar, precision=precision, **kwargs))
                        for f in self.files]
 
         self.log.info('composing drawing')
-        drawing = self._draw(members, scalar, **drgs)
+        drawing = self._draw(members, scalar, style=style or self.style,
+                             precision=precision, viewbox=viewbox, inline=inline)
 
-        # Always reset projected bounds
+        # Always reset projected bounds.
         self._projected_bounds = (None,) * 4
 
         return drawing
 
-    def _draw(self, members, scalar, **kwargs):
+    def _draw(self, members, scalar, precision, style, **kwargs):
         '''
         Combine drawn layers into an SVG drawing.
 
@@ -470,32 +457,28 @@ class SVGIS(object):
         '''
         transform_attrib = 'scale(1,-1)'
 
-        svgargs = {
-            'precision': kwargs.pop('precision', 0),
-            'style': self.style + (kwargs.pop('style', '') or '')
-        }
-
         if any([utils.isinf(b) for b in self._projected_bounds]):
             self.log.warning('Drawing has infinite bounds, consider changing projection or bounding box.')
 
-        x0, y0, x1, y1 = [float(b or 0.) * scalar for b in self.projected_bounds]
+        dims = [float(b or 0.) * scalar for b in self.projected_bounds]
 
         # width and height
-        size = [x1 - x0, y1 - y0]
+        size = [dims[2] - dims[0], dims[3] - dims[1]]
 
         if kwargs.pop('viewbox', True):
-            svgargs['viewbox'] = [x0, -y1] + size
+            viewbox = [dims[0], -dims[3]] + size
             self.log.debug('drawing with viewbox')
         else:
-            transform_attrib += ' translate({},{})'.format(-x0, -y1)
+            viewbox = None
+            transform_attrib += ' translate({},{})'.format(-dims[0], -dims[3])
             self.log.debug('translating contents to fit')
 
         # Create container and then SVG
         container = svg.group(members, fill_rule='evenodd', transform=transform_attrib)
-        drawing = svg.drawing(size, [container], **svgargs)
+        drawing = svg.drawing(size, [container], style=style, precision=precision, viewbox=viewbox)
 
         if kwargs.pop('inline', False):
             self.log.info('inlining styles')
-            drawing = _style.inline(drawing, svgargs['style'])
+            drawing = _style.inline(drawing, style)
 
         return drawing
