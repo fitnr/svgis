@@ -52,7 +52,7 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
         String (unicode in Python 2) containing an entire SVG document.
     '''
     scale = (1 / scale) if scale else 1
-    bounds = bounds if bounds and len(bounds) == 4 else None
+    bounds = bounding.check(bounds)
 
     # Try to read style file(s)
     styles = u''.join(_style.pick(s) for s in kwargs.pop('style', []))

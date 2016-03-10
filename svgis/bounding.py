@@ -20,7 +20,7 @@ def check(bounds):
         if bounds is None or len(bounds) != 4 or not all(bounds):
             raise ValueError
 
-    except (AttributeError, ValueError):
+    except (TypeError, AttributeError, ValueError):
         return False
 
     if bounds[0] > bounds[2]:
@@ -121,6 +121,9 @@ def transform(in_crs, out_crs, bounds):
 
     if out_crs is None:
         raise TypeError('Need output CRS, not None')
+
+    if in_crs == out_crs:
+        return bounds
 
     try:
         xs, ys = list(zip(*ring(bounds)))
