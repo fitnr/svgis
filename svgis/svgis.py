@@ -356,7 +356,21 @@ class SVGIS(object):
             unicode
         '''
         name = kwargs.pop('name', '?')
-        precision = precision or self.precision
+        geom = feature.get('geometry')
+
+        try:
+            # Check if geometry exists (a bit unpythonic, but cleaner errs this way).
+            if geom is None:
+                raise ValueError('NULL geometry')
+
+            # Apply transformations to the geometry.
+            for t in transforms:
+                geom = t(geom) if t is not None else geom
+
+        except ValueError as e:
+            self.log.warning('error transforming feature %s of %s: %s',
+                             kwargs.get('id', feature.get('id', '?')), name, e)
+            return u''
 
         # Set up the element's properties.
         classes = _style.construct_classes(classes, feature['properties'])
@@ -373,30 +387,8 @@ class SVGIS(object):
             drawargs['id'] = _style.sanitize(feature['properties'].get(kwargs['id_field']))
 
         try:
-            geom = feature['geometry']
-
-            # Check if geometry exists (a bit unpythonic, but cleaner errs this way).
-            if geom is None:
-                raise KeyError('NULL geometry')
-
-            # Apply transformations to the geometry.
-            for t in transforms:
-                if t is not None:
-                    geom = t(geom)
-
-        except KeyError as e:
-            self.log.warning('no geometry found for feature %s of %s: %s',
-                             kwargs.get('id', feature.get('id', '?')), name, e)
-            return u''
-
-        except ValueError as e:
-            self.log.warning('error transforming feature %s of %s: %s',
-                             kwargs.get('id', feature.get('id', '?')), name, e)
-            return u''
-
-        try:
             # Draw the geometry.
-            return draw.geometry(geom, precision=precision, **drawargs)
+            return draw.geometry(geom, precision=precision or self.precision, **drawargs)
 
         except (TypeError, errors.SvgisError) as e:
             self.log.warning('unable to draw feature %s of %s: %s',
