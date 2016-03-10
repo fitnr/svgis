@@ -128,6 +128,9 @@ class CliTestCase(unittest.TestCase):
         with self.assertRaises(IOError):
             self.invoke(('draw', 'lksdjlksjdf'))
 
+        with self.assertRaises(IOError):
+            self.invoke(('draw', 'zip://lksdjlksjdf.zip/foo'))
+
 
 if __name__ == '__main__':
     unittest.main()

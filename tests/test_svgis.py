@@ -98,6 +98,10 @@ class SvgisTestCase(unittest.TestCase):
         drawn2 = self.svgis_obj._feature(feat, [], classes=['foo'], id_field='cat')
         self.assertIn('class="foo_bar"', drawn2)
 
+        feat['geometry'] = None
+        drawn3 = self.svgis_obj._feature(feat, [], classes=['foo'], id_field='cat')
+        assert drawn3 == ''
+
     def testSvgisComposeType(self):
         a = self.svgis_obj.compose(inline_css=True)
         b = self.svgis_obj.compose(inline_css=False)
@@ -146,6 +150,12 @@ class SvgisTestCase(unittest.TestCase):
             self.assertIn('fill:none', style)
             self.assertIn('stroke-linejoin:round', style)
 
+    def testOpenZips(self):
+        archive = 'zip://tests/test_data/test.zip/tests/test_data/cb_2014_us_nation_20m.json'
+
+        result = svgis.SVGIS([archive], simplify=60).compose()
+
+        self.assertIn('cb_2014_us_nation_20m', result)
 
     def testDrawWithClasses(self):
         r0 = self.svgis_obj._feature(self.polygon, [], classes=[], id_field=None, name='potato')

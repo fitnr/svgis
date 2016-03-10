@@ -288,12 +288,13 @@ class SVGIS(object):
 
         return result
 
-    def _compose_file(self, filename, unprojected_bounds=None, padding=None, **kwargs):
+    def _compose_file(self, path, unprojected_bounds=None, padding=None, **kwargs):
         '''
         Draw fiona file to an SVG group.
 
         Args:
-            filename (string): path to a fiona-readable file
+            path (string): path to a fiona-readable file, or an Apache Commons VFS spec for a zip
+                           or tar archive, e.g. ``zip://path/to/archive.zip/file.shp``.
             unprojected_bounds (tuple): (minx, maxx, miny, maxy) in the layer's coordinate system.
                                         'None' values are OK. "Unprojected" here refers to
                                         the fact that we haven't transformed these bounds yet.
@@ -307,9 +308,19 @@ class SVGIS(object):
             unicode
         '''
         padding = padding or self.padding
+        vfs = None
 
-        with fiona.open(filename, "r") as layer:
-            self.log.info('starting %s', layer.name)
+        # "Detect Virtual File System" sounds cooler than "Does It Start with zip or tar".
+        if path.startswith('zip://') or path.startswith('tar://'):
+            suffix = '.zip' if path.startswith('z') else '.gz'
+            vfs, path = path.split(suffix, 1)
+            vfs = vfs + suffix
+            self.log.debug('reading vfs: %s ', vfs)
+
+        self.log.debug('opening %s', path)
+
+        with fiona.open(path, vfs=vfs) as layer:
+            self.log.info('reading %s', layer.name)
 
             # Set the input CRS, if not yet set.
             self.set_in_crs(layer.crs)
@@ -335,7 +346,7 @@ class SVGIS(object):
                 self.update_projected_bounds(layer.crs, self.out_crs, layer.bounds, padding)
                 bounds = layer.bounds
 
-            kwargs = self._prepare_layer(layer, filename, bounds, **kwargs)
+            kwargs = self._prepare_layer(layer, path, bounds, **kwargs)
             group = tuple(self._feature(f, **kwargs) for _, f in layer.items(bbox=bounds))
 
         return {
@@ -375,7 +386,7 @@ class SVGIS(object):
         except ValueError as e:
             self.log.warning('error transforming feature %s of %s: %s',
                              kwargs.get('id', feature.get('id', '?')), name, e)
-            return u''
+            return ''
 
         # Set up the element's properties.
         classes = _style.construct_classes(classes, feature['properties'])

@@ -48,6 +48,16 @@ Draw SVGs from input geodata.
       -h, --help                      Show this message and exit.
 
 
+layers
+^^^^^^
+
+Layers may be paths or an zip/gzip archive::
+
+  svgis draw data/cook.shp data/lake.shp
+  svgis draw zip://archive.zip/lorain.shp zip://archive.zip/cuyahoga.shp
+  svgis draw tar://archive.tar.gz/boston.geojson tar://archive.tar.gz/cambridge.geojson
+
+
 bounds
 ^^^^^^
 
