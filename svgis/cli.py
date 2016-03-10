@@ -12,10 +12,11 @@ import sys
 from signal import signal, SIGPIPE, SIG_DFL
 import logging
 import click
+import fiona.crs
 from fionautil.layer import meta_complete
 from . import bounding, projection
 from . import graticule as _graticule, style as _style, svgis, __version__
-from .utils import posint
+from .utils import DEFAULT_GEOID, posint
 
 none = {
     'flag_value': None,
@@ -115,22 +116,21 @@ crs_help = ('Specify a map projection. '
 
 @main.command()
 @click.argument('layer', default=sys.stdin, type=click.Path(exists=True))
-@click.option('-j', '--crs', type=str, metavar='KEYWORD', default=None, help=crs_help)
+@click.option('-j', '--crs', type=str, metavar='KEYWORD', default='file', help=crs_help + ' (default: file)')
 @click.option('--latlon', default=False, flag_value=True, help='Print bounds in latitude, longitude order')
 def bounds(layer, crs, latlon=False):
-    '''Return the bounds for a given layer.'''
+    '''Return the bounds for a given layer, optionally projected.'''
     meta = meta_complete(layer)
 
-    if crs:
-        _, crs = projection.pick(crs)
-        result = bounding.transform(meta['crs'], crs, meta['bounds'])
-    else:
-        result = meta['bounds']
+    # If crs==file, these will basically be no ops.
+    out_crs = projection.pick(crs, meta['bounds'], file_crs=meta['crs'])
+    result = bounding.transform(meta['crs'], out_crs, meta['bounds'])
 
     if latlon:
         fmt = '{0[1]} {0[0]} {0[3]} {0[2]}'
     else:
         fmt = '{0[0]} {0[1]} {0[2]} {0[3]}'
+
     click.echo(fmt.format(result), file=sys.stdout)
 
 
@@ -180,9 +180,13 @@ def draw(layer, output, **kwargs):
 @main.command()
 @click.argument('bounds', nargs=4, type=float, metavar="minx miny maxx maxy", default=None)
 @click.option('-m', '--method', default='local', type=click.Choice(('utm', 'local')), help='Defaults to local')
-def project(bounds, method):
+@click.option('-j', '--crs', default=DEFAULT_GEOID, help='Projection of the bounding coordinates')
+def project(bounds, method, crs):
     '''Get a local Transverse Mercator or UTM projection for a bounding box. Expects WGS84 coordinates.'''
-    click.echo(projection.generatecrs(*bounds, proj_method=method).encode('utf-8'))
+    if crs in projection.METHODS:
+        click.echo('CRS must be an EPSG code, a Proj4 string, or file containing a Proj4 string.', err=1)
+    result = fiona.crs.to_string(projection.pick(method, file_crs=crs, bounds=bounds))
+    click.echo(result.encode('utf-8'))
 
 
 crs_help2 = ('Specify a map projection. '

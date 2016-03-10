@@ -10,6 +10,7 @@
 
 import unittest
 from svgis import projection
+from svgis.utils import DEFAULT_GEOID
 
 SHP = 'tests/test_data/cb_2014_us_nation_20m.json'
 
@@ -32,7 +33,7 @@ class ProjectionTestCase(unittest.TestCase):
 
     def testGenerateCRS(self):
         bounds = -82.2, 40.1, -78.9, 45.8
-        a = projection.generatecrs(*bounds, proj_method='utm')
+        a = projection.generateproj4('utm', bounds=bounds, file_crs=DEFAULT_GEOID)
         self.assertEqual(a, '+proj=utm +zone=17 +north +datum=WGS84 +units=m +no_defs')
 
 if __name__ == '__main__':

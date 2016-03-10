@@ -139,11 +139,13 @@ class SvgisTestCase(unittest.TestCase):
         self.assertIn(svgis.STYLE, result)
 
         doc = minidom.parseString(result)
-
         for poly in doc.getElementsByTagName('polygon'):
+            self.assertIn('polygon', poly.toxml())
+            self.assertIn('style', poly.toxml())
             style = poly.getAttribute('style')
-            assert 'fill:none' in style
-            assert 'stroke-linejoin:round' in style
+            self.assertIn('fill:none', style)
+            self.assertIn('stroke-linejoin:round', style)
+
 
     def testDrawWithClasses(self):
         r0 = self.svgis_obj._feature(self.polygon, [], classes=[], id_field=None, name='potato')

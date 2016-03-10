@@ -57,16 +57,13 @@ def map(layers, bounds=None, scale=None, padding=0, **kwargs):
     # Try to read style file(s)
     styles = u''.join(_style.pick(s) for s in kwargs.pop('style', []))
 
-    proj_method, out_crs = projection.pick(kwargs.pop('crs', None))
-
     class_fields = set(a for c in kwargs.pop('class_fields', []) for a in c.split(','))
 
     drawing = SVGIS(
         layers,
         bounds=bounds,
         scalar=scale,
-        proj_method=proj_method,
-        out_crs=out_crs,
+        out_crs=kwargs.pop('crs', None),
         padding=padding,
         style=styles,
         clip=kwargs.pop('clip', True),
@@ -122,7 +119,9 @@ class SVGIS(object):
         elif bounds:
             self.log.warn("ignoring invalid bounds: %s", bounds)
 
-        self._out_crs = out_crs
+        # This may return a keyword, which will require more updating.
+        # If so, will update when files are open.
+        self._out_crs = projection.pick(out_crs)
 
         self.proj_method = kwargs.pop('proj_method', None)
 
@@ -161,9 +160,12 @@ class SVGIS(object):
 
     @property
     def out_crs(self):
-        return self._out_crs
+        if self._out_crs in projection.METHODS:
+            return None
+        else:
+            return self._out_crs
 
-    def set_out_crs(self, bounds, method):
+    def set_out_crs(self, bounds):
         '''Set the output CRS, if not yet set.'''
         if self.out_crs:
             return
@@ -171,7 +173,7 @@ class SVGIS(object):
         # Determine projection transformation:
         # either use something passed in, a non latlong layer projection,
         # the local UTM, or customize local TM
-        self._out_crs = projection.choosecrs(self.in_crs, bounds, proj_method=method)
+        self._out_crs = projection.pick(self._out_crs, bounds, self.in_crs)
 
     @property
     def unprojected_bounds(self):
@@ -313,7 +315,7 @@ class SVGIS(object):
             # When we have passed bounds:
             if unprojected_bounds:
                 # Set the output CRS, if not yet set, using unprojected bounds.
-                self.set_out_crs(unprojected_bounds, method=self.proj_method)
+                self.set_out_crs(unprojected_bounds)
 
                 # If we haven't set the projected bounds yet, do that.
                 if not self.projected_bounds:
@@ -325,7 +327,7 @@ class SVGIS(object):
             # When we have no passed bounds:
             else:
                 # Set the output CRS, if not yet set, using this layer's bounds.
-                self.set_out_crs(layer.bounds, method=self.proj_method)
+                self.set_out_crs(layer.bounds)
 
                 # Extend projection_bounds
                 self.update_projected_bounds(layer.crs, self.out_crs, layer.bounds, padding)

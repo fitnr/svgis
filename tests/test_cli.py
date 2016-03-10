@@ -55,8 +55,8 @@ class CliTestCase(unittest.TestCase):
 
     def testSvgProjectUtm(self):
         p = self.invoke(['project', '-m', 'utm', '--', '-110.277906', '35.450777', '-110.000477', '35.649030'])
-        expected = '+proj=utm +zone=12 +north +datum=WGS84 +units=m +no_defs\n'
-        self.assertEqual(p.output, expected)
+        expected = set('+proj=utm +zone=12 +datum=WGS84 +units=m +no_defs'.split(' '))
+        self.assertSetEqual(set(p.output.strip().split(' ')), expected)
 
     def testSvgProject(self):
         p = self.invoke(['project', '--', '-110.277906', '35.450777', '-110.000477', '35.649030'])
@@ -67,11 +67,11 @@ class CliTestCase(unittest.TestCase):
             # print(p.exc_info)
             raise
 
-        expected = ('+proj=lcc +lon_0=-111.0 +lat_1=35.64903 +lat_2=35.450777 '
-                    '+lat_0=35.64903+x_0=0 +y_0=0 +ellps=GRS80 '
-                    '+towgs84=0,0,0,0,0,0,0+units=m +no_defs\n')
+        expected = set(u'+proj=lcc +lon_0=-111.0 +lat_1=35.64903 +lat_2=35.450777 '
+                       '+lat_0 +y_0=0 +ellps=GRS80 '
+                       '+towgs84 +no_defs'.split(' '))
 
-        self.assertEqual(p.output, expected)
+        self.assertSetEqual(set(p.output.strip().split(' ')), expected)
 
     def testCliDraw(self):
         self.invoke(['draw', '-j', PROJECTION, '-f', '1000', self.shp,

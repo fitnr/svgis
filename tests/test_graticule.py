@@ -14,13 +14,13 @@ from svgis import graticule
 class GraticuleTestCase(unittest.TestCase):
 
     def testCRS(self):
-        g = graticule.graticule((16.34, -34.81, 32.83, -22.09), step=10000, crs='utm')
+        g = graticule.graticule((16.34, -34.81, 32.83, -22.09), step=10000, crs_or_method='utm')
         a = next(g)
         assert isinstance(a, dict)
 
     def testErr(self):
         with self.assertRaises(ValueError):
-            g = graticule.graticule((16.34, -34.81, 32.83, -22.09), step=10000, crs='file')
+            g = graticule.graticule((16.34, -34.81, 32.83, -22.09), step=10000, crs_or_method='file')
             next(g)
 
     def test_feature(self):

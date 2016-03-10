@@ -15,25 +15,23 @@ import fiona.transform
 from . import bounding, projection, utils
 
 
-def graticule(bounds, step, crs=None):
+def graticule(bounds, step, crs_or_method=None):
     '''
     Draw graticules.
 
     Args:
         bounds (tuple): In WGS84 coordinates.
         step (int): Distance between graticule lines, in the output projection.
-        crs (str): A projection specification.
+        crs_or_method (str): A projection specification.
 
     Returns:
         A generator that yields GeoJSON-like dicts of graticule features.
     '''
-    if crs == 'file':
+    if crs_or_method == 'file':
         raise ValueError("'file' is not a valid option for projecting graticules.")
 
-    if crs:
-        method, out_crs = projection.pick(crs)
-        if method in ('local', 'utm'):
-            out_crs = projection.generatecrs(*bounds, proj_method=method)
+    if crs_or_method:
+        out_crs = projection.pick(crs_or_method, bounds=bounds, file_crs=utils.DEFAULT_GEOID)
 
         bounds = bounding.transform(utils.DEFAULT_GEOID, out_crs, bounds)
         unproject = partial(fiona.transform.transform, out_crs, utils.DEFAULT_GEOID)

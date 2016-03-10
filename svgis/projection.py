@@ -13,6 +13,12 @@ import fiona.transform
 import fiona.crs
 import pyproj
 import utm
+from six import string_types
+from .utils import DEFAULT_GEOID
+from . import bounding
+
+
+METHODS = 'default', 'local', 'utm'
 
 
 def tm_proj4(x0, y0, y1):
@@ -59,27 +65,56 @@ def utm_proj4(lon, lat):
         raise ValueError(e)
 
 
-def generatecrs(minx, miny, maxx, maxy, proj_method=None):
-    '''Choose a projection, either the local UTM zone or
-    create a custom transverse mercator.
+def generateproj4(method, bounds, file_crs):
+    '''
+    Generate a Proj4 projection definition: either the local UTM zone
+    or a custom transverse mercator.
+
+    Args:
+        method (str): If default, local or utm.
+            * If 'utm': generate a UTM. Otherwise, a local projection,
+            * If 'local': generate a custom local transverse mercator projection,
+            * If 'default': if file_crs is longlat, act like local. otherwise use file_crs
+        bounds (tuple): bounding box
+        file_crs (dict): Fiona-generated CRS of the input file
 
     Returns:
         (str) proj4 string
     '''
-    if proj_method == 'utm':
+    if bounds is None or file_crs is None:
+        raise ValueError('generatecrs missing bounds and file crs')
+
+    is_longlat = _is_longlat(file_crs)
+
+    if method == 'default':
+        # Check if file_crs _is_longlat, if not use that.
+        # Option to continue returning default if we didn't get a file_crs
+        if is_longlat:
+            method = 'local'
+        else:
+            return fiona.crs.to_string(file_crs)
+
+    if is_longlat:
+        longlat_bounds = bounds
+    else:
+        longlat_bounds = bounding.transform(file_crs, DEFAULT_GEOID, bounds)
+
+    minx, miny, maxx, maxy = longlat_bounds
+
+    if method == 'utm':
         midx = (minx + maxx) / 2
         midy = (miny + maxy) / 2
 
         return utm_proj4(midx, midy)
 
-    else:
+    elif method == 'local':
         # Create a custom TM projection
         x0 = (float(minx) + float(maxx)) // 2
 
         return tm_proj4(x0, miny, maxy)
 
 
-def _is_latlong(crs):
+def _is_longlat(crs):
     '''Test if CRS is in lat/long coordinates'''
     try:
         if crs.get('proj') == 'longlat' or pyproj.Proj(**crs).is_latlong():
@@ -90,57 +125,50 @@ def _is_latlong(crs):
     return False
 
 
-def choosecrs(in_crs, bounds, proj_method=None):
-    '''Choose a projection. If the layer is projected, use that.
-    Otherwise, create use a passed projection or create a custom transverse mercator.
-
-    Args:
-        in_crs (dict): A fiona-type proj4 dictionary
-        bounds (tuple): (minx, miny, maxx, maxy)
-        proj_method (string): either 'utm' or 'local'
-
-    Returns:
-        fiona-type proj4 dict.
-    '''
-    if proj_method == 'file' or (proj_method is None and not _is_latlong(in_crs)):
-        # it's projected already, so noop.
-        return in_crs
-
-    else:
-        return fiona.crs.from_string(generatecrs(*bounds, proj_method=proj_method))
-
-
-def pick(project):
+def pick(project, bounds=None, file_crs=None):
     '''
     Pick a projection or projection method to use.
 
     Returns:
-        (tuple) method, crs
-        method will be one of: None, 'local', 'utm'
-        crs will be None or a dict
+        (mixed) one of: None, 'local', 'utm' or a dict
     '''
-    proj_method, out_crs = None, None
+    out_crs = None
+    project = project or 'default'
 
-    if project is None:
-        # Protect future option of using file or picking
-        return None, None
+    if isinstance(project, dict):
+        return project
 
-    if project.lower() in ('local', 'utm'):
-        proj_method = project.lower()
+    elif isinstance(project, string_types):
+        if project.lower() == 'file':
+            out_crs = file_crs
 
-    elif os.path.exists(project):
-        # Is a file
-        with open(project) as f:
-            out_crs = fiona.crs.from_string(f.read())
-
-    elif project[:5].lower() == 'epsg:':
         # Is an epsg code
-        _, epsg = project.split(':')
-        out_crs = fiona.crs.from_epsg(int(epsg))
+        elif project.lower()[:5] == 'epsg:':
+            out_crs = fiona.crs.from_epsg(int(project.split(':')[1]))
 
-    else:
-        # Assume it's a proj4 string.
-        # fiona.crs.from_string returns {} if it isn't.
-        out_crs = fiona.crs.from_string(project)
+        elif project.lower() in METHODS:
+            try:
+                out_crs = fiona.crs.from_string(generateproj4(project, bounds, file_crs))
 
-    return proj_method, out_crs
+            except ValueError:
+                return project
+
+        # Is a file
+        elif os.path.exists(project):
+            with open(project) as f:
+                out_crs = fiona.crs.from_string(f.read())
+
+        else:
+            # Assume it's a proj4 string.
+            # fiona.crs.from_string returns {} if it isn't.
+            out_crs = fiona.crs.from_string(project)
+
+    return out_crs
+
+
+def fake_to_string(crs):
+    '''
+    Fake to_string for debugging in places where fiona.crs.to_string
+    isn't available
+    '''
+    return ' '.join('+{0[0]}={0[1]}'.format(i) for i in crs.items())
