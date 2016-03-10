@@ -340,7 +340,7 @@ class SVGIS(object):
             'class': u' '.join(_style.sanitize(c) for c in layer.schema['properties'].keys())
         }
 
-    def _feature(self, feature, transforms, classes, id_field=None, **kwargs):
+    def _feature(self, feature, transforms, classes, precision=None, **kwargs):
         '''
         Draw a single feature.
 
@@ -348,24 +348,29 @@ class SVGIS(object):
             feature (dict): A GeoJSON like feature dict produced by Fiona.
             transforms (list): Functions to apply to the geometry.
             classes (list): Names (unsanitized) of fields to apply as classes in the output element.
+            precision (int): rounding precision for coordinates.
             id_field (str): Field to use as id of the output element.
-            kwargs: Additional properties to apply to the element.
             name (str): layer name (usually basename of the input file).
 
         Returns:
             unicode
         '''
         name = kwargs.pop('name', '?')
+        precision = precision or self.precision
 
         # Set up the element's properties.
         classes = _style.construct_classes(classes, feature['properties'])
+
         # Add the layer name to the class list.
         if name != '?':
             classes.insert(0, _style.sanitize(name))
-        kwargs['class'] = ' '.join(classes)
 
-        if id_field:
-            kwargs['id'] = _style.sanitize(feature['properties'].get(id_field))
+        drawargs = {
+            'class': ' '.join(classes)
+        }
+
+        if 'id_field' in kwargs:
+            drawargs['id'] = _style.sanitize(feature['properties'].get(kwargs['id_field']))
 
         try:
             geom = feature['geometry']
@@ -391,7 +396,7 @@ class SVGIS(object):
 
         try:
             # Draw the geometry.
-            return draw.geometry(geom, **kwargs)
+            return draw.geometry(geom, precision=precision, **drawargs)
 
         except (TypeError, errors.SvgisError) as e:
             self.log.warning('unable to draw feature %s of %s: %s',
