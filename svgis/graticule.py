@@ -35,8 +35,8 @@ def graticule(bounds, step, crs=None):
         if method in ('local', 'utm'):
             out_crs = projection.generatecrs(*bounds, proj_method=method)
 
-        bounds = bounding.transform({'init': u'epsg:4326'}, out_crs, bounds)
-        unproject = partial(fiona.transform.transform, out_crs, {'init': u'epsg:4326'})
+        bounds = bounding.transform(utils.DEFAULT_GEOID, out_crs, bounds)
+        unproject = partial(fiona.transform.transform, out_crs, utils.DEFAULT_GEOID)
 
     else:
         def unproject(x, y):

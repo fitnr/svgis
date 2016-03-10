@@ -14,6 +14,9 @@ from __future__ import division
 from math import ceil, floor
 from itertools import groupby
 
+# WGS 84
+DEFAULT_GEOID = {'init': 'EPSG:4326', 'no_defs': True, 'proj': 'longlat'}
+
 
 def posint(i):
     '''Fake class for positive integers only'''

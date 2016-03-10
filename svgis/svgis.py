@@ -18,7 +18,7 @@ import fiona.transform
 import fionautil.scale
 from . import bounding, draw, errors, projection, svg, transform
 from . import style as _style
-from .utils import isinf
+from .utils import isinf, DEFAULT_GEOID
 
 
 STYLE = ('polyline,line,rect,path,polygon,.polygon{'
@@ -27,9 +27,6 @@ STYLE = ('polyline,line,rect,path,polygon,.polygon{'
          'stroke-width:1px;'
          'stroke-linejoin:round;'
          '}')
-
-# WGS 84
-DEFAULT_PROJECTION = {'init': 'epsg:4269', 'no_defs': True, 'proj': 'longlat'}
 
 
 def map(layers, bounds=None, scale=None, padding=0, **kwargs):
@@ -158,7 +155,7 @@ class SVGIS(object):
 
         if not crs:
             # Assume input CRS is WGS 84
-            self._in_crs = DEFAULT_PROJECTION
+            self._in_crs = DEFAULT_GEOID
             self.log.warn('Found no input coordinate system, '
                           'assuming WGS84 (long/lat) coordinates.')
 
