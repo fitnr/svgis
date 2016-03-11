@@ -464,10 +464,14 @@ class SVGIS(object):
         '''
         transform_attrib = 'scale(1,-1)'
 
-        if any([utils.isinf(b) for b in self._projected_bounds]):
-            self.log.warning('Drawing has infinite bounds, consider changing projection or bounding box.')
+        try:
+            if any((utils.isinf(b) for b in self._projected_bounds)):
+                self.log.warning('Drawing has infinite bounds, consider changing projection or bounding box.')
 
-        dims = [float(b or 0.) * scalar for b in self.projected_bounds]
+            dims = [float(b or 0.) * scalar for b in self.projected_bounds]
+        except TypeError:
+            self.log.warning('Unable to find bounds, the map probably empty ¯\_(ツ)_/¯')
+            dims = 0, 0, 0, 0
 
         # width and height
         size = [dims[2] - dims[0], dims[3] - dims[1]]
