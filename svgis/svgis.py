@@ -305,7 +305,7 @@ class SVGIS(object):
             id_field (string): Field to use as element ID (default: self.id_field).
 
         Returns:
-            unicode
+            dict with keys: members, id, class. This is ready to be passed to svgis.svg.group.
         '''
         padding = kwargs.pop('padding', self.padding)
         kwargs['scalar'] = kwargs.get('scalar', self.scalar)
@@ -319,37 +319,37 @@ class SVGIS(object):
             vfs = vfs + suffix
             self.log.debug('reading vfs: %s ', vfs)
 
-        self.log.debug('opening %s', path)
+        with fiona.drivers():
+            self.log.debug('opening %s', path)
+            with fiona.open(path, vfs=vfs) as layer:
+                self.log.info('reading %s', layer.name)
 
-        with fiona.open(path, vfs=vfs) as layer:
-            self.log.info('reading %s', layer.name)
+                # Set the input CRS, if not yet set.
+                self.set_in_crs(layer.crs)
 
-            # Set the input CRS, if not yet set.
-            self.set_in_crs(layer.crs)
+                # When we have passed bounds:
+                if unprojected_bounds:
+                    # Set the output CRS, if not yet set, using unprojected bounds.
+                    self.set_out_crs(unprojected_bounds)
 
-            # When we have passed bounds:
-            if unprojected_bounds:
-                # Set the output CRS, if not yet set, using unprojected bounds.
-                self.set_out_crs(unprojected_bounds)
+                    # If we haven't set the projected bounds yet, do that.
+                    if not self.projected_bounds:
+                        self.update_projected_bounds(self.in_crs, self.out_crs, unprojected_bounds, padding)
 
-                # If we haven't set the projected bounds yet, do that.
-                if not self.projected_bounds:
-                    self.update_projected_bounds(self.in_crs, self.out_crs, unprojected_bounds, padding)
+                    # Convert global bounds to layer.crs.
+                    bounds = bounding.transform(self.out_crs, layer.crs, self.projected_bounds)
 
-                # Convert global bounds to layer.crs.
-                bounds = bounding.transform(self.out_crs, layer.crs, self.projected_bounds)
+                # When we have no passed bounds:
+                else:
+                    # Set the output CRS, if not yet set, using this layer's bounds.
+                    self.set_out_crs(layer.bounds)
 
-            # When we have no passed bounds:
-            else:
-                # Set the output CRS, if not yet set, using this layer's bounds.
-                self.set_out_crs(layer.bounds)
+                    # Extend projection_bounds
+                    self.update_projected_bounds(layer.crs, self.out_crs, layer.bounds, padding)
+                    bounds = layer.bounds
 
-                # Extend projection_bounds
-                self.update_projected_bounds(layer.crs, self.out_crs, layer.bounds, padding)
-                bounds = layer.bounds
-
-            kwargs = self._prepare_layer(layer, path, bounds, **kwargs)
-            group = tuple(self.feature(f, **kwargs) for _, f in layer.items(bbox=bounds))
+                kwargs = self._prepare_layer(layer, path, bounds, **kwargs)
+                group = tuple(self.feature(f, **kwargs) for _, f in layer.items(bbox=bounds))
 
         return {
             'members': group,
@@ -370,7 +370,7 @@ class SVGIS(object):
             name (str): layer name (usually basename of the input file).
 
         Returns:
-            unicode
+            str (unicode in Python 2)
         '''
         name = kwargs.pop('name', '?')
         geom = feature.get('geometry')
@@ -436,12 +436,11 @@ class SVGIS(object):
         bounds = bounding.check(bounds) or self.unprojected_bounds
 
         # Draw files
-        with fiona.drivers():
-            members = [svg.group(**self.compose_file(f, bounds, scalar=scalar, **kwargs))
-                       for f in self.files]
+        members = [svg.group(**self.compose_file(f, bounds, scalar=scalar, **kwargs))
+                   for f in self.files]
 
         self.log.info('composing drawing')
-        drawing = self._draw(members, scalar, kwargs.get('precision'),
+        drawing = self.draw(members, scalar, kwargs.get('precision'),
                              style=style, viewbox=viewbox, inline=inline)
 
         # Always reset projected bounds.
@@ -449,7 +448,7 @@ class SVGIS(object):
 
         return drawing
 
-    def _draw(self, members, scalar=None, precision=None, style=None, **kwargs):
+    def draw(self, members, scalar=None, precision=None, style=None, **kwargs):
         '''
         Combine drawn layers into an SVG drawing.
 
