@@ -74,7 +74,7 @@ class DrawTestCase(unittest.TestCase):
         self.obj = svgis.SVGIS([])
 
     def testDrawPoint(self):
-        feat = self.obj._feature(self.point, [], classes=self.classes, id_field=None)
+        feat = self.obj.feature(self.point, [], classes=self.classes, id_field=None)
 
         assert isinstance(feat, six.string_types)
         self.assertIn('cat_meow', feat)
@@ -83,7 +83,7 @@ class DrawTestCase(unittest.TestCase):
         line = draw.lines(self.linestring['geometry'])
         assert isinstance(line, six.string_types)
 
-        feat = self.obj._feature(self.linestring, [], classes=self.classes, id_field=None)
+        feat = self.obj.feature(self.linestring, [], classes=self.classes, id_field=None)
 
         assert isinstance(feat, six.string_types)
         assert 'cat_meow' in feat
@@ -95,7 +95,7 @@ class DrawTestCase(unittest.TestCase):
         assert isinstance(mls1, six.string_types)
         assert isinstance(mls2, six.string_types)
 
-        grp = self.obj._feature(self.multilinestring, [], classes=self.classes, id_field=None)
+        grp = self.obj.feature(self.multilinestring, [], classes=self.classes, id_field=None)
 
         assert isinstance(grp, six.string_types)
         assert 'cat_meow' in grp
@@ -103,7 +103,7 @@ class DrawTestCase(unittest.TestCase):
     def testDrawPolygon(self):
         drawn = draw.polygon(self.polygon['geometry']['coordinates'])
         assert "{},{}".format(*self.lis1[0]) in drawn
-        feat = self.obj._feature(self.polygon, [], classes=self.classes, id_field=None)
+        feat = self.obj.feature(self.polygon, [], classes=self.classes, id_field=None)
         assert 'cat_meow' in feat
 
     def testDrawMultiPolygon(self):

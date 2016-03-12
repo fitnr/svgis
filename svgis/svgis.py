@@ -83,7 +83,7 @@ class SVGIS(object):
         bounds (Sequence): An iterable with four float coordinates in (minx, miny, maxx, maxy) format
         out_crs (dict): A proj-4 like mapping, or a projection method keyword (file, local, utm).
         style (string): CSS to add to output file
-        scalar (int): Map scale to use (output coordinate are divided by this)
+        scalar (int): Map scaling factor (output coordinate are multiplied by this)
         style (str): CSS styles
         padding (number): Buffer each edge by this many map units.
         precision (int): Precision for rounding output coordinates.
@@ -288,7 +288,7 @@ class SVGIS(object):
 
         return result
 
-    def _compose_file(self, path, unprojected_bounds=None, padding=None, **kwargs):
+    def compose_file(self, path, unprojected_bounds=None, **kwargs):
         '''
         Draw fiona file to an SVG group.
 
@@ -307,7 +307,9 @@ class SVGIS(object):
         Returns:
             unicode
         '''
-        padding = padding or self.padding
+        padding = kwargs.pop('padding', self.padding)
+        kwargs['scalar'] = kwargs.get('scalar', self.scalar)
+        unprojected_bounds = unprojected_bounds or self.unprojected_bounds
         vfs = None
 
         # "Detect Virtual File System" sounds cooler than "Does It Start with zip or tar".
@@ -347,7 +349,7 @@ class SVGIS(object):
                 bounds = layer.bounds
 
             kwargs = self._prepare_layer(layer, path, bounds, **kwargs)
-            group = tuple(self._feature(f, **kwargs) for _, f in layer.items(bbox=bounds))
+            group = tuple(self.feature(f, **kwargs) for _, f in layer.items(bbox=bounds))
 
         return {
             'members': group,
@@ -355,7 +357,7 @@ class SVGIS(object):
             'class': u' '.join(_style.sanitize(c) for c in layer.schema['properties'].keys())
         }
 
-    def _feature(self, feature, transforms, classes, **kwargs):
+    def feature(self, feature, transforms, classes, **kwargs):
         '''
         Draw a single feature.
 
@@ -435,19 +437,19 @@ class SVGIS(object):
 
         # Draw files
         with fiona.drivers():
-            members = [svg.group(**self._compose_file(f, bounds, scalar=scalar, **kwargs))
+            members = [svg.group(**self.compose_file(f, bounds, scalar=scalar, **kwargs))
                        for f in self.files]
 
         self.log.info('composing drawing')
-        drawing = self._draw(members, scalar, kwargs.get('precision', self.precision),
-                             style=style or self.style, viewbox=viewbox, inline=inline)
+        drawing = self._draw(members, scalar, kwargs.get('precision'),
+                             style=style, viewbox=viewbox, inline=inline)
 
         # Always reset projected bounds.
         self._projected_bounds = (None,) * 4
 
         return drawing
 
-    def _draw(self, members, scalar, precision, style, **kwargs):
+    def _draw(self, members, scalar=None, precision=None, style=None, **kwargs):
         '''
         Combine drawn layers into an SVG drawing.
 
@@ -462,6 +464,9 @@ class SVGIS(object):
         Returns:
             String (unicode in Python 2) containing an entire SVG document.
         '''
+        scalar = scalar or self.scalar
+        precision = precision or self.precision
+        style = style or self.style
         transform_attrib = 'scale(1,-1)'
 
         try:

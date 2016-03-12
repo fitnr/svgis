@@ -25,7 +25,7 @@ class ErrorTestCase(unittest.TestCase):
             draw.geometry(self.feature['geometry'])
 
     def testSvgisDrawInvalidGeometry(self):
-        a = SVGIS([])._feature(self.feature, [], [])
+        a = SVGIS([]).feature(self.feature, [], [])
         assert a == u''
 
 

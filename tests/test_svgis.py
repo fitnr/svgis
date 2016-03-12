@@ -89,17 +89,17 @@ class SvgisTestCase(unittest.TestCase):
                 'cat': 'meow'
             }
         }
-        drawn = self.svgis_obj._feature(feat, [], classes=['foo'], id_field='cat', name='quux')
+        drawn = self.svgis_obj.feature(feat, [], classes=['foo'], id_field='cat', name='quux')
         assert isinstance(drawn, six.string_types)
 
         self.assertIn('id="meow"', drawn)
         self.assertIn('class="quux foo_bar"', drawn)
 
-        drawn2 = self.svgis_obj._feature(feat, [], classes=['foo'], id_field='cat')
+        drawn2 = self.svgis_obj.feature(feat, [], classes=['foo'], id_field='cat')
         self.assertIn('class="foo_bar"', drawn2)
 
         feat['geometry'] = None
-        drawn3 = self.svgis_obj._feature(feat, [], classes=['foo'], id_field='cat')
+        drawn3 = self.svgis_obj.feature(feat, [], classes=['foo'], id_field='cat')
         assert drawn3 == ''
 
     def testSvgisComposeType(self):
@@ -158,14 +158,14 @@ class SvgisTestCase(unittest.TestCase):
         self.assertIn('cb_2014_us_nation_20m', result)
 
     def testDrawWithClasses(self):
-        r0 = self.svgis_obj._feature(self.polygon, [], classes=[], id_field=None, name='potato')
+        r0 = self.svgis_obj.feature(self.polygon, [], classes=[], id_field=None, name='potato')
         self.assertIn('class="potato"', r0)
 
-        r1 = self.svgis_obj._feature(self.polygon, [], classes=['kale'], id_field='apple')
+        r1 = self.svgis_obj.feature(self.polygon, [], classes=['kale'], id_field='apple')
         assert 'kale_leafy_green' in r1
         assert 'id="fruit"' in r1
 
-        r2 = self.svgis_obj._feature(self.polygon, [], id_field='pear', classes=['apple', 'pear', 'kale'])
+        r2 = self.svgis_obj.feature(self.polygon, [], id_field='pear', classes=['apple', 'pear', 'kale'])
         self.assertIn('id="_1"', r2)
         assert 'apple_fruit' in r2
         assert 'pear_1' in r2
