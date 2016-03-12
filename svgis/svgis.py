@@ -408,7 +408,7 @@ class SVGIS(object):
             # Draw the geometry.
             return draw.geometry(geom, precision=precision, **drawargs)
 
-        except (TypeError, errors.SvgisError) as e:
+        except errors.SvgisError as e:
             self.log.warning('unable to draw feature %s of %s: %s',
                              kwargs.get('id', feature.get('id', '?')), name, e)
             return u''

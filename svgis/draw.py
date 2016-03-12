@@ -78,15 +78,16 @@ def polygon(coordinates, **kwargs):
     if len(coordinates) == 1:
         return svg.polygon(coordinates[0], **kwargs)
 
-    # This is trickier because drawing holes in SVG.
-    # We go clockwise on the first ring, then counterclockwise
-    if measure.counterclockwise(coordinates[0]):
-        coordinates[0] = coordinates[0][::-1]
-
     kwargs['class'] = ('polygon ' + kwargs.pop('class', '')).strip()
 
     instructions = ['M']
-    instructions.extend(coordinates[0])
+    # This is trickier because drawing holes in SVG.
+    # We go clockwise on the first ring, then counterclockwise
+    if measure.counterclockwise(coordinates[0]):
+        instructions.extend(coordinates[0][::-1])
+    else:
+        instructions.extend(coordinates[0])
+
     instructions.append('z')
 
     for ring in coordinates[1:]:
