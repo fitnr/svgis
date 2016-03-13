@@ -37,7 +37,7 @@ class CliTestCase(unittest.TestCase):
 
     def testSvgStyle(self):
         sys.stdout = io.StringIO()
-        self.invoke(['style', '-s', self.css, self.fixture, 'tmp.svg'])
+        self.invoke(['style', '--style', self.css, self.fixture, 'tmp.svg'])
         try:
             with open('tmp.svg') as f:
                 self.assertIn(self.css, f.read()[0:1000])
@@ -45,7 +45,7 @@ class CliTestCase(unittest.TestCase):
             os.remove('tmp.svg')
 
     def testSvgScale(self):
-        self.invoke(['scale', '-f', '123', self.fixture, 'tmp.svg'])
+        self.invoke(['scale', '--scale', '123', self.fixture, 'tmp.svg'])
         try:
             with open('tmp.svg') as f:
                 self.assertIn('scale(123)', f.read()[0:1000])
@@ -54,7 +54,7 @@ class CliTestCase(unittest.TestCase):
             os.remove('tmp.svg')
 
     def testSvgProjectUtm(self):
-        p = self.invoke(['project', '-m', 'utm', '--', '-110.277906', '35.450777', '-110.000477', '35.649030'])
+        p = self.invoke(['project', '--method', 'utm', '--', '-110.277906', '35.450777', '-110.000477', '35.649030'])
         expected = set('+proj=utm +zone=12 +datum=WGS84 +units=m +no_defs'.split(' '))
         self.assertSetEqual(set(p.output.strip().split(' ')), expected)
 
@@ -70,7 +70,7 @@ class CliTestCase(unittest.TestCase):
         self.assertSetEqual(set(p.output.strip().split(' ')), expected)
 
     def testCliDraw(self):
-        self.invoke(['draw', '-j', PROJECTION, '-f', '1000', self.shp,
+        self.invoke(['draw', '--crs', PROJECTION, '--scale', '1000', self.shp,
                      '-o', 'tmp.svg', '--viewbox', '--bounds'] + [str(b) for b in BOUNDS])
 
         try:
@@ -88,7 +88,7 @@ class CliTestCase(unittest.TestCase):
             os.remove('tmp.svg')
 
     def testDrawProjected(self):
-        self.invoke(['draw', self.dc, '-v', '-o', 'tmp.svg', '-P', '10'])
+        self.invoke(['draw', self.dc, '--output', 'tmp.svg', '--precision', '10'])
 
         try:
             with open('tmp.svg') as f:

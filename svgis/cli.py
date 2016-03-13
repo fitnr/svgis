@@ -85,7 +85,7 @@ style_help = ("Style to append to SVG. "
 @main.command()
 @inp
 @outp
-@click.option('--style', '-s', type=str, help=style_help, default='')
+@click.option('-c', '--style', type=str, help=style_help, default='')
 @click.option('-r', '--replace', flag_value=True, help='Replace existing styles')
 @click.option('--inline/--no-inline', '-l/ ', **csskwargs)
 def style(layer, output, **kwargs):
