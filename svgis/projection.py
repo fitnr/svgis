@@ -18,7 +18,7 @@ from .utils import DEFAULT_GEOID
 from . import bounding
 
 
-METHODS = 'default', 'local', 'utm'
+METHODS = 'default', 'file', 'local', 'utm'
 
 
 def tm_proj4(x0, y0, y1):
@@ -140,7 +140,7 @@ def pick(project, bounds=None, file_crs=None):
 
     elif isinstance(project, string_types):
         if project.lower() == 'file':
-            out_crs = file_crs
+            out_crs = file_crs if file_crs is not None else 'file'
 
         # Is an epsg code
         elif project.lower()[:5] == 'epsg:':

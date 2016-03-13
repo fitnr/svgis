@@ -62,7 +62,7 @@ def map(layers, bounds=None, scale=None, **kwargs):
         layers,
         bounds=bounds,
         scalar=scale,
-        out_crs=kwargs.pop('crs', None),
+        crs=kwargs.pop('crs', None),
         style=styles,
         clip=kwargs.pop('clip', True),
         id_field=kwargs.pop('id_field', None),
@@ -81,7 +81,7 @@ class SVGIS(object):
     Args:
         files (list): A list of files to draw.
         bounds (Sequence): An iterable with four float coordinates in (minx, miny, maxx, maxy) format
-        out_crs (dict): A proj-4 like mapping, or a projection method keyword (file, local, utm).
+        crs (dict): A proj-4 like mapping, or a projection method keyword (file, local, utm).
         style (string): CSS to add to output file
         scalar (int): Map scaling factor (output coordinate are multiplied by this)
         style (str): CSS styles
@@ -103,7 +103,7 @@ class SVGIS(object):
     clipper = None
     simplifier = None
 
-    def __init__(self, files, bounds=None, out_crs=None, **kwargs):
+    def __init__(self, files, bounds=None, crs=None, **kwargs):
         self.log = logging.getLogger('svgis')
 
         if isinstance(files, string_types):
@@ -122,7 +122,7 @@ class SVGIS(object):
 
         # This may return a keyword, which will require more updating.
         # If so, will update when files are open.
-        self._out_crs = projection.pick(out_crs)
+        self._out_crs = projection.pick(crs)
 
         self.scalar = kwargs.pop('scalar', 1) or 1
 
