@@ -176,6 +176,10 @@ class SVGIS(object):
         # Determine projection transformation:
         # either use something passed in, a non latlong layer projection,
         # the local UTM, or customize local TM
+        self.log.debug('Picking a projection:')
+        self.log.debug('    out crs: %s', self._out_crs)
+        self.log.debug('    in crs: %s', projection.fake_to_string(self.in_crs))
+        self.log.debug('    bounds: %s', bounds)
         self._out_crs = projection.pick(self._out_crs, bounds, self.in_crs)
         self.log.debug('Set output crs to %s', projection.fake_to_string(self.out_crs))
 
@@ -479,6 +483,8 @@ class SVGIS(object):
 
         # width and height
         size = [dims[2] - dims[0], dims[3] - dims[1]]
+
+        self.log.debug('Size: %f x %f', *size)
 
         if kwargs.pop('viewbox', True):
             viewbox = [dims[0], -dims[3]] + size
