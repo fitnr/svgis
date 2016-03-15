@@ -1,3 +1,16 @@
+0.4.1
+-----
+
+* Add support for zipped data
+* Change "svgis style --style" shorthand option from -s to -c
+* Improve support for custom map drawing workflows
+* Change keyword argument for SVGIS from out_crs to crs
+* Shorthand reprojections now work for with data in any projection
+* build as a universal wheel
+* Fix bug for unicode attributes in Python 2 (0.4.0 regression)
+* Fix bug with certain uses of 'file' projection keyword
+* Fix error on multipolygon coordinates in unexpanded generators
+
 0.4.0
 -----
 
