@@ -1,3 +1,8 @@
+0.4.2
+-----
+
+* Bump fionautil requirement, fixing bug that occurs when Numpy is missing.
+
 0.4.1
 -----
 
