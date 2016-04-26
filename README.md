@@ -6,7 +6,7 @@ SVGIS
 
 Create SVG drawings from vector geodata files (SHP, geoJSON, etc).
 
-SVGIS is great for: creating small multiples, combining lots of datasets in a sensible projections, and drawing maps with  basic styles based on classes in the source data. It's perfect for creating base maps for editing in a drawing program, and its CSS-based styling gives great flexibility for styling.
+SVGIS is great for: creating small multiples, combining lots of datasets in a sensible projection, and drawing styled based on classes in the source data. It's perfect for creating base maps for editing in a drawing program, and its CSS-based styling gives great flexibility for styling.
 
 ```
 svgis draw input.shp -o out.svg
@@ -20,20 +20,30 @@ Documentation: http://pythonhosted.org/svgis
 
 Requires [fiona](http://pypi.python.org/pypi/fiona), which in turn requires GDAL.
 
-To instal gdal:
+To instal GDAL:
+
 On OS X: `brew install gdal` (requires [Homebrew](http://brew.sh))
-On Linux: `sudo apt-get -qq install libgdal1-dev`
+
+On Linux: `sudo apt-get install libgdal1-dev`
+
 On Windows: see [OSGeo4W](https://trac.osgeo.org/osgeo4w/wiki)
 
 Then:
-```
-pip install svgis
-```
-
-To support clipping output shapes, download GEOS and install with a slightly different command:
 ````
-brew install geos # os x
-sudo yum/apt-get geos # linux
+pip install svgis
+````
+
+An option feature of svgis is clipping polygons to a bounding box. This will speed things up if you need to draw only part of a very complex feature.
+
+To support clipping output shapes, you'll need the [GEOS](https://trac.osgeo.org/geos/) library:
+
+* OS X: `brew install geos`
+* Linux: `sudo apt-get install geos`
+* Windows: GEOS is part of OSGeo4W, so you have it!
+
+Then, install svgis with a slightly different command:
+
+````
 pip install svgis[clip]
 ````
 
