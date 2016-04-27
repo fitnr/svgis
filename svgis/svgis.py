@@ -34,7 +34,6 @@ def map(layers, bounds=None, scale=None, **kwargs):
 
     Args:
         layers (sequence): Input geodata files.
-        output (path): Output file name
         bounds (sequence): (minx, miny, maxx, maxy)
         scale (int): Map scale. Larger numbers -> smaller maps
         padding (int): Pad around bounds by this much. In projection units.
@@ -46,6 +45,8 @@ def map(layers, bounds=None, scale=None, **kwargs):
         id_field (string): Field to use to determine id of each element in the drawing.
         inline (bool): If False, do not move CSS declarations into each element.
         precision (int): Precision for rounding output coordinates.
+        simplify (int): Integer between 1 and 99 describing simplification level.
+                99: not very much. 1: a lot.
 
     Returns:
         String (unicode in Python 2) containing an entire SVG document.
