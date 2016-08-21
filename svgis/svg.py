@@ -9,7 +9,6 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
-from functools import wraps
 from six import string_types
 from . import utils
 
@@ -33,7 +32,7 @@ def _element(tag, contents=None, **kwargs):
         return u'<{0}{1}/>'.format(tag, attribs)
 
 
-def _fmtcoord(precision):
+def _fmt(precision):
     if precision is None:
         return '{0[0]},{0[1]}'
     else:
@@ -41,9 +40,9 @@ def _fmtcoord(precision):
 
 
 def _poly(name):
-    @wraps(name)
     def poly(coordinates, precision=None, **kwargs):
-        fmt = _fmtcoord(precision)
+        fmt = _fmt(precision)
+
         points = utils.dedupe(fmt.format(c) for c in coordinates)
         return _element(name(), points=' '.join(points), **kwargs)
 
@@ -129,7 +128,7 @@ def path(coordinates, precision=None, **kwargs):
     Returns:
         str (unicode in Python 2)
     '''
-    fmt = _fmtcoord(precision)
+    fmt = _fmt(precision)
     coords = utils.dedupe(i if isinstance(i, string_types) else fmt.format(i) for i in coordinates)
     return _element('path', d=' '.join(coords), **kwargs)
 
