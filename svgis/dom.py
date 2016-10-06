@@ -69,7 +69,7 @@ def _style_dict(style):
     '''Convert a style attribute into a dict.'''
     try:
         styles = [r.split(u':', 1) for r in style.strip(u'; \n\t').split(u';')]
-        return {x[0].strip(): x[1].strip() for x in styles}
+        return {x[0].strip(): x[1].strip() for x in styles if len(x[0]) > 0}
 
     except AttributeError:
         return {}

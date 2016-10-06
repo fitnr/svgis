@@ -167,7 +167,6 @@ def inline(svg, style=None):
     _register()
     try:
         doc = ElementTree.fromstring(svg.encode('utf-8'))
-        wrap = doc.find('./' + dom.ns('g'))
 
         if not style:
             path = './' + dom.ns('defs') + '/' + dom.ns('style')
@@ -179,7 +178,7 @@ def inline(svg, style=None):
         stylesheet = _parse_css(style)
 
         for rule in stylesheet.rules:
-            dom.apply_rule(wrap, rule)
+            dom.apply_rule(doc, rule)
 
         return ElementTree.tostring(doc, encoding='utf-8').decode('utf-8')
 
