@@ -9,6 +9,7 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
 import unittest
+import logging
 import re
 from xml.dom import minidom
 import six
@@ -17,6 +18,8 @@ from svgis import svgis, errors
 
 class SvgisTestCase(unittest.TestCase):
     file = 'tests/test_data/cb_2014_us_nation_20m.json'
+
+    chi_files = ['tests/test_data/chicago_bounds_2790.json', 'tests/test_data/cook_bounds_4269.json']
 
     polygon = {
         "properties": {
@@ -32,6 +35,12 @@ class SvgisTestCase(unittest.TestCase):
     }
 
     def setUp(self):
+        self.log = logging.getLogger('svgis')
+        self.log.setLevel(logging.WARN)
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.WARN)
+        self.log.addHandler(ch)
+
         self.svgis_obj = svgis.SVGIS(self.file)
 
     def assertSequenceAlmostEqual(self, a, b):
@@ -132,14 +141,14 @@ class SvgisTestCase(unittest.TestCase):
 
     def testMapFunc(self):
         args = {
-            "scale": 1000,
+            "scale": 10,
+            "precision": 1,
             "padding": 10,
-            "inline_css": True,
+            "inline": True,
             "clip": False,
-            'crs': 'EPSG:32117',
+            "crs": "EPSG:2790",
         }
-        result = svgis.map([self.file], (-80, 40, -71, 45.1), **args)
-
+        result = svgis.map(self.chi_files, (-80, 40, -71, 45.1), **args)
         self.assertIn(svgis.STYLE, result)
 
         doc = minidom.parseString(result)
@@ -149,6 +158,11 @@ class SvgisTestCase(unittest.TestCase):
             style = poly.getAttribute('style')
             self.assertIn('fill:none', style)
             self.assertIn('stroke-linejoin:round', style)
+            # check that points have 1 decimal place
+            points = poly.getAttribute('points')
+            x, y = points.split(' ').pop(0).split(',')
+            assert len(x[x.index('.') + 1 : ]) == 1
+            assert len(y[y.index('.') + 1 : ]) == 1
 
     def testOpenZips(self):
         archive = 'zip://tests/test_data/test.zip/tests/test_data/cb_2014_us_nation_20m.json'
