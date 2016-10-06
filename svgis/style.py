@@ -112,7 +112,7 @@ def add_style(svgfile, style, replace=False):
 
     if ext == '.css' or root == '/dev/stdin':
         with open(style) as f:
-            style = f.read()
+            style = _uncomment(f.read())
 
     try:
         svg = ElementTree.parse(svgfile).getroot()
@@ -189,6 +189,13 @@ def inline(svg, style=None):
         return svg
 
 
+def _uncomment(stylesheet):
+    '''Remove CSS comments ('//') from a stylesheet.'''
+    return re.sub(r'//.+', '', stylesheet)
+
+
 def _parse_css(stylesheet):
-    mini = re.sub(r'\s+([,>~+])\s+', r'\1', stylesheet)
+    '''Turn a block of CSS into a tinycss stylesheet object.'''
+    # remove spaces in selectors
+    mini = _uncomment(re.sub(r'\s+([,>~+])\s+', r'\1', stylesheet))
     return tinycss.make_parser().parse_stylesheet(mini)
