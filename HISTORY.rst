@@ -1,3 +1,10 @@
+0.4.3
+-----
+
+* Improve CSS parsing and creating in `style`
+* Simplify string conversion in `svg`
+* Expand and update tests a bit
+
 0.4.2
 -----
 

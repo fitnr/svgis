@@ -18,7 +18,7 @@ from . import svgis
 from . import transform
 from .svgis import map, SVGIS
 
-__version__ = '0.4.2'
+__version__ = '0.4.3'
 
 __all__ = [
     'bounding',
