@@ -185,6 +185,7 @@ def project(bounds, method, crs):
     '''Get a local Transverse Mercator or UTM projection for a bounding box. Expects WGS84 coordinates.'''
     if crs in projection.METHODS:
         click.echo('CRS must be an EPSG code, a Proj4 string, or file containing a Proj4 string.', err=1)
+        return
     result = fiona.crs.to_string(projection.pick(method, file_crs=crs, bounds=bounds))
     click.echo(result.encode('utf-8'))
 
