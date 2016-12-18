@@ -406,7 +406,7 @@ class SVGIS(object):
             'class': ' '.join(classes)
         }
 
-        if 'id_field' in kwargs:
+        if 'id_field' in kwargs and kwargs['id_field'] in feature['properties']:
             drawargs['id'] = _style.sanitize(feature['properties'].get(kwargs['id_field']))
 
         try:
