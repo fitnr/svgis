@@ -178,7 +178,7 @@ def draw(layer, output, **kwargs):
 
 # Proj
 @main.command()
-@click.argument('bounds', nargs=4, type=float, metavar="minx miny maxx maxy", default=None)
+@click.argument('bounds', nargs=-1, type=float, metavar="minx miny maxx maxy | x y", default=None)
 @click.option('-m', '--method', default='local', type=click.Choice(('utm', 'local')), help='Defaults to local')
 @click.option('-j', '--crs', default=DEFAULT_GEOID, help='Projection of the bounding coordinates')
 def project(bounds, method, crs):
@@ -186,6 +186,10 @@ def project(bounds, method, crs):
     if crs in projection.METHODS:
         click.echo('CRS must be an EPSG code, a Proj4 string, or file containing a Proj4 string.', err=1)
         return
+
+    if len(bounds) == 2:
+        bounds = bounds + bounds
+
     result = fiona.crs.to_string(projection.pick(method, file_crs=crs, bounds=bounds))
     click.echo(result.encode('utf-8'))
 
