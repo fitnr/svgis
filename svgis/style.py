@@ -38,7 +38,7 @@ def sanitize(string):
         str
     '''
     try:
-        string = re.sub(r'\s+', '_', re.sub(r'(\.|#|")', '', string))
+        string = re.sub(r'\s+', '_', re.sub(r'(\.|#|"|&)', '', string))
         return string if string[:1] in '_-' + ascii_letters else '_' + string
 
     except TypeError:
