@@ -11,8 +11,9 @@ QUIET ?= -q
 PYTHONFLAGS = -W ignore
 
 README.rst: README.md
-	pandoc $< -o $@ || touch $@
-	python setup.py check --restructuredtext --strict
+	- pandoc $< -o $@
+	@touch $@
+	- python setup.py check --restructuredtext --strict
 
 .PHONY: test deploy clean
 
