@@ -1,3 +1,11 @@
+0.4.4
+-----
+
+* bump fiona requirements, now compatible with GDAL v2.
+* Ignore id_field in layers without that field
+* Sanitize ampersands in data fields
+* Allow an x/y pair argument to `svgis project`.
+
 0.4.3
 -----
 
