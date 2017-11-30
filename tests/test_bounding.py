@@ -75,7 +75,7 @@ class ConvertTestCase(unittest.TestCase):
         fixture = (43332273.50269379, 15584115.894447982, 44004519.424246654, 16320640.928220816)
 
         for z in zip(a, fixture):
-            self.assertAlmostEqual(*z)
+            self.assertAlmostEqual(*z, places=5)
 
 
 if __name__ == '__main__':

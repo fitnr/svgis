@@ -13,7 +13,6 @@ import sys
 import os
 import io
 import re
-import functools
 from xml.dom import minidom
 import fionautil
 import click.testing
@@ -25,15 +24,16 @@ BOUNDS = (-124.0, 20.5, -64.0, 49.0)
 
 
 class CliTestCase(unittest.TestCase):
+    runner = click.testing.CliRunner()
     fixture = 'tests/test_data/test.svg'
 
     shp = 'tests/test_data/cb_2014_us_nation_20m.json'
     dc = 'tests/test_data/tl_2015_11_place.json'
     css = 'polygon{fill:green}'
 
-    def setUp(self):
-        self.runner = runner = click.testing.CliRunner()
-        self.invoke = functools.partial(runner.invoke, svgis.cli.main, catch_exceptions=False)
+
+    def invoke(self, argument):
+        return self.runner.invoke(svgis.cli.main, argument, catch_exceptions=False)
 
     def testSvgStyle(self):
         sys.stdout = io.StringIO()
