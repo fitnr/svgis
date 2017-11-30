@@ -31,6 +31,10 @@ class CliTestCase(unittest.TestCase):
     dc = 'tests/test_data/tl_2015_11_place.json'
     css = 'polygon{fill:green}'
 
+    def setUp(self):
+        self.assertTrue(os.path.exists(self.dc))
+        self.assertTrue(os.path.exists(self.fixture))
+        self.assertTrue(os.path.exists(self.shp))
 
     def invoke(self, argument):
         return self.runner.invoke(svgis.cli.main, argument, catch_exceptions=False)
@@ -88,13 +92,23 @@ class CliTestCase(unittest.TestCase):
             os.remove('tmp.svg')
 
     def testDrawProjected(self):
-        self.invoke(['draw', self.dc, '--output', 'tmp.svg', '--precision', '10'])
+        f = os.path.expanduser('~/tmp.svg')
+        result = self.invoke(['draw', self.dc, '--output', f, '--precision', '10'])
+
+        self.assertEqual(result.exit_code, 0)
+        self.assertTrue(os.path.exists(f))
 
         try:
-            with open('tmp.svg') as f:
-                svg = f.read()
+            with open(f) as g:
+                svg = g.read()
                 match = re.search(r'points="([^"]+)"', svg)
-                assert match
+                try:
+                    self.assertIsNotNone(match)
+                except AssertionError:
+                    print(svg)
+                    result = self.invoke(['draw', self.dc])
+                    print(result.output)
+                    raise
 
             result = match.groups()[0]
             points = [[float(x) for x in p.split(',')] for p in result.split(' ')]
@@ -106,7 +120,7 @@ class CliTestCase(unittest.TestCase):
                     self.assertAlmostEqual(*z)
 
         finally:
-            os.remove('tmp.svg')
+            os.remove(f)
 
     def testCliHelp(self):
         result = self.invoke(('--help',))
