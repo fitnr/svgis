@@ -27,23 +27,30 @@ profile: tests/profile.py
 	@python $(PYTHONFLAGS) -m cProfile -s tottime $< | \
 	grep -E '(svgis|draw|css|projection|svg|cli|clip|convert|errors).py'
 
-test: $(TIGERS) tests/test_data/test.zip tests/test_data/test.svg
+coords = -110.277906 35.450777 -110.000477 35.649030
+
+test: $(TIGERS) tests/test_data/test.svg tests/test_data/zip.svg
+	wc $<
+	svgis project -m utm -- $(coords)
+	svgis project -- $(coords)
+	svgis project -m local -- $(wordlist 1,2,$(coords))
+	svgis graticule -s 1 -- $(coords) | wc -l
+	svgis bounds $<
+	-svgis bounds - < $<
+	-svgis draw -f 1000 -j utm $< | wc -l
+	svgis bounds - < $< | \
+		xargs -n4 svgis draw -f 1000 -j '$(PROJECTION)' $< -b | \
+		svgis style -c 'polygon{fill:green}' | \
+		svgis scale -f 10 - | wc
+
 	coverage run --include='svgis/*' setup.py $(QUIET) test
 	coverage report
 	coverage html
 
-	svgis draw $(addprefix zip://$(filter %.zip,$^)/,$(filter %.json,$^)) > /dev/null
-	svgis style -c 'polygon{fill:green}' $(lastword $^) > /dev/null
-	svgis scale -f 10 $(lastword $^) | wc
-	svgis project -m utm -- -110.277906 35.450777 -110.000477 35.649030
-	svgis project -- -110.277906 35.450777 -110.000477 35.649030
-	svgis project -m local -- -110.277906 35.450777
-	svgis graticule -s 1 -- -110.2 35.45 -110.1 35.6 > /dev/null
-	svgis bounds $<
-	svgis bounds $< | \
-		xargs -n4 svgis draw -f 1000 -j '$(PROJECTION)' $< -b | \
-		svgis style -c 'polygon{fill:green}' | \
-		svgis scale -f 10 - | wc
+tests/test_data/zip.svg: tests/test_data/test.zip $(TIGERS)
+	svgis draw $(addprefix zip://$</,$(filter %.json,$^)) | \
+	svgis style -c 'polygon{fill:green}' | \
+	svgis scale -f 10 > $@
 
 tests/test_data/test.zip: $(TIGERS)
 	zip $@ $^
@@ -60,4 +67,4 @@ deploy: docs.zip README.rst | clean
 	git push
 	git push --tags
 
-clean: ; rm -rf build dist
+clean: ; rm -rf tests/test_data/{test.svg,zip.svg,test.zip} build dist

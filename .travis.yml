@@ -9,9 +9,9 @@ language: python
 
 python:
     - 2.7
-    - 3.3
     - 3.4
     - 3.5
+    - 3.6
 
 os:
  - linux
@@ -43,15 +43,19 @@ cache:
 
 before_install:
     - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -qq update; fi
-    - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -qq install -y libgdal1-dev; fi
+    - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -qq install -y libgdal1-dev gdal-bin; fi
     - pip install docutils coverage python-coveralls
     - if [[ $SIMPLIFY != "yes" ]]; then pip uninstall -y numpy visvalingamwyatt || :; fi
 
 install:
     - make
     - python setup.py install
-    - if [[ $CLIP == "yes" ]]; then pip install -e .[clip]; fi
-    - if [[ $SIMPLIFY == "yes" ]]; then pip install -e .[simplify]; fi
+    - if [[ $CLIP == "yes" ]]; then pip install .[clip]; fi
+    - if [[ $SIMPLIFY == "yes" ]]; then pip install .[simplify]; fi
+
+before_script:
+    - gdalinfo --version
+    - pip list
 
 script:
     - make test QUIET=
@@ -65,4 +69,3 @@ after_script:
   - svgis bounds -h
   - coveralls
   - make profile
-  - pip list
