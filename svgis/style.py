@@ -171,7 +171,7 @@ def inline(svg, style=None):
         if not style:
             path = './' + dom.ns('defs') + '/' + dom.ns('style')
             try:
-                style = doc.findall(path).pop().text
+                style = doc.findall(path).pop().text or ''
             except IndexError:
                 style = ''
 
