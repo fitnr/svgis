@@ -102,13 +102,7 @@ class CliTestCase(unittest.TestCase):
             with open(f) as g:
                 svg = g.read()
                 match = re.search(r'points="([^"]+)"', svg)
-                try:
-                    self.assertIsNotNone(match)
-                except AssertionError:
-                    print(svg)
-                    result = self.invoke(['draw', self.dc])
-                    print(result.output)
-                    raise
+                self.assertIsNotNone(match)
 
             result = match.groups()[0]
             points = [[float(x) for x in p.split(',')] for p in result.split(' ')]
