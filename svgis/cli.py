@@ -115,11 +115,15 @@ crs_help = ('Specify a map projection. '
 
 
 @main.command()
-@click.argument('layer', default=sys.stdin, type=click.Path(exists=True))
+@click.argument('layer', type=click.Path(allow_dash=True, exists=True))
 @click.option('-j', '--crs', type=str, metavar='KEYWORD', default='file', help=crs_help + ' (default: file)')
 @click.option('--latlon', default=False, flag_value=True, help='Print bounds in latitude, longitude order')
 def bounds(layer, crs, latlon=False):
-    '''Return the bounds for a given layer, optionally projected.'''
+    '''
+    Return the bounds for a given layer, optionally projected.
+
+    Use - for stdin.
+    '''
     meta = meta_complete(layer)
 
     # If crs==file, these will basically be no ops.
@@ -178,7 +182,7 @@ def draw(layer, output, **kwargs):
 
 # Proj
 @main.command()
-@click.argument('bounds', nargs=-1, type=float, metavar="minx miny maxx maxy | x y", default=None)
+@click.argument('bounds', nargs=-1, type=float, default=None)
 @click.option('-m', '--method', default='local', type=click.Choice(('utm', 'local')), help='Defaults to local')
 @click.option('-j', '--crs', default=DEFAULT_GEOID, help='Projection of the bounding coordinates')
 def project(bounds, method, crs):
@@ -189,6 +193,10 @@ def project(bounds, method, crs):
 
     if len(bounds) == 2:
         bounds = bounds + bounds
+
+    if len(bounds) != 4:
+        click.echo('Either two or four bounds required', err=True)
+        return
 
     result = fiona.crs.to_string(projection.pick(method, file_crs=crs, bounds=bounds))
     click.echo(result.encode('utf-8'))
