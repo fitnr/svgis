@@ -36,8 +36,8 @@ class CliTestCase(unittest.TestCase):
         self.assertTrue(os.path.exists(self.fixture))
         self.assertTrue(os.path.exists(self.shp))
 
-    def invoke(self, argument):
-        return self.runner.invoke(svgis.cli.main, argument, catch_exceptions=False)
+    def invoke(self, argument, **kwargs):
+        return self.runner.invoke(svgis.cli.main, argument, catch_exceptions=False, **kwargs)
 
     def testSvgStyle(self):
         sys.stdout = io.StringIO()
@@ -56,6 +56,11 @@ class CliTestCase(unittest.TestCase):
 
         finally:
             os.remove('tmp.svg')
+
+    def testBounds(self):
+        result = self.invoke(['bounds', self.shp])
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(result.output.strip(), '-179.174265 17.913769 179.773922 71.352561')
 
     def testSvgProjectUtm(self):
         p = self.invoke(['project', '--method', 'utm', '--', '-110.277906', '35.450777', '-110.000477', '35.649030'])

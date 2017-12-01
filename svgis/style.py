@@ -75,7 +75,7 @@ def pick(style):
             with open(style) as f:
                 return f.read()
 
-    except AttributeError:
+    except (AttributeError, TypeError):
         # Probably style is None.
         return None
 

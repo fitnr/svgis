@@ -113,7 +113,7 @@ class CssTestCase(unittest.TestCase):
         result = style.pick(self.css)
         self.assertEqual(self.css, result)
 
-        assert style.pick(None) is None
+        self.assertIsNone(style.pick(None))
 
     def testAddCli(self):
         result = style.add_style(self.file, self.css)

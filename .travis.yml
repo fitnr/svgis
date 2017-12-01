@@ -3,18 +3,18 @@
 
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
-# Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
+# Copyright (c) 2016-7, Neil Freeman <contact@fakeisthenewreal.org>
 
 language: python
 
 python:
-    - 2.7
-    - 3.4
-    - 3.5
-    - 3.6
+  - 2.7
+  - 3.4
+  - 3.5
+  - 3.6
 
 os:
- - linux
+  - linux
 
 git:
   depth: 3
@@ -22,40 +22,72 @@ git:
 sudo: true
 
 env:
-  - SIMPLIFY=yes
-  - CLIP=yes
-  - SIMPLIFY= CLIP=
+ - GDAL=gdal
+ - GDAL=gdal1
+ - GDAL=gdal EXTRAS=yes
+ - GDAL=gdal1 EXTRAS=yes
 
 matrix:
   exclude:
-    - python: 3.3
-      env: SIMPLIFY=yes
-    - python: 3.3
-      env: CLIP=yes
-    - python: 3.4
-      env: SIMPLIFY=yes
-    - python: 3.4
-      env: CLIP=yes
+    - env: GDAL=gdal EXTRAS=yes
+      python: 3.4
+
+    - env: GDAL=gdal1 EXTRAS=yes
+      python: 3.4
+
+    - env: GDAL=gdal EXTRAS=yes
+      python: 3.5
+
+    - env: GDAL=gdal1 EXTRAS=yes
+      python: 3.5
+
+  allow_failures:
+    - os: osx
+
+  include:
+    - language: generic
+      os: osx
+      env: PYTHON3
+      before_install:
+        - brew --version
+        - brew install python gdal
+        - virtualenv env -p python
+        - source env/bin/activate
+
+    - language: generic
+      os: osx
+      env: PYTHON
+      before_install:
+        - brew --version
+        - brew install python3 gdal
+        - virtualenv env -p python3
+        - source env/bin/activate
 
 cache:
   directories:
     - $HOME/.cache/pip
 
 before_install:
-    - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -qq update; fi
-    - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -qq install -y libgdal1-dev gdal-bin; fi
     - pip install docutils coverage python-coveralls
-    - if [[ $SIMPLIFY != "yes" ]]; then pip uninstall -y numpy visvalingamwyatt || :; fi
+    - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -q update; fi
+    - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -q install -y lib${GDAL}-dev ; fi
+    - if [[ $TRAVIS_PYTHON_VERSION != 3.6 ]]; then export GDAL_DATA=/usr/share/gdal/1.10 PROJ_LIB=/usr/share/proj ; fi
+    - if [[ -z "$EXTRAS" ]]; then pip uninstall -y numpy visvalingamwyatt || :; fi
 
 install:
     - make
     - python setup.py install
-    - if [[ $CLIP == "yes" ]]; then pip install .[clip]; fi
-    - if [[ $SIMPLIFY == "yes" ]]; then pip install .[simplify]; fi
+    - if [[ $EXTRAS == "yes" ]]; then pip install .[clip,simplify]; fi
 
 before_script:
-    - gdalinfo --version
-    - pip list
+    - fio --version
+    - fio --gdal-version
+    - fio info tests/test_data/cb_2014_us_nation_20m.json
+
+after_failure:
+  - echo $GDAL_DATA $PROJ_LIB
+  - fio info --indent 2 tests/test_data/cb_2014_us_nation_20m.json
+  - fio info --indent 2 tests/test_data/tl_2015_11_place.json
 
 script:
     - make test QUIET=

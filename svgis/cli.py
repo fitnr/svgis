@@ -121,8 +121,6 @@ crs_help = ('Specify a map projection. '
 def bounds(layer, crs, latlon=False):
     '''
     Return the bounds for a given layer, optionally projected.
-
-    Use - for stdin.
     '''
     meta = meta_complete(layer)
 

@@ -36,9 +36,8 @@ test: $(TIGERS) tests/test_data/test.svg tests/test_data/zip.svg
 	svgis project -m local -- $(wordlist 1,2,$(coords))
 	svgis graticule -s 1 -- $(coords) | wc -l
 	svgis bounds $<
-	-svgis bounds - < $<
 	-svgis draw -f 1000 -j utm $< | wc -l
-	svgis bounds - < $< | \
+	svgis bounds $< | \
 		xargs -n4 svgis draw -f 1000 -j '$(PROJECTION)' $< -b | \
 		svgis style -c 'polygon{fill:green}' | \
 		svgis scale -f 10 - | wc
@@ -46,6 +45,8 @@ test: $(TIGERS) tests/test_data/test.svg tests/test_data/zip.svg
 	coverage run --include='svgis/*' setup.py $(QUIET) test
 	coverage report
 	coverage html
+
+	-svgis bounds - < $<
 
 tests/test_data/zip.svg: tests/test_data/test.zip $(TIGERS)
 	svgis draw $(addprefix zip://$</,$(filter %.json,$^)) | \
