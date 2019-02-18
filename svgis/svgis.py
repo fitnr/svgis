@@ -324,7 +324,7 @@ class SVGIS(object):
             vfs = vfs + suffix
             self.log.debug('reading vfs: %s ', vfs)
 
-        with fiona.drivers():
+        with fiona.Env():
             self.log.debug('opening %s', path)
             with fiona.open(path, vfs=vfs) as layer:
                 self.log.info('reading %s', layer.name)
