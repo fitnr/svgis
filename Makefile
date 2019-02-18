@@ -10,11 +10,6 @@ PROJECTION = +proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +d
 QUIET ?= -q
 PYTHONFLAGS = -W ignore
 
-README.rst: README.md
-	- pandoc $< -o $@
-	@touch $@
-	- python setup.py check --restructuredtext --strict
-
 .PHONY: test deploy clean
 
 docs.zip: $(wildcard docs/*.rst docs/*/*.rst) svgis/__init__.py
@@ -60,8 +55,7 @@ tests/test_data/test.svg: tests/test_data/cb_2014_us_nation_20m.json
 	- svgis draw --viewbox -j '$(PROJECTION)' -f 1000 -c "polygon { fill: blue }" --bounds -124 20.5 -64 49 $< -o $@
 	@touch $@
 
-deploy: docs.zip README.rst | clean
-	python3 setup.py register
+deploy: docs.zip | clean
 	python3 setup.py sdist
 	python3 setup.py bdist_wheel --universal
 	twine upload dist/*
