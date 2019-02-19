@@ -1,3 +1,8 @@
+0.4.6
+-----
+
+* bump fiona requirements to 1.8
+
 0.4.5
 -----
 
