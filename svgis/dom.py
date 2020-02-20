@@ -192,7 +192,10 @@ def _process_tokens(doc, els, tokens):
         try:
             els = _find_classes(doc, els, [c.value for c in classes])
             # All tokens after the last class in classes.
-            remaining_tokens = tokens[tokens.index(classes[-1]) + 1:]
+            try:
+                remaining_tokens = tokens[tokens.index(classes[-1]) + 1:]
+            except AttributeError:
+                import pdb; pdb.set_trace()
         except ValueError:
             remaining_tokens = tokens[1:]
 

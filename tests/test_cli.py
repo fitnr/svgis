@@ -14,6 +14,7 @@ import os
 import io
 import re
 from xml.dom import minidom
+import fiona.errors
 import fionautil
 import click.testing
 import svgis.cli
@@ -138,10 +139,10 @@ class CliTestCase(unittest.TestCase):
         assert result.exit_code == 0
 
     def testErrs(self):
-        with self.assertRaises(IOError):
+        with self.assertRaises(fiona.errors.DriverError):
             self.invoke(('draw', 'lksdjlksjdf'))
 
-        with self.assertRaises(IOError):
+        with self.assertRaises(fiona.errors.DriverError):
             self.invoke(('draw', 'zip://lksdjlksjdf.zip/foo'))
 
 

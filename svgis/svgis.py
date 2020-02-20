@@ -119,7 +119,7 @@ class SVGIS(object):
         if bounding.check(bounds):
             self._unprojected_bounds = bounds
         elif bounds:
-            self.log.warn("ignoring invalid bounds: %s", bounds)
+            self.log.warning("ignoring invalid bounds: %s", bounds)
 
         # This may return a keyword, which will require more updating.
         # If so, will update when files are open.
@@ -159,15 +159,15 @@ class SVGIS(object):
         if not crs:
             # Assume input CRS is WGS 84
             self._in_crs = utils.DEFAULT_GEOID
-            self.log.warn('Found no input coordinate system, '
+            self.log.warning('Found no input coordinate system, '
                           'assuming WGS84 (long/lat) coordinates.')
 
     @property
     def out_crs(self):
         if self._out_crs in projection.METHODS:
             return None
-        else:
-            return self._out_crs
+
+        return self._out_crs
 
     def set_out_crs(self, bounds):
         '''Set the output CRS, if not yet set.'''
@@ -245,8 +245,7 @@ class SVGIS(object):
             self.log.debug('input crs: %s', projection.fake_to_string(in_crs))
             return partial(fiona.transform.transform_geom, in_crs, self.out_crs)
 
-        else:
-            return None
+        return None
 
     def _prepare_layer(self, layer, filename, bounds, scalar, **kwargs):
         '''
@@ -315,18 +314,9 @@ class SVGIS(object):
         padding = kwargs.pop('padding', self.padding)
         kwargs['scalar'] = kwargs.get('scalar', self.scalar)
         unprojected_bounds = unprojected_bounds or self.unprojected_bounds
-        vfs = None
-
-        # "Detect Virtual File System" sounds cooler than "Does It Start with zip or tar".
-        if path.startswith('zip://') or path.startswith('tar://'):
-            suffix = '.zip' if path.startswith('z') else '.gz'
-            vfs, path = path.split(suffix, 1)
-            vfs = vfs + suffix
-            self.log.debug('reading vfs: %s ', vfs)
-
         with fiona.Env():
             self.log.debug('opening %s', path)
-            with fiona.open(path, vfs=vfs) as layer:
+            with fiona.open(path) as layer:
                 self.log.info('reading %s', layer.name)
 
                 # Set the input CRS, if not yet set.

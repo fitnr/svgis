@@ -74,6 +74,10 @@ class DomTestCase(unittest.TestCase):
             print(ElementTree.tostring(polyline, encoding='utf-8'))
             raise
 
+    def defTestAccessTokenIndex(self):
+        '''Check that using tinycss tokens.index works'''
+        pass
+
     def testProcessTokens(self):
         document = self.document()
         asterisk = '* { fill: tan; }'
