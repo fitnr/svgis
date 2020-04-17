@@ -61,6 +61,20 @@ def construct_classes(classes, properties):
     f = u'{}_{}'
     return [sanitize(f.format(p, properties.get(p))) for p in classes if p in properties]
 
+def construct_datas(fields, properties):
+    '''
+    Build a data- attribute string for an element using the properties. Attributes
+    take the form data_FIELD=PROPERTY.
+
+    Args:
+        datas (Sequence): Column names to include in the class list
+        properties (dict): A single feature's properties.
+
+    Returns:
+        (dict) attribute dictionary
+    '''
+    return {sanitize('data-' + n): sanitize(properties.get(n)) for n in fields if n in properties}
+
 
 def pick(style):
     '''

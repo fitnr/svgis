@@ -58,6 +58,7 @@ def map(layers, bounds=None, scale=None, **kwargs):
     styles = u''.join(_style.pick(s) for s in kwargs.pop('style', []))
 
     class_fields = set(a for c in kwargs.pop('class_fields', []) for a in c.split(','))
+    data_fields = set(a for c in kwargs.pop('data_fields', []) for a in c.split(','))
 
     drawing = SVGIS(
         layers,
@@ -68,6 +69,7 @@ def map(layers, bounds=None, scale=None, **kwargs):
         clip=kwargs.pop('clip', True),
         id_field=kwargs.pop('id_field', None),
         class_fields=class_fields,
+        data_fields=data_fields,
         simplify=kwargs.pop('simplify', None)
     ).compose(**kwargs)
 
@@ -144,6 +146,7 @@ class SVGIS(object):
         self.id_field = kwargs.pop('id_field', None)
 
         self.class_fields = kwargs.pop('class_fields', [])
+        self.data_fields = kwargs.pop('data_fields', [])
 
     def __repr__(self):
         return ('SVGIS(files={0.files}, out_crs={0.out_crs})').format(self)
@@ -282,6 +285,8 @@ class SVGIS(object):
         # A list of class names to get from layer properties.
         class_fields = kwargs.pop('class_fields', None) or self.class_fields
         result['classes'] = [x for x in class_fields if x in layer.schema['properties']]
+        data_fields = kwargs.pop('data_fields', None) or self.data_fields
+        result['datas'] = [x for x in data_fields if x in layer.schema['properties']]
 
         # Remove the id field if it doesn't appear in the properties.
         id_field = kwargs.pop('id_field', self.id_field)
@@ -352,7 +357,7 @@ class SVGIS(object):
             'class': u' '.join(_style.sanitize(c) for c in layer.schema['properties'].keys())
         }
 
-    def feature(self, feature, transforms, classes, **kwargs):
+    def feature(self, feature, transforms, classes, datas, **kwargs):
         '''
         Draw a single feature.
 
@@ -386,15 +391,15 @@ class SVGIS(object):
             return ''
 
         # Set up the element's properties.
+        drawargs = _style.construct_datas(datas, feature['properties'])
+
         classes = _style.construct_classes(classes, feature['properties'])
 
         # Add the layer name to the class list.
         if name != '?':
             classes.insert(0, _style.sanitize(name))
 
-        drawargs = {
-            'class': ' '.join(classes)
-        }
+        drawargs['class'] = ' '.join(classes)
 
         if 'id_field' in kwargs and kwargs['id_field'] in feature['properties']:
             drawargs['id'] = _style.sanitize(feature['properties'].get(kwargs['id_field']))

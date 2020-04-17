@@ -150,6 +150,8 @@ def bounds(layer, crs, latlon=False):
 @click.option('-i', '--id-field', type=str, metavar='FIELD', help='Geodata field to use as ID')
 @click.option('-a', '--class-fields', type=str, default='', metavar='FIELDS', multiple=True,
               help='Geodata fields to use as class (comma-separated)')
+@click.option('-a', '--data-fields', type=str, default='', metavar='FIELDS', multiple=True,
+              help='Geodata fields to add as data-* attributes (comma-separated)')
 @click.option('-j', '--crs', metavar='KEYWORD', type=str, help=crs_help)
 @click.option('-s', '--simplify', **simplifykwargs)
 @click.option('-P', '--precision', metavar='INTEGER', type=posint, default=5,
