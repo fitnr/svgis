@@ -52,7 +52,7 @@ def lines(geom, **kwargs):
     if geom['type'] == 'LineString':
         return linestring(geom['coordinates'], **kwargs)
 
-    elif geom['type'] == 'MultiLineString':
+    if geom['type'] == 'MultiLineString':
         return multilinestring(geom['coordinates'], **kwargs)
 
 
@@ -70,7 +70,7 @@ def polygons(geom, **kwargs):
     if geom['type'] == 'Polygon':
         return polygon(geom['coordinates'], **kwargs)
 
-    elif geom['type'] == 'MultiPolygon':
+    if geom['type'] == 'MultiPolygon':
         return multipolygon(geom['coordinates'], **kwargs)
 
 
@@ -119,7 +119,7 @@ def points(geom, **kwargs):
     if geom['type'] == 'Point':
         return svg.circle(geom['coordinates'], **kwargs)
 
-    elif geom['type'] == 'MultiPoint':
+    if geom['type'] == 'MultiPoint':
         return multipoint(geom['coordinates'], **kwargs)
 
 
@@ -155,17 +155,16 @@ def geometry(geom, bbox=None, precision=None, **kwargs):
     if geom['type'] in ('Point', 'MultiPoint'):
         return points(geom, precision=precision, **kwargs)
 
-    elif geom['type'] in ('LineString', 'MultiLineString'):
+    if geom['type'] in ('LineString', 'MultiLineString'):
         return lines(geom, precision=precision, **kwargs)
 
-    elif geom['type'] in ('Polygon', 'MultiPolygon'):
+    if geom['type'] in ('Polygon', 'MultiPolygon'):
         return polygons(geom, precision=precision, **kwargs)
 
-    elif geom['type'] == 'GeometryCollection':
+    if geom['type'] == 'GeometryCollection':
         return geometrycollection(geom, bbox, precision, **kwargs)
 
-    else:
-        raise SvgisError("Can't draw features of type: {}".format(geom['type']))
+    raise SvgisError("Can't draw features of type: {}".format(geom['type']))
 
 
 def group(geometries, **kwargs):

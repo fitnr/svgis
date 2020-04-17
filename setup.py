@@ -45,10 +45,10 @@ setup(
     install_requires=[
         'six>=1.7.3,<2',
         'click>=6.2,<8',
-        'pyproj>=1.9.5,<2',
-        'fiona>=1.8,<2.0',
-        'fionautil>=0.6,<1.0',
-        'tinycss==0.3',
+        'pyproj',
+        'fiona',
+        'fionautil',
+        'tinycss2==0.3',
         'utm>=0.4.0,<1'
     ],
     extras_require={

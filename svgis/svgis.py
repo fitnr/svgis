@@ -13,8 +13,8 @@ from functools import partial
 import logging
 import fiona
 import fiona.transform
-import fionautil.scale
 from six import string_types
+import fionautil.scale
 from . import bounding, draw, errors, projection, svg, transform, utils
 from . import style as _style
 
@@ -162,8 +162,10 @@ class SVGIS(object):
         if not crs:
             # Assume input CRS is WGS 84
             self._in_crs = utils.DEFAULT_GEOID
-            self.log.warning('Found no input coordinate system, '
-                          'assuming WGS84 (long/lat) coordinates.')
+            self.log.warning(
+                'Found no input coordinate system, '
+                'assuming WGS84 (long/lat) coordinates.'
+            )
 
     @property
     def out_crs(self):
