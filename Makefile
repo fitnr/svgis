@@ -41,8 +41,6 @@ test: $(TIGERS) tests/test_data/test.svg tests/test_data/zip.svg
 	coverage report
 	coverage html
 
-	-svgis bounds - < $<
-
 tests/test_data/zip.svg: tests/test_data/test.zip $(TIGERS)
 	svgis draw $(addprefix zip://$</,$(filter %.json,$^)) | \
 	svgis style -c 'polygon{fill:green}' | \

@@ -13,7 +13,6 @@ from signal import signal, SIGPIPE, SIG_DFL
 import logging
 import click
 import fiona.crs
-from fionautil.layer import meta_complete
 from . import bounding, projection
 from . import graticule as _graticule, style as _style, svgis, __version__
 from .utils import DEFAULT_GEOID, posint
@@ -115,14 +114,17 @@ crs_help = ('Specify a map projection. '
 
 
 @main.command()
-@click.argument('layer', type=click.Path(allow_dash=True, exists=True))
+@click.argument('layer', type=click.Path(exists=True))
 @click.option('-j', '--crs', type=str, metavar='KEYWORD', default='file', help=crs_help + ' (default: file)')
 @click.option('--latlon', default=False, flag_value=True, help='Print bounds in latitude, longitude order')
 def bounds(layer, crs, latlon=False):
     '''
     Return the bounds for a given layer, optionally projected.
     '''
-    meta = meta_complete(layer)
+    with fiona.Env():
+        with fiona.open(layer, "r") as f:
+            meta = {'bounds': f.bounds}
+            meta.update(f.meta)
 
     # If crs==file, these will basically be no ops.
     out_crs = projection.pick(crs, meta['bounds'], file_crs=meta['crs'])
