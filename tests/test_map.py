@@ -10,9 +10,13 @@
 
 import unittest
 import os
+import logging
+import warnings
 from xml.dom import minidom
+
 from svgis import svgis
 
+warnings.filterwarnings("always")
 
 class MapTestCase(unittest.TestCase):
     projection = '+proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'
@@ -27,6 +31,7 @@ class MapTestCase(unittest.TestCase):
         self.assertIn(self.css, result)
 
         style = 'tmp.css'
+
         with open(style, 'w') as w:
             w.write(self.css)
 

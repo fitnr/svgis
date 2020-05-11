@@ -11,9 +11,8 @@
 import os.path
 import fiona.transform
 import fiona.crs
-import pyproj
+from pyproj.crs import CRS
 import utm
-from six import string_types
 from .utils import DEFAULT_GEOID
 from . import bounding
 
@@ -85,7 +84,6 @@ def generateproj4(method, bounds, file_crs):
         raise ValueError('generatecrs missing bounds and file crs')
 
     is_longlat = _is_longlat(file_crs)
-
     if method == 'default':
         # Check if file_crs _is_longlat, if not use that.
         # Option to continue returning default if we didn't get a file_crs
@@ -97,17 +95,16 @@ def generateproj4(method, bounds, file_crs):
     if is_longlat:
         longlat_bounds = bounds
     else:
-        longlat_bounds = bounding.transform(file_crs, DEFAULT_GEOID, bounds)
+        longlat_bounds = bounding.transform(bounds, in_crs=file_crs, out_crs=DEFAULT_GEOID)
 
     minx, miny, maxx, maxy = longlat_bounds
 
     if method == 'utm':
         midx = (minx + maxx) / 2
         midy = (miny + maxy) / 2
-
         return utm_proj4(midx, midy)
 
-    elif method == 'local':
+    if method == 'local':
         # Create a custom TM projection
         x0 = (float(minx) + float(maxx)) // 2
 
@@ -117,12 +114,16 @@ def generateproj4(method, bounds, file_crs):
 def _is_longlat(crs):
     '''Test if CRS is in lat/long coordinates'''
     try:
-        if crs.get('proj') == 'longlat' or pyproj.Proj(**crs).is_latlong():
-            return True
-    except RuntimeError:
+        return crs['proj'] == 'longlat'
+    except (KeyError, TypeError, AttributeError):
         pass
 
-    return False
+    projection = CRS(crs)
+
+    try:
+        return projection.is_geographic
+    except AttributeError:
+        return crs.to_dict().get('proj') == 'longlat'
 
 
 def pick(project, bounds=None, file_crs=None):
@@ -138,7 +139,7 @@ def pick(project, bounds=None, file_crs=None):
     if isinstance(project, dict):
         return project
 
-    elif isinstance(project, string_types):
+    if isinstance(project, str):
         if project.lower() == 'file':
             out_crs = file_crs if file_crs is not None else 'file'
 

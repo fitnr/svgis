@@ -10,7 +10,7 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 import json
 from functools import partial
-import fiona.transform
+from pyproj.transformer import Transformer
 from . import bounding, projection, utils
 
 
@@ -31,13 +31,11 @@ def graticule(bounds, step, crs_or_method=None):
 
     if crs_or_method:
         out_crs = projection.pick(crs_or_method, bounds=bounds, file_crs=utils.DEFAULT_GEOID)
-
-        bounds = bounding.transform(utils.DEFAULT_GEOID, out_crs, bounds)
-        unproject = partial(fiona.transform.transform, out_crs, utils.DEFAULT_GEOID)
+        unproject = Transformer.from_crs(utils.DEFAULT_GEOID, out_crs, skip_equivalent=True, always_xy=True)
+        bounds = bounding.transform(bounds, transformer=unproject)
 
     else:
-        def unproject(x, y):
-            return x, y
+        unproject = Transformer.from_crs(4269, 4269, always_xy=True, skip_equivalent=True)
 
     minx, miny, maxx, maxy = bounds
 
@@ -47,19 +45,19 @@ def graticule(bounds, step, crs_or_method=None):
     frange = partial(utils.frange, cover=True)
 
     for i, X in enumerate(frange(minx, maxx + step, step), 1):
-        coords = unproject(*list(zip(*[(X, y) for y in frange(miny, maxy + step, step / 2.)])))
-        yield _feature(i, tuple(zip(*coords)), axis='x', coord=X)
+        coords = unproject.itransform([(X, y) for y in frange(miny, maxy + step, step / 2.)])
+        yield _feature(i, coords, axis='x', coord=X)
 
     for i, Y in enumerate(frange(miny, maxy + step, step), i + 1):
-        coords = unproject(*list(zip(*[(x, Y) for x in frange(minx, maxx + step, step / 2.)])))
-        yield _feature(i, tuple(zip(*coords)), axis='y', coord=Y)
+        coords = unproject.itransform([(x, Y) for x in frange(minx, maxx + step, step / 2.)])
+        yield _feature(i, coords, axis='y', coord=Y)
 
 
 def _feature(i, coords, axis=None, coord=None):
     return {
         'geometry': {
             'type': 'LineString',
-            'coordinates': coords
+            'coordinates': list(coords)
         },
         'properties': {
             'axis': axis,

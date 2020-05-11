@@ -9,7 +9,7 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
-from fiona.transform import transform as fionatransform
+from pyproj.transformer import Transformer
 from . import utils
 
 
@@ -104,33 +104,29 @@ def covers(b1, b2):
     return b1[0] <= b2[0] and b1[1] <= b2[1] and b1[2] >= b2[2] and b1[3] >= b2[3]
 
 
-def transform(in_crs, out_crs, bounds):
+def transform(bounds, **kwargs):
     '''
     Project a bounding box, taking care to not slice off the sides.
 
     Args:
+        bounds (tuple): bounding box to transform.
+        transformer (pyproj.transformer.Transformer): A pyproj Transformer instance.
         in_crs (dict): Fiona-type proj4 mapping representing input projection.
         out_crs (dict): Fiona-type proj4 mapping representing output projection.
-        bounds (tuple): bounding box to transform.
 
     Returns:
         tuple
     '''
-    if in_crs is None:
-        raise TypeError('Need input CRS, not None')
+    transformer = kwargs.get('transformer')
+    in_crs = kwargs.get('in_crs')
+    out_crs = kwargs.get('out_crs')
 
-    if out_crs is None:
-        raise TypeError('Need output CRS, not None')
+    if not transformer and not (in_crs and out_crs):
+        raise TypeError('Need input CRS and output CRS or a Transformer')
 
-    if in_crs == out_crs:
-        return bounds
+    if transformer is None:
+        transformer = Transformer.from_crs(in_crs, out_crs, skip_equivalent=True, always_xy=True)
 
-    try:
-        xs, ys = list(zip(*ring(bounds)))
-    except ValueError:
-        # file is likely empty
-        return float('-inf'), float('-inf'), float('inf'), float('inf')
-
-    xbounds, ybounds = fionatransform(in_crs, out_crs, xs, ys)
-
+    densebounds = ring(bounds)
+    xbounds, ybounds = list(zip(*transformer.itransform(densebounds)))
     return min(xbounds), min(ybounds), max(xbounds), max(ybounds)

@@ -58,7 +58,7 @@ class ProjectionDrawTestCase(unittest.TestCase):
         self.assertIn('points', u[i:])
 
     def testDrawWithSameProjection(self):
-        s = svgis.SVGIS(self.files, crs={'init': 'epsg:2790', 'no_defs': True})
+        s = svgis.SVGIS(self.files, crs=2790)
         a = s.compose()
 
         self.assertIn('points', a)

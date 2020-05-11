@@ -11,8 +11,7 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
 from functools import wraps
-from fionautil import measure
-from . import svg, transform
+from . import svg, transform, utils
 from .errors import SvgisError
 
 
@@ -85,7 +84,7 @@ def polygon(coordinates, **kwargs):
     instructions = ['M']
     # This is trickier because drawing holes in SVG.
     # We go clockwise on the first ring, then counterclockwise
-    if measure.counterclockwise(coordinates[0]):
+    if utils.counterclockwise(coordinates[0]):
         instructions.extend(coordinates[0][::-1])
     else:
         instructions.extend(coordinates[0])
@@ -95,7 +94,7 @@ def polygon(coordinates, **kwargs):
     for ring in coordinates[1:]:
         # make all interior run the counter-clockwise
         instructions.append('M')
-        instructions.extend(ring[::-1] if measure.clockwise(ring) else ring)
+        instructions.extend(ring[::-1] if utils.clockwise(ring) else ring)
         instructions.append('z')
 
     return svg.path(instructions, fill_rule='evenodd', **kwargs)

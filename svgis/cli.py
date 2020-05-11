@@ -128,7 +128,7 @@ def bounds(layer, crs, latlon=False):
 
     # If crs==file, these will basically be no ops.
     out_crs = projection.pick(crs, meta['bounds'], file_crs=meta['crs'])
-    result = bounding.transform(meta['crs'], out_crs, meta['bounds'])
+    result = bounding.transform(meta['bounds'], in_crs=meta['crs'], out_crs=out_crs)
 
     if latlon:
         fmt = '{0[1]} {0[0]} {0[3]} {0[2]}'

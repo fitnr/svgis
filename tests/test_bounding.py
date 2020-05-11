@@ -65,15 +65,14 @@ class ConvertTestCase(unittest.TestCase):
         bounds = (-74, 42, -73, 43)
 
         with self.assertRaises(TypeError):
-            bounding.transform(None, {'init': 'epsg:4269'}, bounds)
+            bounding.transform(bounds, in_crs=4269)
 
         with self.assertRaises(TypeError):
-            bounding.transform({'init': 'epsg:4269'}, None, bounds)
+            bounding.transform(bounds, out_crs=4269)
 
-        a = bounding.transform({'init': 'epsg:4269'}, {'init': 'epsg:3102'}, bounds)
+        a = bounding.transform(bounds, in_crs=4269, out_crs=3102)
 
-        fixture = (43332273.50269379, 15584115.894447982, 44004519.424246654, 16320640.928220816)
-
+        fixture = (43332271.446783714, 15585187.3924282, 44004528.34377961, 16321716.827537995)
         for z in zip(a, fixture):
             self.assertAlmostEqual(*z, places=5)
 

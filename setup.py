@@ -45,9 +45,8 @@ setup(
     install_requires=[
         'six>=1.7.3,<2',
         'click>=6.2,<8',
-        'pyproj',
-        'fiona',
-        'fionautil',
+        'pyproj>=2.6',
+        'fiona>=1.8',
         'tinycss2>=1.0.2',
         'utm>=0.4.0,<1',
         'lxml>=4.5.0',

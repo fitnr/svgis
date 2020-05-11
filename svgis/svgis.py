@@ -11,10 +11,11 @@ import os.path
 from collections import Iterable
 from functools import partial
 import logging
+import warnings
 import fiona
 import fiona.transform
 from six import string_types
-import fionautil.scale
+
 from . import bounding, draw, errors, projection, svg, transform, utils
 from . import style as _style
 
@@ -25,6 +26,9 @@ STYLE = ('polyline,line,rect,path,polygon,.polygon{'
          'stroke-width:1px;'
          'stroke-linejoin:round;'
          '}')
+
+
+warnings.filterwarnings("ignore")
 
 
 def map(layers, bounds=None, scale=None, **kwargs):
@@ -76,7 +80,7 @@ def map(layers, bounds=None, scale=None, **kwargs):
     return drawing
 
 
-class SVGIS(object):
+class SVGIS():
 
     """
     Draw geodata files to SVG.
@@ -126,6 +130,7 @@ class SVGIS(object):
         # This may return a keyword, which will require more updating.
         # If so, will update when files are open.
         self._out_crs = projection.pick(crs)
+        self.log.debug('picked tentative output projection or method: %s', self._out_crs)
 
         self.scalar = kwargs.pop('scalar', 1) or 1
 
@@ -157,11 +162,13 @@ class SVGIS(object):
 
     def set_in_crs(self, crs):
         if not self.in_crs and crs:
+            self.log.debug('setting input crs to %s', crs)
             self._in_crs = crs
 
         if not crs:
             # Assume input CRS is WGS 84
             self._in_crs = utils.DEFAULT_GEOID
+            self.log.debug('setting input crs to default %s', utils.DEFAULT_GEOID)
             self.log.warning(
                 'Found no input coordinate system, '
                 'assuming WGS84 (long/lat) coordinates.'
@@ -216,8 +223,11 @@ class SVGIS(object):
             (tuple) bounding box in out_crs coordinates.
         '''
         # This may happen many times if we were passed bounds, but it's a cheap operation.
-        projected = bounding.transform(in_crs, out_crs, bounds)
+        self.log.debug('updating bounds - in_crs: %s', in_crs)
+        self.log.debug('                - out_crs: %s', out_crs)
+        projected = bounding.transform(bounds, in_crs=in_crs, out_crs=out_crs)
         self._projected_bounds = bounding.pad(projected, padding or 0)
+        self.log.debug('                - new bounds: %s', self._projected_bounds)
         return self._projected_bounds
 
     def _get_clipper(self, layer_bounds, out_bounds, scalar=None):
@@ -247,7 +257,7 @@ class SVGIS(object):
         '''Return a reprojection transform from in_crs to self.out_crs.'''
         if self.out_crs != in_crs:
             self.log.info('set up reprojection')
-            self.log.debug('input crs: %s', projection.fake_to_string(in_crs))
+            self.log.debug('set up reprojection - input crs: %s', projection.fake_to_string(in_crs))
             return partial(fiona.transform.transform_geom, in_crs, self.out_crs)
 
         return None
@@ -271,7 +281,7 @@ class SVGIS(object):
         result = {
             'transforms': [
                 self._reprojector(layer.crs),
-                partial(fionautil.scale.geometry, factor=scalar),
+                partial(transform.scale_geom, factor=scalar),
                 # Get clipping function based on a slightly extended version of _projected_bounds.
                 self._get_clipper(layer.bounds, bounds, scalar=scalar),
                 self.simplifier
@@ -339,7 +349,7 @@ class SVGIS(object):
                         self.update_projected_bounds(self.in_crs, self.out_crs, unprojected_bounds, padding)
 
                     # Convert global bounds to layer.crs.
-                    bounds = bounding.transform(self.out_crs, layer.crs, self.projected_bounds)
+                    bounds = bounding.transform(self.projected_bounds, in_crs=self.out_crs, out_crs=layer.crs)
 
                 # When we have no passed bounds:
                 else:
@@ -478,7 +488,7 @@ class SVGIS(object):
 
             dims = [float(b or 0.) * scalar for b in self.projected_bounds]
         except TypeError:
-            self.log.warning('Unable to find bounds, map is probably empty ¯\_(ツ)_/¯')
+            self.log.warning(r'Unable to find bounds, map is probably empty ¯\_(ツ)_/¯')
             dims = 0, 0, 0, 0
 
         # width and height

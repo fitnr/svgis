@@ -15,8 +15,6 @@ import io
 import re
 from xml.dom import minidom
 import fiona.errors
-import fionautil
-import fionautil.layer
 import click.testing
 import svgis.cli
 
@@ -114,7 +112,8 @@ class CliTestCase(unittest.TestCase):
             result = match.groups()[0]
             points = [[float(x) for x in p.split(',')] for p in result.split(' ')]
 
-            ring = fionautil.layer.first(self.dc)['geometry']['coordinates'][0]
+            with fiona.open(self.dc) as src:
+                ring = next(src)['geometry']['coordinates'][0]
 
             for points in zip(ring, points):
                 for z in zip(*points):
