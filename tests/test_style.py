@@ -13,32 +13,18 @@ import re
 import os
 from io import BytesIO, StringIO
 from xml.dom import minidom
-import xml.etree.ElementTree as ElementTree
+try:
+    from lxml import etree
+except ImportError:
+    import xml.etree.ElementTree as etree
+
 from svgis import dom, style
+from . import TEST_SVG, TEST_CSS
 
 
 class CssTestCase(unittest.TestCase):
-    svg = """<svg baseProfile="full" height="1" version="1.1" xmlns="http://www.w3.org/2000/svg">
-            <defs></defs>
-            <g>
-                <g id="test">
-                    <polygon class="test" points="3,2 -2,6 8,-1 8,2 4,1 3,2" />
-                </g>
-                <g id="foo">
-                    <polyline id="baz" class="foo" points="3,2 -2,6 8,-1"></polyline>
-                </g>
-                <g id="cat">
-                    <polyline id="meow" class="long-class-name" points="3,2 -2,6 8,-1"></polyline>
-                </g>
-            </g>
-        </svg>"""
-
-    css = """polygon {fill: orange;}
-                .test { stroke: green; }
-                polyline { stroke: blue}
-                .test, #baz { stroke-width: 2; }
-                #test ~ #foo { fill: purple; }
-                #cat polyline { fill: red }"""
+    svg = TEST_SVG
+    css = TEST_CSS
 
     css1 = '''.class-name { fill: orange;}'''
 
@@ -53,22 +39,22 @@ class CssTestCase(unittest.TestCase):
     }
 
     def testInlineCSS(self):
-        inlined = style.inline(self.svg, self.css)
+        svg = style.add_style(self.svg, self.css)
+        inlined = style.inline(svg)
         self.assertNotEqual(inlined, self.svg)
 
-        assert 'fill:purple' not in inlined
-
         doc = minidom.parseString(inlined)
+        self.assertIn('fill:purple', inlined)
 
-        polygon = doc.getElementsByTagName('polygon').item(0).getAttribute('style')
-        self.assertIn('stroke:green', polygon)
-        self.assertIn('fill:orange', polygon)
+        polygon_style = doc.getElementsByTagName('polygon').item(0).getAttribute('style')
+        self.assertIn('stroke:green', polygon_style)
+        self.assertIn('fill:orange', polygon_style)
 
-        cat = doc.getElementsByTagName('polyline').item(1).getAttribute('style')
-        self.assertIn('fill:red', cat)
+        cat_style = doc.getElementsByTagName('polyline').item(1).getAttribute('style')
+        self.assertIn('fill:red', cat_style)
 
-        polyline = doc.getElementsByTagName('polyline').item(0).getAttribute('style')
-        self.assertIn('stroke:blue', polyline)
+        polyline_style = doc.getElementsByTagName('polyline').item(0).getAttribute('style')
+        self.assertIn('stroke:blue', polyline_style)
 
     def test_add_style(self):
         new = style.add_style(self.file, self.css)
@@ -120,7 +106,6 @@ class CssTestCase(unittest.TestCase):
         self.assertIn(self.css, result[0:2000])
 
         cssfile = 'tmp.css'
-
         with open(cssfile, 'w') as w:
             w.write(self.css)
 
@@ -184,32 +169,17 @@ class CssTestCase(unittest.TestCase):
         classes = style.construct_classes(self.classes, {'apple': None})
         self.assertEqual(classes, [u'apple_None'])
 
-    def testCDATA(self):
-        
-        xml = """<?xml version='1.0' encoding='utf-8'?><text>hi</text>"""
-        content = 'this is some text & > <'
-
-        style._register()
-        et = ElementTree.fromstring(xml)
-        e = ElementTree.Element("data")
-        cd = dom.cdata(content)
-        e.append(cd)
-        et.append(e)
-
-        string = ElementTree.tostring(et, encoding='utf-8')
-
-        self.assertIn(content.encode('utf8'), string)
-
     def testPartialStyleName(self):
-        doc = ElementTree.fromstring(self.svg).find('./' + dom.ns('g'))
-        ruleset = style._parse_css(self.css1)
-
-        dom.apply_rule(doc, ruleset.rules[0])
-        svg = ElementTree.tostring(doc, encoding='utf-8').decode('utf-8')
-        self.assertNotIn('orange', svg)
-
-        inlined = style.inline(self.svg, self.css1)
+        inlined = style.inline(self.svg)
         self.assertNotIn('orange', inlined)
+
+    def testReplaceComments(self):
+        css = """
+        // foo
+        """
+        result = style.replace_comments(css)
+        self.assertIn('/* foo */', result)
+
 
 if __name__ == '__main__':
     unittest.main()

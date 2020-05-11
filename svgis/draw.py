@@ -73,6 +73,8 @@ def polygons(geom, **kwargs):
     if geom['type'] == 'MultiPolygon':
         return multipolygon(geom['coordinates'], **kwargs)
 
+    raise ValueError("geom has incorrect type. Expected Polygon or MultiPolygon, but got: " + geom['type'])
+
 
 def polygon(coordinates, **kwargs):
     if len(coordinates) == 1:

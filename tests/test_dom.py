@@ -8,111 +8,69 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 import unittest
+import tinycss2
 try:
-    import xml.etree.cElementTree as ElementTree
+    from lxml import etree
 except ImportError:
-    import xml.etree.ElementTree as ElementTree
+    import xml.etree.ElementTree as etree
 
-import tinycss
-from svgis import dom
+from svgis import dom, style
+from . import TEST_SVG, TEST_CSS
 
 
 class DomTestCase(unittest.TestCase):
 
-    parser = tinycss.make_parser()
-
-    svg = """<svg baseProfile="full" height="1" version="1.1" xmlns="http://www.w3.org/2000/svg">
-            <defs><style></style></defs>
-            <g>
-                <g id="test">
-                    <polygon class="test" points="3,2 -2,6 8,-1 8,2 4,1 3,2" />
-                </g>
-                <g id="foo">
-                    <polyline id="baz" class="foo" points="3,2 -2,6 8,-1"></polyline>
-                    <polyline id="bozo" class="squa" points="3,2 -2,6 8,-1"></polyline>
-                </g>
-                <g id="cat">
-                    <polyline id="meow" class="squa tront" points="3,2 -2,6 8,-1"></polyline>
-                </g>
-            </g>
-        </svg>"""
-
-    css = """polygon {fill: orange;}
-            .test { stroke: green; }
-            polyline { stroke: blue}
-            .test, #baz { stroke-width: 2; }
-            #test ~ #foo { fill: purple; }
-            #cat polyline { fill: red }
-            .squa.tront { stroke-opacity: 0.50; }
-            """
+    svg = TEST_SVG
+    css = TEST_CSS
 
     def setUp(self):
-        self.rules = self.parse(self.css).rules
+        self.rules = tinycss2.parse_stylesheet(self.css, skip_whitespace=True, skip_comments=True)
+        self.document = etree.fromstring(self.svg)
 
-    def parse(self, css):
-        return self.parser.parse_stylesheet(css)
+    def testSerializeToken(self):
+        rules = tinycss2.parse_stylesheet("polygon{fill:orange}")
+        token = rules[0].prelude[0]
+        assert token.type == 'ident'
 
-    def document(self):
-        return ElementTree.fromstring(self.svg).find('./{http://www.w3.org/2000/svg}g')
+        assert ('svg|' + token.serialize()) == 'svg|polygon'
+
+        prelude_value = dom.serialize_token(token)
+        self.assertEqual(prelude_value, 'svg|polygon')
+
+        prelude = dom.serialize_prelude(rules[0])
+        self.assertEqual(prelude, 'svg|polygon')
 
     def testApplyRule(self):
-        document = self.document()
-        dom.apply_rule(document, self.rules[0])
+        rules = tinycss2.parse_stylesheet("polygon {fill: orange}", skip_whitespace=True, skip_comments=True)
+        svg = etree.fromstring(
+            '<svg baseProfile="full" height="1" version="1.1" xmlns="http://www.w3.org/2000/svg">'
+            '<polygon class="test" points="3,2 -2,6 8,-1 8,2 4,1 3,2" />'
+            '</svg>'
+        )
+        dom.apply_rules(svg, rules)
+        text = etree.tostring(svg).decode('ascii')
+        self.assertIn('orange', text)
 
-        polygon = document.find('.//{http://www.w3.org/2000/svg}polygon')
+    def testApplyIdentRule(self):
+        dom.apply_rules(self.document, self.rules)
+        polygon = self.document.xpath('.//svg:polygon', namespaces={'svg': 'http://www.w3.org/2000/svg'})[0]
 
-        dom.apply_rule(document, self.rules[6])
+        self.assertIsNotNone(polygon)
 
-        polyline = document.find(".//*[@id='meow']")
+        self.assertIn('fill:orange', polygon.attrib['style'])
 
-        try:
-            self.assertIn('fill:orange', polygon.attrib['style'])
-            self.assertIn('stroke-opacity:0.50', polyline.attrib.get('style', ''))
-
-        except AssertionError:
-            print(ElementTree.tostring(polygon, encoding='utf-8'))
-            print(ElementTree.tostring(polyline, encoding='utf-8'))
-            raise
-
-    def defTestAccessTokenIndex(self):
-        '''Check that using tinycss tokens.index works'''
-        pass
-
-    def testProcessTokens(self):
-        document = self.document()
-        asterisk = '* { fill: tan; }'
-        rule = self.parse(asterisk).rules[0]
-
-        els, toks = dom._process_tokens(document, None, rule.selector)
-        assert toks == []
-        assert els == document.findall('.//')
+    def testApplyHashRule(self):
+        dom.apply_rules(self.document, self.rules)
+        polyline = self.document.xpath(".//*[@id='meow']")[0]
+        self.assertIsNotNone(polyline)
+        self.assertIn('stroke-opacity:0.50', polyline.attrib.get('style', ''))
 
     def testChildToken(self):
-        css = "#cat>.squa { stroke: green }"
-        rules = self.parse(css).rules
-        document = self.document()
-        dom.apply_rule(document, rules[0])
-        polyline = document.find(".//*[@id='meow']")
+        css = "#foo > #baz { stroke: green }"
+        rules = tinycss2.parse_stylesheet(css, skip_whitespace=True, skip_comments=True)
+        dom.apply_rules(self.document, rules)
+        polyline = self.document.find(".//*[@id='baz']")
         self.assertIn('stroke:green', polyline.attrib.get('style', ''))
-
-    def testBuildTokenList(self):
-        css = """
-            #foo[name=foo] {}
-            .foo~.squa {}
-            .pizza::first-child {}
-            .salad>kale {}
-            """
-        rules = self.parse(css).rules
-
-        for r in rules:
-            parsed = [getattr(t, 'value', '') for t in r.selector]
-            built = dom._build_tokenlist(r.selector)
-            self.assertEqual(parsed, [getattr(t, 'value', '') for t in built[0]])
-
-    def testStyleDecoding(self):
-        assert dom._style_dict('fill:none;') == {'fill': 'none'}
-        self.assertEqual(dom._style_dict('fill:none;   stroke    : 3px  ; '), {'fill': 'none', 'stroke': '3px'})
-        assert dom._style_string({'fill': 'none'}) == 'fill:none'
 
 if __name__ == '__main__':
     unittest.main()

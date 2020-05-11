@@ -8,19 +8,16 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
-
 import re
 from string import ascii_letters
 import os.path
 import logging
-import xml.etree.ElementTree as ElementTree
-import tinycss
+from lxml import etree
+import tinycss2
+
 from . import dom
 
-
-def _register():
-    ElementTree.register_namespace('', dom.SVG_NS)
-    ElementTree._serialize_xml = ElementTree._serialize['xml'] = dom._serialize_xml
+LOG = logging.getLogger('svgis')
 
 
 def sanitize(string):
@@ -61,6 +58,7 @@ def construct_classes(classes, properties):
     f = u'{}_{}'
     return [sanitize(f.format(p, properties.get(p))) for p in classes if p in properties]
 
+
 def construct_datas(fields, properties):
     '''
     Build a data- attribute string for an element using the properties. Attributes
@@ -100,12 +98,16 @@ def pick(style):
 
 
 def rescale(svgfile, factor):
-    _register()
-    svg = ElementTree.parse(svgfile)
+    svg = etree.parse(svgfile).getroot()
     scalar = 'scale({})'.format(factor)
-    g = svg.getroot().find(dom.ns('g'))
+    g = svg.find('.//g', namespaces=svg.nsmap)
     g.attrib['transform'] = (g.attrib.get('transform') + ' ' + scalar).strip()
-    return ElementTree.tostring(svg.getroot(), encoding='utf-8').decode('utf-8')
+    return etree.tostring(svg, encoding='utf-8').decode('utf-8')
+
+
+def replace_comments(css):
+    '''Replace one-line non-standard comments ('//') with body-style comments (/* .. */).'''
+    return re.sub(r'//(.+)', r'/*\1 */', css)
 
 
 def add_style(svgfile, style, replace=False):
@@ -117,8 +119,6 @@ def add_style(svgfile, style, replace=False):
         newstyle (str): CSS string, or path to CSS file.
         replace (bool): If true, replace the existing CSS with newstyle (default: False)
     '''
-    _register()
-
     if style == '-':
         style = '/dev/stdin'
 
@@ -126,45 +126,44 @@ def add_style(svgfile, style, replace=False):
 
     if ext == '.css' or root == '/dev/stdin':
         with open(style) as f:
-            style = _uncomment(f.read())
+            style = replace_comments(f.read())
 
     try:
-        svg = ElementTree.parse(svgfile).getroot()
+        svg = etree.parse(svgfile).getroot()
     except IOError:
         try:
-            svg = ElementTree.fromstring(svgfile)
+            svg = etree.fromstring(svgfile)
         except UnicodeDecodeError:
-            svg = ElementTree.fromstring(svgfile.encode('utf-8'))
+            svg = etree.fromstring(svgfile.encode('utf-8'))
 
-    if svg.find(dom.ns('defs')) is not None:
-        defs = svg.find(dom.ns('defs'))
+    defs = svg.find('defs', namespaces=svg.nsmap)
 
-    else:
-        defs = ElementTree.Element(dom.ns('defs'))
+    if defs is None:
+        defs = etree.Element('defs', nsmap=svg.nsmap)
         svg.insert(0, defs)
 
-    if defs.find(dom.ns('style')) is not None:
-        style_element = defs.find(dom.ns('style'))
+    style_element = defs.find('.//style', namespaces=svg.nsmap)
 
-        if not replace:
-            # Append CSS.
-            style = (style_element.text or '') + ' ' + style
-
-        style_element.text = ''
-
-    else:
-        style_element = ElementTree.Element(dom.ns('style'))
+    if style_element is None:
+        style_element = etree.Element('style', nsmap=svg.nsmap)
         defs.append(style_element)
 
-    style_element.append(dom.cdata(style))
+    if replace:
+        style_content = style
+    else:
+        # Append CSS.
+        style_content = (style_element.text or '') + ' ' + style
 
-    return ElementTree.tostring(svg, encoding='utf-8').decode('utf-8')
+    # append cdata
+    style_element.text = etree.CDATA(style_content)
+
+    return etree.tostring(svg, encoding='utf-8').decode('utf-8')
 
 
-def inline(svg, style=None):
+def inline(svg):
     '''
     Inline the CSS rules in an SVG. This is a very rough operation,
-    and full css precedence rules won't be respected. Ignores sibling
+    and full css precedence rules won't be respected. May ignore sibling
     operators (``~``, ``+``), pseudo-selectors (e.g. ``:first-child``), and
     attribute selectors (e.g. ``.foo[name=bar]``). Works best with rules like:
 
@@ -176,39 +175,20 @@ def inline(svg, style=None):
 
     Args:
         svg (string): An SVG document.
-        css (string): CSS to use, instead of the CSS in the <defs> element of the SVG.
+        style (string): CSS to use, instead of the CSS in the <defs> element of the SVG.
     '''
-    _register()
     try:
-        doc = ElementTree.fromstring(svg.encode('utf-8'))
+        doc = etree.fromstring(svg.encode('utf-8'))
+        style_element = doc.find('.//style', namespaces=doc.nsmap)
+        if style_element is None:
+            return svg
 
-        if not style:
-            path = './' + dom.ns('defs') + '/' + dom.ns('style')
-            try:
-                style = doc.findall(path).pop().text or ''
-            except IndexError:
-                style = ''
-
-        stylesheet = _parse_css(style)
-
-        for rule in stylesheet.rules:
-            dom.apply_rule(doc, rule)
-
-        return ElementTree.tostring(doc, encoding='utf-8').decode('utf-8')
+        css = style_element.text
+        rules = tinycss2.parse_stylesheet(css, skip_whitespace=True, skip_comments=True)
+        dom.apply_rules(doc, rules)
+        return etree.tostring(doc, encoding='utf-8').decode('utf-8')
 
     # Return plain old SVG.
     except (AttributeError, NameError) as e:
         logging.getLogger('svgis').warning("Unable to inline CSS: %s", e)
         return svg
-
-
-def _uncomment(stylesheet):
-    '''Remove CSS comments ('//') from a stylesheet.'''
-    return re.sub(r'//.+', '', stylesheet)
-
-
-def _parse_css(stylesheet):
-    '''Turn a block of CSS into a tinycss stylesheet object.'''
-    # remove spaces in selectors
-    mini = _uncomment(re.sub(r'\s+([,>~+])\s+', r'\1', stylesheet))
-    return tinycss.make_parser().parse_stylesheet(mini)

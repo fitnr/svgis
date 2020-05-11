@@ -9,6 +9,7 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
 import unittest
+import logging
 from svgis import utils
 
 

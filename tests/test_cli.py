@@ -16,6 +16,7 @@ import re
 from xml.dom import minidom
 import fiona.errors
 import fionautil
+import fionautil.layer
 import click.testing
 import svgis.cli
 

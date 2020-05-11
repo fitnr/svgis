@@ -359,7 +359,7 @@ class SVGIS(object):
             'class': u' '.join(_style.sanitize(c) for c in layer.schema['properties'].keys())
         }
 
-    def feature(self, feature, transforms, classes, datas, **kwargs):
+    def feature(self, feature, transforms, classes, datas=None, **kwargs):
         '''
         Draw a single feature.
 
@@ -367,6 +367,7 @@ class SVGIS(object):
             feature (dict): A GeoJSON like feature dict produced by Fiona.
             transforms (list): Functions to apply to the geometry.
             classes (list): Names (unsanitized) of fields to apply as classes in the output element.
+            datas (dict): key-value pairs to add as data-KEY="value" elements in the output element.
             precision (int): rounding precision for coordinates.
             id_field (str): Field to use as id of the output element.
             name (str): layer name (usually basename of the input file).
@@ -377,6 +378,7 @@ class SVGIS(object):
         name = kwargs.pop('name', '?')
         geom = feature.get('geometry')
         precision = kwargs.pop('precision', self.precision)
+        datas = datas or {}
 
         try:
             # Check if geometry exists (a bit unpythonic, but cleaner errs this way).
@@ -443,7 +445,7 @@ class SVGIS(object):
 
         self.log.info('composing drawing')
         drawing = self.draw(members, scalar, kwargs.get('precision'),
-                             style=style, viewbox=viewbox, inline=inline)
+                            style=style, viewbox=viewbox, inline=inline)
 
         # Always reset projected bounds.
         self._projected_bounds = (None,) * 4
@@ -476,7 +478,7 @@ class SVGIS(object):
 
             dims = [float(b or 0.) * scalar for b in self.projected_bounds]
         except TypeError:
-            self.log.warning('Unable to find bounds, the map probably empty ¯\_(ツ)_/¯')
+            self.log.warning('Unable to find bounds, map is probably empty ¯\_(ツ)_/¯')
             dims = 0, 0, 0, 0
 
         # width and height
@@ -498,6 +500,6 @@ class SVGIS(object):
 
         if kwargs.pop('inline', False):
             self.log.info('inlining styles')
-            drawing = _style.inline(drawing, style)
+            drawing = _style.inline(drawing)
 
         return drawing
