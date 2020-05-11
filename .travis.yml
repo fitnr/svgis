@@ -22,24 +22,9 @@ sudo: true
 
 env:
  - GDAL=gdal
- - GDAL=gdal1
  - GDAL=gdal EXTRAS=yes
- - GDAL=gdal1 EXTRAS=yes
 
 matrix:
-  exclude:
-    - env: GDAL=gdal EXTRAS=yes
-      python: 3.4
-
-    - env: GDAL=gdal1 EXTRAS=yes
-      python: 3.4
-
-    - env: GDAL=gdal EXTRAS=yes
-      python: 3.5
-
-    - env: GDAL=gdal1 EXTRAS=yes
-      python: 3.5
-
   allow_failures:
     - os: osx
 
