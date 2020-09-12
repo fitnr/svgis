@@ -26,12 +26,11 @@ class GraticuleTestCase(unittest.TestCase):
     def test_feature(self):
         g = graticule._feature(0, [1, 2, 3])
         assert g['geometry'] == {
-                'type': 'LineString',
-                'coordinates': [1, 2, 3]
-            }
+            'type': 'LineString',
+            'coordinates': [1, 2, 3]
+        }
         assert g['type'] == 'Feature'
-        assert g['id'] ==  0
-
+        assert g['id'] == 0
 
     def test_layer(self):
         a = graticule.layer([0, 0, 5, 5], 1)

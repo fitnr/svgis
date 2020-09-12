@@ -36,5 +36,6 @@ class ProjectionTestCase(unittest.TestCase):
         a = projection.generateproj4('utm', bounds=bounds, file_crs=DEFAULT_GEOID)
         self.assertEqual(a, '+proj=utm +zone=17 +north +datum=WGS84 +units=m +no_defs')
 
+
 if __name__ == '__main__':
     unittest.main()

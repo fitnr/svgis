@@ -19,10 +19,10 @@ DEFAULT_GEOID = 4326
 
 def posint(i):
     '''Fake class for positive integers only'''
-    I = int(i)
-    if I < 0:
+    val = int(i)
+    if val < 0:
         raise ValueError('Must be a positive integer')
-    return I
+    return val
 
 
 def isinf(x):

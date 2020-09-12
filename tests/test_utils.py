@@ -66,5 +66,6 @@ class UtilsTestCase(unittest.TestCase):
 
         self.assertSequenceEqual(list(utils.dedupe(test)), fixture)
 
+
 if __name__ == '__main__':
     unittest.main()

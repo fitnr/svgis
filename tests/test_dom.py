@@ -72,5 +72,6 @@ class DomTestCase(unittest.TestCase):
         polyline = self.document.find(".//*[@id='baz']")
         self.assertIn('stroke:green', polyline.attrib.get('style', ''))
 
+
 if __name__ == '__main__':
     unittest.main()

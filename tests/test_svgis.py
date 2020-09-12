@@ -117,12 +117,12 @@ class SvgisTestCase(unittest.TestCase):
 
         try:
             try:
-                self.assertIsInstance(a, unicode)
+                self.assertIsInstance(a, str)
             except AssertionError:
                 raise AssertionError(type(a))
 
             try:
-                self.assertIsInstance(b, unicode)
+                self.assertIsInstance(b, str)
             except AssertionError:
                 raise AssertionError(type(b))
 
@@ -161,8 +161,8 @@ class SvgisTestCase(unittest.TestCase):
             # check that points have 1 decimal place
             points = poly.getAttribute('points')
             x, y = points.split(' ').pop(0).split(',')
-            assert len(x[x.index('.') + 1 : ]) == 1
-            assert len(y[y.index('.') + 1 : ]) == 1
+            assert len(x[x.index('.') + 1:]) == 1
+            assert len(y[y.index('.') + 1:]) == 1
 
     def testOpenZips(self):
         archive = 'zip://tests/test_data/test.zip/tests/test_data/cb_2014_us_nation_20m.json'
@@ -184,6 +184,7 @@ class SvgisTestCase(unittest.TestCase):
         assert 'apple_fruit' in r2
         assert 'pear_1' in r2
         assert 'kale_leafy_green' in r2
+
 
 if __name__ == '__main__':
     unittest.main()

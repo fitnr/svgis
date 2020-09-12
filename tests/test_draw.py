@@ -171,5 +171,6 @@ class DrawTestCase(unittest.TestCase):
         draw.geometry(self.polygon['geometry'])
         draw.geometry(self.multipolygon['geometry'])
 
+
 if __name__ == '__main__':
     unittest.main()
