@@ -36,6 +36,11 @@ requires = [
 numpy = ["numpy"]
 clip = ["shapely>=1.5.7"]
 simplify = ["visvalingamwyatt>=0.1.1"]
+dev = ["coverage[toml]"]
+doc = [
+    "sphinx",
+    "sphinx-rtd-theme"
+]
 
 [tool.flit.scripts]
 svgis = "svgis.cli:main"
