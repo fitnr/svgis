@@ -7,7 +7,7 @@
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://www.opensource.org/licenses/GNU General Public License v3 (GPLv3)-license
-# Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
+# Copyright (c) 2016, 2020, Neil Freeman <contact@fakeisthenewreal.org>
 import json
 from functools import partial
 from pyproj.transformer import Transformer

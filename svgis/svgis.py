@@ -6,7 +6,7 @@
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
-# Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
+# Copyright (c) 2015-16, 2020, Neil Freeman <contact@fakeisthenewreal.org>
 import os.path
 from collections import Iterable
 from functools import partial
@@ -80,7 +80,7 @@ def map(layers, bounds=None, scale=None, **kwargs):
     return drawing
 
 
-class SVGIS():
+class SVGIS:
 
     """
     Draw geodata files to SVG.

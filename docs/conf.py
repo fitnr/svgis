@@ -52,7 +52,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'svgis'
-copyright = u'2016, Neil Freeman'
+copyright = u'2020, Neil Freeman'
 author = u'Neil Freeman'
 
 # The version info for the project you're documenting, acts as replacement for
