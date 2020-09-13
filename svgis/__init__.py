@@ -8,6 +8,10 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
 
+"""
+Create SVG drawings from vector geodata files (SHP, geoJSON, etc).
+"""
+
 from . import bounding
 from . import draw
 from . import errors

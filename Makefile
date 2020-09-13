@@ -56,10 +56,8 @@ tests/test_data/test.svg: tests/test_data/cb_2014_us_nation_20m.json
 	@touch $@
 
 deploy: docs.zip | clean
-	python3 setup.py sdist
-	python3 setup.py bdist_wheel --universal
-	twine upload dist/*
 	git push
 	git push --tags
+	flit publish
 
 clean: ; rm -rf tests/test_data/{test.svg,zip.svg,test.zip} build dist

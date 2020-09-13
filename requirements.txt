@@ -1,8 +1,0 @@
-six>=1.7.3,<2
-click>=6.2,<8
-pyproj>=2.6
-fiona
-tinycss2>=1.0.2
-utm>=0.4.0,<1
-cssselect>=1.1.0
-lxml>=4.5.0

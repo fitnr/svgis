@@ -1,0 +1,43 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "svgis"
+author = "Neil Freeman"
+author-email = "contact@fakeisthenewreal.org"
+home-page = "https://github.com/fitnr/svgis"
+keywords = "svg, gis, geojson, shapefile, cartography, map, geodata"
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Natural Language :: English",
+    "Operating System :: Unix",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Operating System :: OS Independent",
+]
+description-file = "README.md"
+requires = [
+    "six>=1.7.3,<2",
+    "click>=6.2,<8",
+    "pyproj>=2.6",
+    "fiona>=1.8",
+    "tinycss2>=1.0.2",
+    "utm>=0.4.0,<1",
+    "cssselect>=1.1.0",
+    "lxml>=4.5.0",
+]
+
+[tool.flit.metadata.requires-extra]
+numpy = ["numpy"]
+clip = ["shapely>=1.5.7"]
+inline = []
+simplify = ["visvalingamwyatt>=0.1.1"]
+
+[tool.flit.scripts]
+svgis = "svgis.cli:main"
+

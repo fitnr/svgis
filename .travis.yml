@@ -33,10 +33,10 @@ before_install:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -q install -y lib${GDAL}-dev ; fi
   - if [[ $TRAVIS_PYTHON_VERSION != 3.6 ]]; then export GDAL_DATA=/usr/share/gdal/1.10 PROJ_LIB=/usr/share/proj ; fi
   - if [[ -z "$EXTRAS" ]]; then pip uninstall -y numpy visvalingamwyatt || :; fi
+  - pip install tox-travis coverage flit
 
 install:
-  - pip install tox-travis coverage
-  - python setup.py install
+  - flit install -s
   - if [[ $EXTRAS == "yes" ]]; then pip install .[clip,simplify]; fi
 
 before_script:
