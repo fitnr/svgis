@@ -35,12 +35,7 @@ class SvgisTestCase(unittest.TestCase):
     }
 
     def setUp(self):
-        self.log = logging.getLogger('svgis')
-        self.log.setLevel(logging.WARN)
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.WARN)
-        self.log.addHandler(ch)
-
+        logging.getLogger('svgis').setLevel(logging.CRITICAL)
         self.svgis_obj = svgis.SVGIS(self.file)
 
     def assertSequenceAlmostEqual(self, a, b):

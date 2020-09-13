@@ -6,6 +6,7 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
 
+import logging
 import unittest
 from svgis import draw, errors, SVGIS
 
@@ -19,6 +20,9 @@ class ErrorTestCase(unittest.TestCase):
         },
         'properties': {}
     }
+
+    def setUp(self):
+        logging.getLogger('svgis').setLevel(logging.CRITICAL)
 
     def testDrawInvalidGeometry(self):
         with self.assertRaises(errors.SvgisError):
