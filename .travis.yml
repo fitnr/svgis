@@ -22,7 +22,7 @@ sudo: true
 
 env:
  - GDAL=gdal
- - GDAL=gdal EXTRAS=yes
+ - GDAL=gdal EXTRAS=numpy,clip,simplify
 
 cache:
   directories:
@@ -33,11 +33,11 @@ before_install:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -q install -y lib${GDAL}-dev ; fi
   - if [[ $TRAVIS_PYTHON_VERSION != 3.6 ]]; then export GDAL_DATA=/usr/share/gdal/1.10 PROJ_LIB=/usr/share/proj ; fi
   - if [[ -z "$EXTRAS" ]]; then pip uninstall -y numpy visvalingamwyatt || :; fi
-  - pip install tox-travis coverage[toml] flit
+  - pip install coverage[toml] flit
 
 install:
   - flit install -s
-  - if [[ $EXTRAS == "yes" ]]; then pip install .[clip,simplify]; fi
+  - if [[ ! -z $EXTRAS ]]; then flit install -s --extras $EXTRAS; fi
 
 before_script:
   - fio --gdal-version || echo 'fio failed'
@@ -50,10 +50,11 @@ after_failure:
   - fio info --indent 2 tests/test_data/tl_2015_11_place.json
 
 script:
-  - tox
+  - make test
+  - make test-cli
 
 after_script:
-  - coverage report
+  - make coverage -o test
   - svgis -h
   - svgis draw -h
   - svgis style -h

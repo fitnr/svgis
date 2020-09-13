@@ -40,7 +40,7 @@ coverage: | test
 	coverage report
 	coverage html
 
-test: pyproject.toml
+test: pyproject.toml | $(TIGERS) tests/test_data/test.svg tests/test_data/zip.svg
 	coverage run --rcfile=$< -m unittest $(QUIET)
 
 test_resources: $(TIGERS) tests/test_data/test.svg tests/test_data/zip.svg

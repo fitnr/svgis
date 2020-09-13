@@ -35,7 +35,6 @@ requires = [
 [tool.flit.metadata.requires-extra]
 numpy = ["numpy"]
 clip = ["shapely>=1.5.7"]
-inline = []
 simplify = ["visvalingamwyatt>=0.1.1"]
 
 [tool.flit.scripts]
