@@ -76,6 +76,22 @@ class ConvertTestCase(unittest.TestCase):
         for z in zip(a, fixture):
             self.assertAlmostEqual(*z, places=5)
 
+    def testCheck(self):
+        fixture = (1, 1, 2, 2)
+        result = bounding.check((2, 2, 1, 1))
+        self.assertSequenceEqual(result, fixture)
+
+        result = bounding.check((2, 1, 1, 2))
+        self.assertSequenceEqual(result, fixture)
+
+        result = bounding.check((1, 2, 2, 1))
+        self.assertSequenceEqual(result, fixture)
+
+        self.assertFalse(bounding.check(None))
+        self.assertFalse(bounding.check(object))
+        self.assertFalse(bounding.check((1, 2, 3)))
+        self.assertFalse(bounding.check((1, 2, 3, None)))
+
 
 if __name__ == '__main__':
     unittest.main()
