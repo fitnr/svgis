@@ -1,3 +1,12 @@
+0.5.0
+-----
+
+* Drop Python 2 support
+* Add "data_fields" option to generate data attributes in output SVG.
+* Update for newer pyproj and Fiona APIs
+* Shift CSS handling from tinycss to tinycss2
+* Add requirements for cssselect, move lxml from optional to required
+
 0.4.6
 -----
 
