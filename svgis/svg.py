@@ -10,7 +10,7 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
 from six import string_types
-from . import utils
+from . import dom, utils
 
 
 def _element(tag, contents=None, **kwargs):
@@ -27,16 +27,15 @@ def _element(tag, contents=None, **kwargs):
     '''
     attribs = toattribs(**kwargs)
     if contents:
-        return u'<{0}{1}>{2}</{0}>'.format(tag, attribs, contents)
-    else:
-        return u'<{0}{1}/>'.format(tag, attribs)
+        return '<{0}{1}>{2}</{0}>'.format(tag, attribs, contents)
+
+    return '<{0}{1}/>'.format(tag, attribs)
 
 
 def _fmt(precision):
     if precision is None:
         return '{0[0]},{0[1]}'
-    else:
-        return '{{0[0]:.{0}f}},{{0[1]:.{0}f}}'.format(precision)
+    return '{{0[0]:.{0}f}},{{0[1]:.{0}f}}'.format(precision)
 
 
 def _poly(name):
@@ -145,7 +144,7 @@ def polyline():
     Returns:
         str (unicode in Python 2)
     '''
-    return u'polyline'
+    return 'polyline'
 
 
 @_poly
@@ -170,12 +169,15 @@ def toattribs(**kwargs):
     Returns:
         str (unicode in Python 2)
     '''
-    attribs = u' '.join(u'{}="{}"'.format(k, v) for k, v in kwargs.items() if v is not None and v != '')
-
-    if len(attribs) > 0:
+    attribs = ' '.join(
+        '{}="{}"'.format(k, dom.ampencode(v))
+        for k, v in kwargs.items()
+        if v is not None and v != ''
+    )
+    if attribs:
         return ' ' + attribs
-    else:
-        return attribs
+
+    return attribs
 
 
 def defstyle(style=None):
@@ -189,9 +191,9 @@ def defstyle(style=None):
         str (unicode in Python 2)
     '''
     if style:
-        return u'<defs><style type="text/css"><![CDATA[{}]]></style></defs>'.format(style)
-    else:
-        return u'<defs />'
+        return '<defs><style type="text/css"><![CDATA[{}]]></style></defs>'.format(style)
+
+    return '<defs />'
 
 
 def group(members=None, **kwargs):
@@ -239,5 +241,5 @@ def drawing(size, members, precision=None, viewbox=None, style=None):
     if viewbox:
         kwargs['viewBox'] = (','.join(fmt * 4)).format(*viewbox, precision=precision)
 
-    contents = defstyle(style) + u''.join(members)
+    contents = defstyle(style) + ''.join(members)
     return _element('svg', contents, **kwargs)

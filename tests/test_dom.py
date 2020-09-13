@@ -14,7 +14,7 @@ try:
 except ImportError:
     import xml.etree.ElementTree as etree
 
-from svgis import dom, style
+from svgis import dom
 from . import TEST_SVG, TEST_CSS
 
 
@@ -39,6 +39,14 @@ class DomTestCase(unittest.TestCase):
 
         prelude = dom.serialize_prelude(rules[0])
         self.assertEqual(prelude, 'svg|polygon')
+
+        pretoken = tinycss2.ast.LiteralToken(1, 1, '.')
+        serialized = dom.serialize_token(rules[0].prelude[0], pretoken)
+        self.assertEqual(serialized, 'polygon')
+
+        pretoken = tinycss2.ast.LiteralToken(1, 1, '/')
+        serialized = dom.serialize_token(rules[0].prelude[0], pretoken)
+        self.assertEqual(serialized, 'polygon')
 
     def testApplyRule(self):
         rules = tinycss2.parse_stylesheet("polygon {fill: orange}", skip_whitespace=True, skip_comments=True)
@@ -71,6 +79,13 @@ class DomTestCase(unittest.TestCase):
         dom.apply_rules(self.document, rules)
         polyline = self.document.find(".//*[@id='baz']")
         self.assertIn('stroke:green', polyline.attrib.get('style', ''))
+
+    def testApplyRadiusRule(self):
+        css = tinycss2.parse_stylesheet('circle { r: 1 }')
+        dom.apply_rules(self.document, css)
+        circ = self.document.find('.//circle', namespaces=self.document.nsmap)
+        self.assertIsNotNone(circ)
+        self.assertIn('1', circ.attrib.get('r', ''))
 
 
 if __name__ == '__main__':

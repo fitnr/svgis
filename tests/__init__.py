@@ -27,6 +27,7 @@ TEST_SVG = """<svg baseProfile="full" height="1" version="1.1" xmlns="http://www
         </g>
         <g id="cat">
             <polyline id="meow" class="long-class-name" points="3,2 -2,6 8,-1"></polyline>
+            <circle id="orb" cx="1" cy="1"></circle>
         </g>
     </g>
 </svg>"""
@@ -39,4 +40,5 @@ polyline { stroke: blue}
 #test ~ #foo { fill: purple; }
 #cat polyline { fill: red }
 #meow { stroke-opacity: 0.50 }
+circle { r: 1; }
 """

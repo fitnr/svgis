@@ -24,6 +24,10 @@ profile: tests/profile.py
 
 coords = -110.277906 35.450777 -110.000477 35.649030
 
+coverage: | test
+	coverage report
+	coverage html
+
 test: $(TIGERS) tests/test_data/test.svg tests/test_data/zip.svg
 	wc $<
 	svgis project -m utm -- $(coords)
@@ -37,9 +41,7 @@ test: $(TIGERS) tests/test_data/test.svg tests/test_data/zip.svg
 		svgis style -c 'polygon{fill:green}' | \
 		svgis scale -f 10 - | wc
 
-	coverage run --include='svgis/*' setup.py $(QUIET) test
-	coverage report
-	coverage html
+	coverage run --include='svgis/*' -m unittest $(QUIET)
 
 tests/test_data/zip.svg: tests/test_data/test.zip $(TIGERS)
 	svgis draw $(addprefix zip://$</,$(filter %.json,$^)) | \

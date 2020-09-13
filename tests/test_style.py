@@ -180,6 +180,12 @@ class CssTestCase(unittest.TestCase):
         result = style.replace_comments(css)
         self.assertIn('/* foo */', result)
 
+    def testConstructDataFields(self):
+        fields = style.construct_datas(['a', 'b'], {'a': '1', 'b': '_ _'})
+        self.assertEqual(fields['data-a'], '1')
+        self.assertEqual(fields['data-b'], '_ _')
+        self.assertNotIn('data-c', fields)
+
 
 if __name__ == '__main__':
     unittest.main()

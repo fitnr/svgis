@@ -8,9 +8,9 @@
 language: python
 
 python:
-  - 3.6
-  - 3.7
-  - 3.8
+  - "3.6"
+  - "3.7"
+  - "3.8"
 
 os:
   - linux
@@ -24,48 +24,25 @@ env:
  - GDAL=gdal
  - GDAL=gdal EXTRAS=yes
 
-matrix:
-  allow_failures:
-    - os: osx
-
-  include:
-    - language: generic
-      os: osx
-      env: PYTHON3
-      before_install:
-        - brew --version
-        - brew install python gdal
-        - virtualenv env -p python
-        - source env/bin/activate
-
-    - language: generic
-      os: osx
-      env: PYTHON
-      before_install:
-        - brew --version
-        - brew install python3 gdal
-        - virtualenv env -p python3
-        - source env/bin/activate
-
 cache:
   directories:
     - $HOME/.cache/pip
 
 before_install:
-    - pip install docutils coverage python-coveralls
-    - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -q update; fi
-    - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -q install -y lib${GDAL}-dev ; fi
-    - if [[ $TRAVIS_PYTHON_VERSION != 3.6 ]]; then export GDAL_DATA=/usr/share/gdal/1.10 PROJ_LIB=/usr/share/proj ; fi
-    - if [[ -z "$EXTRAS" ]]; then pip uninstall -y numpy visvalingamwyatt || :; fi
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -q update; fi
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -q install -y lib${GDAL}-dev ; fi
+  - if [[ $TRAVIS_PYTHON_VERSION != 3.6 ]]; then export GDAL_DATA=/usr/share/gdal/1.10 PROJ_LIB=/usr/share/proj ; fi
+  - if [[ -z "$EXTRAS" ]]; then pip uninstall -y numpy visvalingamwyatt || :; fi
 
 install:
-    - python setup.py install
-    - if [[ $EXTRAS == "yes" ]]; then pip install .[clip,simplify]; fi
+  - pip install tox-travis coverage
+  - python setup.py install
+  - if [[ $EXTRAS == "yes" ]]; then pip install .[clip,simplify]; fi
 
 before_script:
-    - fio --version
-    - fio --gdal-version
-    - fio info tests/test_data/cb_2014_us_nation_20m.json
+  - fio --gdal-version || echo 'fio failed'
+  - fio --version || echo 'fio failed'
+  - fio info tests/test_data/cb_2014_us_nation_20m.json || echo 'fio failed'
 
 after_failure:
   - echo $GDAL_DATA $PROJ_LIB
@@ -73,7 +50,7 @@ after_failure:
   - fio info --indent 2 tests/test_data/tl_2015_11_place.json
 
 script:
-    - make test QUIET=
+  - tox
 
 after_script:
   - svgis -h

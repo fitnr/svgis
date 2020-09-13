@@ -9,12 +9,18 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
+import re
 import logging
 from lxml.cssselect import CSSSelector
 
 
 SVG_NS = 'http://www.w3.org/2000/svg'
 LOG = logging.getLogger('svgis')
+
+
+def ampencode(value):
+    """Escape an ampersand that isn't already url encoded"""
+    return re.sub(r'&(?!amp;)', r'&amp;', str(value))
 
 
 def serialize_token(token, previous_token=None):

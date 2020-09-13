@@ -26,6 +26,8 @@ Draw SVGs from input geodata.
       -i, --id-field FIELD            Geodata field to use as ID
       -a, --class-fields FIELDS       Geodata fields to use as class (comma-
                                       separated)
+      -a, --data-fields FIELDS        Geodata fields to add as data-* attributes
+                                      (comma-separated)
       -j, --crs KEYWORD               Specify a map projection. Accepts either an
                                       EPSG code (e.g. epsg:4456), a proj4 string,
                                       a file containing a proj4 string, "utm" (use
@@ -235,11 +237,11 @@ The result will include something like:
 
 .. code:: xml
 
-    <g id="ne_110m_admin_0_countries" class="scalerank featurecla labelrank ...">
-        <g id="Afghanistan" class="ne_110m_admin_0_countries continent_Asia income_grp_5_Low_income">/* Afghanistan */</g>
-        <g id="Angola" class="ne_110m_admin_0_countries continent_Africa income_grp_3_Upper_middle_income">/* Angola */</g>
+    <g id="ne_110m_admin_0_countries">
+        <g id="Afghanistan" class="continent_Asia income_grp_5_Low_income">/* Afghanistan */</g>
+        <g id="Angola" class="continent_Africa income_grp_3_Upper_middle_income">/* Angola */</g>
         /* ... */
-        <g id="Zimbabwe" class="ne_110m_admin_0_countries continent_Africa income_grp_5_Low_income">/* Zimbabwe */</g>
+        <g id="Zimbabwe" class="continent_Africa income_grp_5_Low_income">/* Zimbabwe */</g>
     </g>
 
 Note that each layer is always wrapped in a group with ``id`` set to the its name,
@@ -266,6 +268,28 @@ be represented with the Pythonic "None".
     }
 
 The ``class-fields`` argument can be provided multiple times.
+
+data fields
+^^^^^^^^^^^
+
+Attributes with the ``data-`` prefix are useful for storing values in front-end Javascript.
+Convert specific fields in your geodata to attributes:
+
+.. code:: bash
+
+    svgis draw --data-fields continent ne_110m_admin_0_countries.shp -o out.svg
+
+The result will include something like:
+
+.. code:: xml
+
+    <g id="ne_110m_admin_0_countries">
+        <g id="Afghanistan" data-continent="Asia">/* Afghanistan */</g>
+        <g id="Angola" data-continent="Africa">/* Angola */</g>
+        /* ... */
+        <g id="Zimbabwe" data-continent="Africa">/* Zimbabwe */</g>
+    </g>
+
 
 .. _simplify:
 

@@ -27,7 +27,7 @@ def posint(i):
 
 def isinf(x):
     inf = float('inf')
-    return x == inf or x == inf * -1
+    return x in (inf, inf * -1)
 
 
 def between(a, b, count=None):
@@ -62,8 +62,8 @@ def modceil(inp, mod):
 def rnd(i, precision):
     if precision is None:
         return i
-    else:
-        return round(i, precision)
+
+    return round(i, precision)
 
 
 def dedupe(array):

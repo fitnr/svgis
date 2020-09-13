@@ -50,7 +50,7 @@ setup(
         'tinycss2>=1.0.2',
         'utm>=0.4.0,<1',
         'lxml>=4.5.0',
-        'cssselect>=1.10'
+        'cssselect>=1.1.0'
     ],
     extras_require={
         'numpy': ['numpy'],
@@ -59,7 +59,9 @@ setup(
         'simplify': ['visvalingamwyatt>=0.1.1']
     },
     test_suite='tests',
-    tests_require=['six'],
+    tests_require=[
+        'coverage',
+    ],
     entry_points={
         'console_scripts': [
             'svgis=svgis.cli:main',
