@@ -10,7 +10,7 @@ PROJECTION = +proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +d
 QUIET ?= -q
 PYTHONFLAGS = -W ignore
 
-.PHONY: test deploy clean
+.PHONY: test deploy clean test-cli test_resources
 
 docs.zip: $(wildcard docs/*.rst docs/*/*.rst) svgis/__init__.py
 	$(MAKE) -C $(<D) html
@@ -24,12 +24,7 @@ profile: tests/profile.py
 
 coords = -110.277906 35.450777 -110.000477 35.649030
 
-coverage: | test
-	coverage report
-	coverage html
-
-test: $(TIGERS) tests/test_data/test.svg tests/test_data/zip.svg
-	wc $<
+test-cli: tests/test_data/cb_2014_us_nation_20m.json
 	svgis project -m utm -- $(coords)
 	svgis project -- $(coords)
 	svgis project -m local -- $(wordlist 1,2,$(coords))
@@ -41,7 +36,14 @@ test: $(TIGERS) tests/test_data/test.svg tests/test_data/zip.svg
 		svgis style -c 'polygon{fill:green}' | \
 		svgis scale -f 10 - | wc
 
-	coverage run --include='svgis/*' -m unittest $(QUIET)
+coverage: | test
+	coverage report
+	coverage html
+
+test: pyproject.toml | $(TIGERS) tests/test_data/test.svg tests/test_data/zip.svg
+	coverage run --rcfile=$< -m unittest $(QUIET)
+
+test_resources: $(TIGERS) tests/test_data/test.svg tests/test_data/zip.svg
 
 tests/test_data/zip.svg: tests/test_data/test.zip $(TIGERS)
 	svgis draw $(addprefix zip://$</,$(filter %.json,$^)) | \
@@ -49,7 +51,7 @@ tests/test_data/zip.svg: tests/test_data/test.zip $(TIGERS)
 	svgis scale -f 10 > $@
 
 tests/test_data/test.zip: $(TIGERS)
-	zip $@ $^
+	zip -q $@ $^
 
 tests/test_data/test.svg: tests/test_data/cb_2014_us_nation_20m.json
 	- svgis draw --viewbox -j '$(PROJECTION)' -f 1000 -c "polygon { fill: blue }" --bounds -124 20.5 -64 49 $< -o $@
@@ -60,4 +62,4 @@ deploy: docs.zip | clean
 	git push --tags
 	flit publish
 
-clean: ; rm -rf tests/test_data/{test.svg,zip.svg,test.zip} build dist
+clean: ; rm -rf build dist

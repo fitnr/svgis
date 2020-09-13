@@ -21,8 +21,8 @@ git:
 sudo: true
 
 env:
- - GDAL=gdal
- - GDAL=gdal EXTRAS=yes
+ - EXTRAS=none
+ - EXTRAS=numpy,clip,simplify
 
 cache:
   directories:
@@ -30,34 +30,35 @@ cache:
 
 before_install:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -q update; fi
-  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -q install -y lib${GDAL}-dev ; fi
-  - if [[ $TRAVIS_PYTHON_VERSION != 3.6 ]]; then export GDAL_DATA=/usr/share/gdal/1.10 PROJ_LIB=/usr/share/proj ; fi
-  - if [[ -z "$EXTRAS" ]]; then pip uninstall -y numpy visvalingamwyatt || :; fi
-  - pip install tox-travis coverage flit
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -q install -y libgdal-dev ; fi
+  - pip uninstall -y numpy visvalingamwyatt
+  - pip install coverage[toml] flit
 
 install:
-  - flit install -s
-  - if [[ $EXTRAS == "yes" ]]; then pip install .[clip,simplify]; fi
+  - flit install -s --deps develop --extras $EXTRAS
 
 before_script:
   - fio --gdal-version || echo 'fio failed'
   - fio --version || echo 'fio failed'
   - fio info tests/test_data/cb_2014_us_nation_20m.json || echo 'fio failed'
 
+script:
+  - make test
+  - make test-cli
+
 after_failure:
   - echo $GDAL_DATA $PROJ_LIB
   - fio info --indent 2 tests/test_data/cb_2014_us_nation_20m.json
   - fio info --indent 2 tests/test_data/tl_2015_11_place.json
-
-script:
-  - tox
+  - head tests/test_data/test.svg
+  - unzip -l tests/test_data/zip.svg
 
 after_script:
+  - make coverage -o test
   - svgis -h
   - svgis draw -h
   - svgis style -h
   - svgis scale -h
   - svgis project -h
   - svgis bounds -h
-  - coveralls
   - make profile

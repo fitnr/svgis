@@ -49,14 +49,18 @@ class MapTestCase(unittest.TestCase):
         with open('a.svg', 'w') as A:
             A.write(a)
 
-        result = minidom.parseString(a).getElementsByTagName('svg').item(0)
-        fixture = minidom.parse(self.fixture).getElementsByTagName('svg').item(0)
+        try:
+            result = minidom.parseString(a).getElementsByTagName('svg').item(0)
+            fixture = minidom.parse(self.fixture).getElementsByTagName('svg').item(0)
 
-        result_vb = [float(x) for x in result.attributes.get('viewBox').value.split(',')]
-        fixture_vb = [float(x) for x in fixture.attributes.get('viewBox').value.split(',')]
+            result_vb = [float(x) for x in result.attributes.get('viewBox').value.split(',')]
+            fixture_vb = [float(x) for x in fixture.attributes.get('viewBox').value.split(',')]
 
-        for r, f in zip(result_vb, fixture_vb):
-            self.assertAlmostEqual(r, f, 5, 'viewbox doesnt match fixture')
+            for r, f in zip(result_vb, fixture_vb):
+                self.assertAlmostEqual(r, f, 5, 'viewbox doesnt match fixture')
+        finally:
+            os.remove("a.svg")
+
 
     def testMapProjFile(self):
         a = svgis.map(self.shp, scale=1000, crs='tests/test_data/test.proj4', bounds=self.bounds, clip=False)
