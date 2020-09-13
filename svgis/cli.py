@@ -7,15 +7,17 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://www.opensource.org/licenses/GNU General Public License v3 (GPLv3)-license
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
-
 import sys
 from signal import signal, SIGPIPE, SIG_DFL
 import logging
+import warnings
 import click
 import fiona.crs
+
 from . import bounding, projection
 from . import graticule as _graticule, style as _style, svgis, __version__
 from .utils import DEFAULT_GEOID, posint
+
 
 none = {
     'flag_value': None,
@@ -125,6 +127,8 @@ def bounds(layer, crs, latlon=False):
         with fiona.open(layer, "r") as f:
             meta = {'bounds': f.bounds}
             meta.update(f.meta)
+
+    warnings.filterwarnings("ignore")
 
     # If crs==file, these will basically be no ops.
     out_crs = projection.pick(crs, meta['bounds'], file_crs=meta['crs'])
