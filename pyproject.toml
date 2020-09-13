@@ -41,3 +41,6 @@ simplify = ["visvalingamwyatt>=0.1.1"]
 [tool.flit.scripts]
 svgis = "svgis.cli:main"
 
+[tool.coverage.run]
+branch = true
+source = ["svgis"]

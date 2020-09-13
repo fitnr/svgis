@@ -33,7 +33,7 @@ before_install:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -q install -y lib${GDAL}-dev ; fi
   - if [[ $TRAVIS_PYTHON_VERSION != 3.6 ]]; then export GDAL_DATA=/usr/share/gdal/1.10 PROJ_LIB=/usr/share/proj ; fi
   - if [[ -z "$EXTRAS" ]]; then pip uninstall -y numpy visvalingamwyatt || :; fi
-  - pip install tox-travis coverage flit
+  - pip install tox-travis coverage[toml] flit
 
 install:
   - flit install -s
@@ -53,11 +53,11 @@ script:
   - tox
 
 after_script:
+  - coverage report
   - svgis -h
   - svgis draw -h
   - svgis style -h
   - svgis scale -h
   - svgis project -h
   - svgis bounds -h
-  - coveralls
   - make profile
