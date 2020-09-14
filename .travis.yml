@@ -31,7 +31,7 @@ cache:
 before_install:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -q update; fi
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get -q install -y libgdal-dev ; fi
-  - pip uninstall -y numpy visvalingamwyatt || :
+  - pip uninstall -y numpy visvalingamwyatt
   - pip install coverage[toml] flit
 
 install:
