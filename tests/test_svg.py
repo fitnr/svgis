@@ -18,7 +18,7 @@ from svgis import style, svg
 class SvgTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.file = 'tests/test_data/test.svg'
+        self.file = 'tests/fixtures/test.svg'
         self.newstyle = 'stroke {color:red;}'
 
     def test_rescale(self):

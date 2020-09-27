@@ -19,9 +19,9 @@ from svgis import errors, svgis
 
 
 class SvgisTestCase(unittest.TestCase):
-    file = 'tests/test_data/cb_2014_us_nation_20m.json'
+    file = 'tests/fixtures/cb_2014_us_nation_20m.json'
 
-    chi_files = ['tests/test_data/chicago_bounds_2790.json', 'tests/test_data/cook_bounds_4269.json']
+    chi_files = ['tests/fixtures/chicago_bounds_2790.json', 'tests/fixtures/cook_bounds_4269.json']
 
     polygon = {
         "properties": {
@@ -162,7 +162,7 @@ class SvgisTestCase(unittest.TestCase):
             assert len(y[y.index('.') + 1:]) == 1
 
     def testOpenZips(self):
-        archive = 'zip://tests/test_data/test.zip/tests/test_data/cb_2014_us_nation_20m.json'
+        archive = 'zip://tests/fixtures/test.zip/fixtures/cb_2014_us_nation_20m.json'
 
         result = svgis.SVGIS([archive], simplify=60).compose()
 

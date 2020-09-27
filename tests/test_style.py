@@ -30,7 +30,7 @@ class CssTestCase(unittest.TestCase):
 
     css1 = '''.class-name { fill: orange;}'''
 
-    file = 'tests/test_data/test.svg'
+    file = 'tests/fixtures/test.svg'
 
     classes = ('apple', 'potato')
 
@@ -82,7 +82,7 @@ class CssTestCase(unittest.TestCase):
         self.assertIn(self.css, result.toxml())
 
     def testReScale(self):
-        result = style.rescale('tests/test_data/test.svg', 1.37)
+        result = style.rescale('tests/fixtures/test.svg', 1.37)
         self.assertIn('scale(1.37)', result[0:2000])
 
     def testPickStyle(self):

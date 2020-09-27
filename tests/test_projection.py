@@ -14,7 +14,7 @@ from svgis import projection
 from svgis.errors import SvgisError
 from svgis.utils import DEFAULT_GEOID
 
-SHP = 'tests/test_data/cb_2014_us_nation_20m.json'
+SHP = 'tests/fixtures/cb_2014_us_nation_20m.json'
 
 
 class ProjectionTestCase(unittest.TestCase):

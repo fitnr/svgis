@@ -19,8 +19,8 @@ warnings.filterwarnings("always")
 class MapTestCase(unittest.TestCase):
     projection = '+proj=lcc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'
     bounds = (-124.0, 20.5, -64.0, 49.0)
-    fixture = 'tests/test_data/test.svg'
-    shp = 'tests/test_data/cb_2014_us_nation_20m.json'
+    fixture = 'tests/fixtures/test.svg'
+    shp = 'tests/fixtures/cb_2014_us_nation_20m.json'
     css = 'polygon{fill:green}'
 
     def testMapWithStyle(self):
@@ -60,7 +60,7 @@ class MapTestCase(unittest.TestCase):
             os.remove("a.svg")
 
     def testMapProjFile(self):
-        a = svgis.map(self.shp, scale=1000, crs='tests/test_data/test.proj4', bounds=self.bounds, clip=False)
+        a = svgis.map(self.shp, scale=1000, crs='tests/fixtures/test.proj4', bounds=self.bounds, clip=False)
 
         result = minidom.parseString(a).getElementsByTagName('svg').item(0)
         fixture = minidom.parse(self.fixture).getElementsByTagName('svg').item(0)

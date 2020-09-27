@@ -26,10 +26,10 @@ BOUNDS = (-124.0, 20.5, -64.0, 49.0)
 
 class CliTestCase(unittest.TestCase):
     runner = click.testing.CliRunner()
-    fixture = 'tests/test_data/test.svg'
+    fixture = 'tests/fixtures/test.svg'
 
-    shp = 'tests/test_data/cb_2014_us_nation_20m.json'
-    dc = 'tests/test_data/tl_2015_11_place.json'
+    shp = 'tests/fixtures/cb_2014_us_nation_20m.json'
+    dc = 'tests/fixtures/tl_2015_11_place.json'
     css = 'polygon{fill:green}'
 
     def setUp(self):

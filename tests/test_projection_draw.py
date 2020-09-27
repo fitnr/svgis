@@ -28,8 +28,8 @@ class ProjectionDrawTestCase(unittest.TestCase):
 
     def setUp(self):
         self.files = [
-            path.join(path.dirname(__file__), 'test_data', 'chicago_bounds_2790.json'),
-            path.join(path.dirname(__file__), 'test_data', 'cook_bounds_4269.json'),
+            path.join(path.dirname(__file__), 'fixtures', 'chicago_bounds_2790.json'),
+            path.join(path.dirname(__file__), 'fixtures', 'cook_bounds_4269.json'),
         ]
 
         svgis.STYLE = ''
