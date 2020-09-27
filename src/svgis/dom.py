@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 '''Utilities for manipulating the DOM and applying styles to same'''
-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, 2020, Neil Freeman <contact@fakeisthenewreal.org>
-import re
-import logging
-from lxml.cssselect import CSSSelector
+# pylint: disable=c-extension-no-member
 
+import logging
+import re
+
+from lxml.cssselect import CSSSelector
 
 SVG_NS = 'http://www.w3.org/2000/svg'
 LOG = logging.getLogger('svgis')
@@ -24,13 +23,13 @@ def ampencode(value):
 
 
 def serialize_token(token, previous_token=None):
-    '''
+    """
     Convert a tinycss2 selector to string in preparation for use with cssselect.
     This involves prepending 'svg|'  to element selectors.
 
     Arguments:
         token (tinycss2.ast.Node): The selector to serialize.
-    '''
+    """
     prev_type = 'whitespace' if previous_token is None else previous_token.type
     if token.type == 'ident' and prev_type == 'whitespace':
         return 'svg|' + token.serialize()
@@ -38,23 +37,25 @@ def serialize_token(token, previous_token=None):
 
 
 def serialize_prelude(rule):
+    """Convert the selector section of a CSS rule to string."""
     p = (serialize_token(a, b) for a, b in zip(rule.prelude, [None] + rule.prelude[:-1]))
     return ''.join(p).strip()
 
 
 def rule_content(rule):
+    """Except the content from CSS rules."""
     return [token.serialize() for token in rule.content if token.type != 'whitespace']
 
 
 def apply_rules(doc, rules, nsmap=None):
-    '''
+    """
     Apply tinycss2 rules to an etree.Element (only tested on documents created by SVGIS).
 
     Args:
         doc (ElementTree.Element): The svg document to scan.
         rules (list): List of tinycss2 Rules to apply.
         nsmap (dict): namespace map.  Default: ``{ "svg": "http://www.w3.org/2000/svg" }``
-    '''
+    """
     nsmap = nsmap or {'svg': SVG_NS}
     for rule in rules:
         apply_rule(doc, rule, nsmap)
@@ -63,13 +64,13 @@ def apply_rules(doc, rules, nsmap=None):
 
 
 def apply_rule(doc, rule, nsmap):
-    '''
+    """
     Apply a tinycss2 rule to an etree.Element
     Args:
         doc (ElementTree.Element): The svg document to scan.
         rule (QualifiedRule): tinycss2 rule
         nsmap (dict): namespace map
-    '''
+    """
     declaration = serialize_prelude(rule)
     selector = CSSSelector(declaration, namespaces=nsmap)
 
@@ -78,7 +79,7 @@ def apply_rule(doc, rule, nsmap):
     if 'r' in tokens:
         i = tokens.index('r')
         token = rule.content[i]
-        for token in rule.content[i + 1:]:
+        for token in rule.content[i + 1 :]:
             if token.type == 'number':
                 rvalue = token.serialize()
                 break

@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
-import unittest
-import os
 import logging
+import os
+import unittest
 import warnings
 from xml.dom import minidom
 
@@ -60,7 +58,6 @@ class MapTestCase(unittest.TestCase):
                 self.assertAlmostEqual(r, f, 5, 'viewbox doesnt match fixture')
         finally:
             os.remove("a.svg")
-
 
     def testMapProjFile(self):
         a = svgis.map(self.shp, scale=1000, crs='tests/test_data/test.proj4', bounds=self.bounds, clip=False)

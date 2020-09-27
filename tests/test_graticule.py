@@ -8,7 +8,9 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 import unittest
+
 from svgis import graticule
+from svgis.errors import SvgisError
 
 
 class GraticuleTestCase(unittest.TestCase):
@@ -19,7 +21,7 @@ class GraticuleTestCase(unittest.TestCase):
         assert isinstance(a, dict)
 
     def testErr(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(SvgisError):
             g = graticule.graticule((16.34, -34.81, 32.83, -22.09), step=10000, crs_or_method='file')
             next(g)
 

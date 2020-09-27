@@ -8,7 +8,8 @@
 
 import logging
 import unittest
-from svgis import draw, errors, SVGIS
+
+from svgis import SVGIS, draw, errors
 
 
 class ErrorTestCase(unittest.TestCase):

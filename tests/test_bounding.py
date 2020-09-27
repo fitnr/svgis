@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
 
-from __future__ import unicode_literals
 import unittest
-from svgis import bounding
+
+from svgis import bounding, errors
 
 
 class ConvertTestCase(unittest.TestCase):
@@ -64,10 +62,10 @@ class ConvertTestCase(unittest.TestCase):
     def testTransformBounds(self):
         bounds = (-74, 42, -73, 43)
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(errors.SvgisError):
             bounding.transform(bounds, in_crs=4269)
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(errors.SvgisError):
             bounding.transform(bounds, out_crs=4269)
 
         a = bounding.transform(bounds, in_crs=4269, out_crs=3102)

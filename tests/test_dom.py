@@ -8,14 +8,17 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 import unittest
+
 import tinycss2
+
 try:
     from lxml import etree
 except ImportError:
     import xml.etree.ElementTree as etree
 
 from svgis import dom
-from . import TEST_SVG, TEST_CSS
+
+from . import TEST_CSS, TEST_SVG
 
 
 class DomTestCase(unittest.TestCase):

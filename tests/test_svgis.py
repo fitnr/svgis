@@ -8,12 +8,14 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
-import unittest
 import logging
 import re
+import unittest
 from xml.dom import minidom
+
 import six
-from svgis import svgis, errors
+
+from svgis import errors, svgis
 
 
 class SvgisTestCase(unittest.TestCase):
@@ -55,7 +57,7 @@ class SvgisTestCase(unittest.TestCase):
         svgis_obj2 = svgis.SVGIS([self.file])
         assert svgis_obj2.files == [self.file]
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(errors.SvgisError):
             svgis.SVGIS(12)
 
     def testSvgisCompose(self):
@@ -113,24 +115,24 @@ class SvgisTestCase(unittest.TestCase):
         try:
             try:
                 self.assertIsInstance(a, str)
-            except AssertionError:
-                raise AssertionError(type(a))
+            except AssertionError as err:
+                raise AssertionError(type(a)) from err
 
             try:
                 self.assertIsInstance(b, str)
-            except AssertionError:
-                raise AssertionError(type(b))
+            except AssertionError as er:
+                raise AssertionError(type(b)) from err
 
-        except NameError:
+        except NameError as nameerr:
             try:
                 self.assertIsInstance(a, str)
-            except AssertionError:
-                raise AssertionError(type(a))
+            except AssertionError as err:
+                raise AssertionError(type(a)) from err
 
             try:
                 self.assertIsInstance(b, str)
-            except AssertionError:
-                raise AssertionError(type(b))
+            except AssertionError as err:
+                raise AssertionError(type(b)) from err
 
         self.assertEqual(type(a), type(b))
 

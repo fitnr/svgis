@@ -5,21 +5,21 @@
 
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, 2020, Neil Freeman <contact@fakeisthenewreal.org>
-
 from functools import wraps
+
 from . import svg, transform, utils
 from .errors import SvgisError
 
 
 def _applyid(multifunc):
-    '''
+    """
     This decorator applies the ID attribute to the group that
     contains multi-part geometries, rather than the elements of the group.
-    '''
+    """
+
     @wraps(multifunc)
     def func(coordinates, **kwargs):
         ID = kwargs.pop('id', None)
@@ -30,16 +30,18 @@ def _applyid(multifunc):
 
 
 def linestring(coordinates, **kwargs):
+    """Serialize coordinates to a svg line."""
     return svg.polyline(coordinates, **kwargs)
 
 
 @_applyid
 def multilinestring(coordinates, **kwargs):
+    """Serialize lists of coordinates to a multiline svg lines."""
     return (linestring(coords, **kwargs) for coords in coordinates)
 
 
 def lines(geom, **kwargs):
-    '''
+    """
     Draw a LineString or MultiLineString geometry.
 
     Args:
@@ -47,16 +49,18 @@ def lines(geom, **kwargs):
 
     Returns:
         str (unicode in Python 2) representation of the SVG group or polyline element(s).
-    '''
+    """
     if geom['type'] == 'LineString':
         return linestring(geom['coordinates'], **kwargs)
 
     if geom['type'] == 'MultiLineString':
         return multilinestring(geom['coordinates'], **kwargs)
 
+    raise SvgisError("Unexpected geometry type. Expected LineString or MultiLineString, but got: " + geom['type'])
+
 
 def polygons(geom, **kwargs):
-    '''
+    """
     Draw polygon(s) in a feature. transform is a function to operate on coords.
     Draws first ring clockwise, and subsequent ones counter-clockwise.
 
@@ -65,17 +69,18 @@ def polygons(geom, **kwargs):
 
     Returns:
         str (unicode in Python 2) representation of the SVG group, path or polygon element.
-    '''
+    """
     if geom['type'] == 'Polygon':
         return polygon(geom['coordinates'], **kwargs)
 
     if geom['type'] == 'MultiPolygon':
         return multipolygon(geom['coordinates'], **kwargs)
 
-    raise ValueError("geom has incorrect type. Expected Polygon or MultiPolygon, but got: " + geom['type'])
+    raise SvgisError("Unexpected geometry type. Expected Polygon or MultiPolygon, but got: " + geom['type'])
 
 
 def polygon(coordinates, **kwargs):
+    """Serialize lists of coordinates to a svg polygon."""
     if len(coordinates) == 1:
         return svg.polygon(coordinates[0], **kwargs)
 
@@ -102,11 +107,12 @@ def polygon(coordinates, **kwargs):
 
 @_applyid
 def multipolygon(coordinates, **kwargs):
+    """Serialize lists of lists of coordinates to multiple svg polygons."""
     return (polygon(coords, **kwargs) for coords in coordinates)
 
 
 def points(geom, **kwargs):
-    '''
+    """
     Draw a Point or MultiPoint geometry
 
     Args:
@@ -114,7 +120,7 @@ def points(geom, **kwargs):
 
     Returns:
         str (unicode in Python 2) representation of the SVG group, or circle element
-    '''
+    """
     kwargs['r'] = kwargs.get('r', 1)
 
     if geom['type'] == 'Point':
@@ -123,21 +129,24 @@ def points(geom, **kwargs):
     if geom['type'] == 'MultiPoint':
         return multipoint(geom['coordinates'], **kwargs)
 
+    raise SvgisError("Unexpected geometry type. Expected Point or MultiPoint, but got: " + geom['type'])
+
 
 @_applyid
 def multipoint(coordinates, **kwargs):
+    """Serialize coordinates to multiple svg points."""
     return (svg.circle((pt[0], pt[1]), **kwargs) for pt in coordinates)
 
 
 def geometrycollection(collection, bbox, precision, **kwargs):
+    """Serialize diverse geometry rtpes to svg."""
     ID = kwargs.pop('id', None)
-    geoms = (geometry(g, bbox=bbox, precision=precision, **kwargs)
-             for g in collection['geometries'])
+    geoms = (geometry(g, bbox=bbox, precision=precision, **kwargs) for g in collection['geometries'])
     return svg.group(geoms, fill_rule="evenodd", id=ID)
 
 
 def geometry(geom, bbox=None, precision=None, **kwargs):
-    '''
+    """
     Draw a geometry. Will return either a single geometry or a group.
 
     Args:
@@ -149,7 +158,7 @@ def geometry(geom, bbox=None, precision=None, **kwargs):
 
     Returns:
         str (unicode in Python 2) representation of SVG element(s) of the given geometry.
-    '''
+    """
     if bbox:
         geom = transform.clip(geom, bbox)
 
@@ -169,7 +178,7 @@ def geometry(geom, bbox=None, precision=None, **kwargs):
 
 
 def group(geometries, **kwargs):
-    '''
+    """
     Add a list of geometries to a group.
 
     Args:
@@ -177,5 +186,5 @@ def group(geometries, **kwargs):
 
     Returns:
         str (unicode in Python 2) representation of the SVG group
-    '''
+    """
     return svg.group([geometries(g, fill_rule="evenodd", **kwargs) for g in geometries])

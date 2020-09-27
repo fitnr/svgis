@@ -3,16 +3,17 @@
 
 '''Clip and simplify geometries'''
 
+from functools import partial
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, 2020, Neil Freeman <contact@fakeisthenewreal.org>
 from types import GeneratorType
-from functools import partial
 
 try:
-    from shapely.geometry import shape, mapping
+    from shapely.geometry import mapping, shape
     from shapely.geos import TopologicalError
 except ImportError:
     pass
@@ -53,7 +54,6 @@ def expand_rings(rings):
 
 def expand_geom(geom):
     '''Expand generators in a geometry's coordinates.'''
-
     if geom['type'] == 'MultiPolygon':
         geom['coordinates'] = tuple(expand_rings(rings) for rings in geom['coordinates'])
 
@@ -73,7 +73,7 @@ def expand_geom(geom):
 
 
 def clipper(bbox):
-    '''
+    """
     Create a clipping function for a given bounding box.
 
     Args:
@@ -81,11 +81,11 @@ def clipper(bbox):
 
     Returns:
         function that will given geometries to input bounding box
-    '''
+    """
     minx, miny, maxx, maxy = bbox
     bounds = {
         "type": "Polygon",
-        "coordinates": [[(minx, miny), (minx, maxy), (maxx, maxy), (maxx, miny), (minx, miny)]]
+        "coordinates": [[(minx, miny), (minx, maxy), (maxx, maxy), (maxx, miny), (minx, miny)]],
     }
     try:
         bbox_shape = shape(bounds)
@@ -102,6 +102,7 @@ def clipper(bbox):
             return mapping(clipped)
 
     except NameError:
+
         def func(geometry):
             return geometry
 
@@ -109,7 +110,7 @@ def clipper(bbox):
 
 
 def clip(geometry, bounds):
-    '''
+    """
     Clip a geometry to a bounding box. Equivalent to calling clipper(bounds)(geometry).
 
     Args:
@@ -118,7 +119,7 @@ def clip(geometry, bounds):
 
     Returns:
         (dict) geometry
-    '''
+    """
     try:
         return clipper(bounds)(geometry)
 
@@ -127,7 +128,7 @@ def clip(geometry, bounds):
 
 
 def simplifier(ratio):
-    '''
+    """
     Create a simplification function, if visvalingamwyatt is available.
     Otherwise, return a noop function.
 
@@ -136,15 +137,15 @@ def simplifier(ratio):
 
     Returns:
         simplification function
-    '''
+    """
     try:
         # put this first to get NameError out of the way
         simplify = vw.simplify_geometry
 
         if ratio is None or ratio >= 100 or ratio < 1:
-            raise ValueError
+            raise SvgisError("Invalid ratio")
 
-        return partial(simplify, ratio=ratio / 100.)
+        return partial(simplify, ratio=ratio / 100.0)
 
     except (TypeError, ValueError, NameError):
         return None
@@ -173,6 +174,13 @@ def scale_rings(rings, factor=1):
 
 
 def scale_geom(geom, factor=1):
+    """
+    Scale a geometry by a given factor
+
+    Args:
+        geom (dict): geojson-like dict
+        factor (numeric): scale factor, default: 1
+    """
     if geom['type'] == 'MultiPolygon':
         geom['coordinates'] = [scale_rings(rings, factor) for rings in geom['coordinates']]
 

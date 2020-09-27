@@ -8,12 +8,16 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, 2020, Neil Freeman <contact@fakeisthenewreal.org>
+
+import logging
+import os.path
+
+# pylint: disable=c-extension-no-member
 import re
 from string import ascii_letters
-import os.path
-import logging
-from lxml import etree
+
 import tinycss2
+from lxml import etree
 
 from . import dom
 
@@ -21,7 +25,7 @@ LOG = logging.getLogger('svgis')
 
 
 def sanitize(string):
-    '''
+    """
     Make input safe of use in an svg ID or class field.
     Replaces blocks of whitespace with an underscore (``_``),
     deletes periods, number signs and double-quotes (``.#"``).
@@ -33,7 +37,7 @@ def sanitize(string):
 
     Returns:
         str
-    '''
+    """
     try:
         string = re.sub(r'\s+', '_', re.sub(r'(\.|#|"|&)', '', string))
         return string if string[:1] in '_-' + ascii_letters else '_' + string
@@ -43,7 +47,7 @@ def sanitize(string):
 
 
 def construct_classes(classes, properties):
-    '''
+    """
     Build a class string for an element using the properties. Class names
     take the form CLASS_PROPERTY. If a given class isn't found in properties,
     the class name is added (e.g. CLASS).
@@ -54,13 +58,13 @@ def construct_classes(classes, properties):
 
     Returns:
         (list) class names
-    '''
+    """
     f = u'{}_{}'
     return [sanitize(f.format(p, properties.get(p))) for p in classes if p in properties]
 
 
 def construct_datas(fields, properties):
-    '''
+    """
     Build a data- attribute string for an element using the properties. Attributes
     take the form data_FIELD=PROPERTY.
 
@@ -70,17 +74,17 @@ def construct_datas(fields, properties):
 
     Returns:
         (dict) attribute dictionary
-    '''
+    """
     return {sanitize('data-' + n): str(properties.get(n)) for n in fields if n in properties}
 
 
 def pick(style):
-    '''
+    """
     Fetch a CSS string.
 
     Args:
         style (str): Either a CSS string or the path of a css file.
-    '''
+    """
     try:
         _, ext = os.path.splitext(style)
         if ext == '.css':
@@ -98,6 +102,7 @@ def pick(style):
 
 
 def rescale(svgfile, factor):
+    """Add a scale() operation to an entire svg file."""
     svg = etree.parse(svgfile).getroot()
     scalar = 'scale({})'.format(factor)
     g = svg.find('.//g', namespaces=svg.nsmap)
@@ -111,14 +116,14 @@ def replace_comments(css):
 
 
 def add_style(svgfile, style, replace=False):
-    '''
+    """
     Add to or replace the CSS style in an SVG file.
 
     Args:
         svgfile (str): Path to an SVG file or an SVG string.
         newstyle (str): CSS string, or path to CSS file.
         replace (bool): If true, replace the existing CSS with newstyle (default: False)
-    '''
+    """
     if style == '-':
         style = '/dev/stdin'
 
@@ -161,7 +166,7 @@ def add_style(svgfile, style, replace=False):
 
 
 def inline(svg):
-    '''
+    """
     Inline the CSS rules in an SVG. This is a very rough operation,
     and full css precedence rules won't be respected. May ignore sibling
     operators (``~``, ``+``), pseudo-selectors (e.g. ``:first-child``), and
@@ -176,7 +181,7 @@ def inline(svg):
     Args:
         svg (string): An SVG document.
         style (string): CSS to use, instead of the CSS in the <defs> element of the SVG.
-    '''
+    """
     try:
         doc = etree.fromstring(svg.encode('utf-8'))
         style_element = doc.find('.//style', namespaces=doc.nsmap)

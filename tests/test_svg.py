@@ -9,8 +9,10 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 import unittest
 from xml.dom import minidom
-from svgis import style, svg
+
 import six
+
+from svgis import style, svg
 
 
 class SvgTestCase(unittest.TestCase):

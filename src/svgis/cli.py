@@ -1,62 +1,67 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+"""Command-line utilities for SVGIS."""
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://www.opensource.org/licenses/GNU General Public License v3 (GPLv3)-license
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
-import sys
-from signal import signal, SIGPIPE, SIG_DFL
+
 import logging
+import sys
 import warnings
+from signal import SIG_DFL, SIGPIPE, signal
+
 import click
 import fiona.crs
 
-from . import bounding, projection
-from . import graticule as _graticule, style as _style, svgis, __version__
+from . import __version__, bounding
+from . import graticule as _graticule
+from . import projection
+from . import style as _style
+from . import svgis
 from .utils import DEFAULT_GEOID, posint
 
-
-none = {
-    'flag_value': None,
-    'expose_value': False,
-    'help': '(not enabled)'
-}
+none = {'flag_value': None, 'expose_value': False, 'help': '(not enabled)'}
 
 try:
+    # pylint: disable=unused-import
     import shapely
+
     clipkwargs = {
         'default': True,
         'flag_value': True,
-        'help': "Clip shapes to bounds. Slightly slower, produces smaller files (default: clip)."
+        'help': "Clip shapes to bounds. Slightly slower, produces smaller files (default: clip).",
     }
 except ImportError:
     clipkwargs = none
 
 try:
+    # pylint: disable=unused-import
     import visvalingamwyatt
+
     simplifykwargs = {
         'type': click.IntRange(1, 100, clamp=True),
         'metavar': 'FACTOR',
-        'help': ('Simplify geometries, '
-                 'accepts an integer between 1 and 100, '
-                 'the percentage of each geometry to retain.'),
+        'help': (
+            'Simplify geometries, '
+            'accepts an integer between 1 and 100, '
+            'the percentage of each geometry to retain.'
+        ),
     }
 except ImportError:
     simplifykwargs = none
 
-CLICKARGS = {
-    'context_settings': dict(help_option_names=['-h', '--help'])
-}
+CLICKARGS = {'context_settings': dict(help_option_names=['-h', '--help'])}
 
 csskwargs = {
     'flag_value': True,
     'default': True,
-    'help': ('Inline CSS styles to each element. '
-             'Slightly slower, but required by some clients (e.g. Adobe) '
-             '(default: inline).'),
+    'help': (
+        'Inline CSS styles to each element. '
+        'Slightly slower, but required by some clients (e.g. Adobe) '
+        '(default: inline).'
+    ),
 }
 
 inp = click.argument('layer', default=sys.stdin, type=click.File('rb'))
@@ -68,6 +73,7 @@ outp = click.argument('output', default=sys.stdout, type=click.File('wb'))
 @click.version_option(version=__version__, message='%(prog)s %(version)s')
 @click.pass_context
 def main(context):
+    """Entry-point for svgis command-line interface."""
     context.log = logging.getLogger('svgis')
     context.log.setLevel(logging.WARN)
     ch = logging.StreamHandler()
@@ -78,9 +84,9 @@ def main(context):
 
 
 # Style
-style_help = ("Style to append to SVG. "
-              "Either a valid CSS string, a file path (must end in '.css'). "
-              "Use '-' for stdin.")
+style_help = (
+    "Style to append to SVG. Either a valid CSS string, a file path (must end in '.css'). Use '-' for stdin."
+)
 
 
 @main.command()
@@ -106,13 +112,15 @@ def scale(layer, output, **kwargs):
     click.echo(_style.rescale(layer, factor=kwargs['scale']).encode('utf-8'), file=output)
 
 
-crs_help = ('Specify a map projection. '
-            'Accepts either an EPSG code (e.g. epsg:4456), '
-            'a proj4 string, '
-            'a file containing a proj4 string, '
-            '"utm" (use local UTM), '
-            '"file" (use existing), '
-            '"local" (generate a local projection)')
+crs_help = (
+    'Specify a map projection. '
+    'Accepts either an EPSG code (e.g. epsg:4456), '
+    'a proj4 string, '
+    'a file containing a proj4 string, '
+    '"utm" (use local UTM), '
+    '"file" (use existing), '
+    '"local" (generate a local projection)'
+)
 
 
 @main.command()
@@ -120,9 +128,7 @@ crs_help = ('Specify a map projection. '
 @click.option('-j', '--crs', type=str, metavar='KEYWORD', default='file', help=crs_help + ' (default: file)')
 @click.option('--latlon', default=False, flag_value=True, help='Print bounds in latitude, longitude order')
 def bounds(layer, crs, latlon=False):
-    '''
-    Return the bounds for a given layer, optionally projected.
-    '''
+    """Return the bounds for a given layer, optionally projected."""
     with fiona.Env():
         with fiona.open(layer, "r") as f:
             meta = {'bounds': f.bounds}
@@ -146,29 +152,54 @@ def bounds(layer, crs, latlon=False):
 @main.command()
 @click.argument('layer', nargs=-1, type=str, required=True)
 @click.option('-o', '--output', default=sys.stdout, type=click.File('wb'), help="Defaults to stdout")
-@click.option('-b', '--bounds', nargs=4, type=float, metavar="minx miny maxx maxy",
-              help='In the same coordinate system as the first input layer', default=None)
+@click.option(
+    '-b',
+    '--bounds',
+    nargs=4,
+    type=float,
+    metavar="minx miny maxx maxy",
+    help='In the same coordinate system as the first input layer',
+    default=None,
+)
 @click.option('-c', '--style', type=str, metavar='CSS', help="CSS file or string", multiple=True)
-@click.option('-f', '--scale', type=int, default=None,
-              help='Scale for the map (units are divided by this number)')
-@click.option('-p', '--padding', type=int, default=None, required=None,
-              help='Buffer the map (in projection units)')
+@click.option('-f', '--scale', type=int, default=None, help='Scale for the map (units are divided by this number)')
+@click.option('-p', '--padding', type=int, default=None, required=None, help='Buffer the map (in projection units)')
 @click.option('-i', '--id-field', type=str, metavar='FIELD', help='Geodata field to use as ID')
-@click.option('-a', '--class-fields', type=str, default='', metavar='FIELDS', multiple=True,
-              help='Geodata fields to use as class (comma-separated)')
-@click.option('-a', '--data-fields', type=str, default='', metavar='FIELDS', multiple=True,
-              help='Geodata fields to add as data-* attributes (comma-separated)')
+@click.option(
+    '-a',
+    '--class-fields',
+    type=str,
+    default='',
+    metavar='FIELDS',
+    multiple=True,
+    help='Geodata fields to use as class (comma-separated)',
+)
+@click.option(
+    '-a',
+    '--data-fields',
+    type=str,
+    default='',
+    metavar='FIELDS',
+    multiple=True,
+    help='Geodata fields to add as data-* attributes (comma-separated)',
+)
 @click.option('-j', '--crs', metavar='KEYWORD', type=str, help=crs_help)
 @click.option('-s', '--simplify', **simplifykwargs)
-@click.option('-P', '--precision', metavar='INTEGER', type=posint, default=5,
-              help='Rounding precision for coordinates (default: 5)')
+@click.option(
+    '-P',
+    '--precision',
+    metavar='INTEGER',
+    type=posint,
+    default=5,
+    help='Rounding precision for coordinates (default: 5)',
+)
 @click.option('--clip/--no-clip', ' /-n', **clipkwargs)
 @click.option('--inline/--no-inline', '-l/ ', **csskwargs)
 @click.option('--viewbox/--no-viewbox', ' /-x', default=False, help='Draw SVG using a ViewBox (default: no ViewBox)')
 @click.option('-q', '--quiet', default=False, flag_value=True, help='Ignore warnings')
 @click.option('-v', '--verbose', default=False, count=True, help='Talk a lot')
 def draw(layer, output, **kwargs):
-    '''Draw SVGs from input geodata'''
+    """Draw SVGs from input geodata"""
     log = logging.getLogger('svgis')
 
     verbose = kwargs.pop('verbose', None)
@@ -192,7 +223,11 @@ def draw(layer, output, **kwargs):
 @click.option('-m', '--method', default='local', type=click.Choice(('utm', 'local')), help='Defaults to local')
 @click.option('-j', '--crs', default=DEFAULT_GEOID, help='Projection of the bounding coordinates')
 def project(bounds, method, crs):
-    '''Get a local Transverse Mercator or UTM projection for a bounding box. Expects WGS84 coordinates.'''
+    """
+    Get a local Transverse Mercator or UTM projection for a bounding box.
+    Expects WGS84 coordinates.
+    """
+    # pylint: disable=redefined-outer-name
     if crs in projection.METHODS:
         click.echo('CRS must be an EPSG code, a Proj4 string, or file containing a Proj4 string.', err=1)
         return
@@ -208,12 +243,14 @@ def project(bounds, method, crs):
     click.echo(result.encode('utf-8'))
 
 
-crs_help2 = ('Specify a map projection. '
-             'Accepts either an EPSG code (e.g. epsg:4456), '
-             'a proj4 string, '
-             'a file containing a proj4 string, '
-             '"utm" (use local UTM), '
-             '"local" (generate a local projection)')
+crs_help2 = (
+    'Specify a map projection. '
+    'Accepts either an EPSG code (e.g. epsg:4456), '
+    'a proj4 string, '
+    'a file containing a proj4 string, '
+    '"utm" (use local UTM), '
+    '"local" (generate a local projection)'
+)
 
 
 # Graticule
@@ -223,5 +260,9 @@ crs_help2 = ('Specify a map projection. '
 @click.option('-j', '--crs', type=str, default=None, help=crs_help2)
 @click.option('-o', '--output', default=sys.stdout, type=click.File('wb'), help="Defaults to stdout")
 def graticule(bounds, step, crs, output):
-    '''Generate a GeoJSON containing a graticule. Accepts a bounding box in longitude and latitude (WGS84).'''
+    """
+    Generate a GeoJSON containing a graticule.
+    Accepts a bounding box in longitude and latitude (WGS84).
+    """
+    # pylint: disable=redefined-outer-name
     click.echo(_graticule.geojson(bounds, step, crs), file=output)

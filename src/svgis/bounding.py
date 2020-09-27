@@ -10,7 +10,8 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, 2020, Neil Freeman <contact@fakeisthenewreal.org>
 from pyproj.transformer import Transformer
-from . import utils
+
+from . import errors, utils
 
 
 def check(bounds):
@@ -18,7 +19,7 @@ def check(bounds):
     # Refuse to set these more than once
     try:
         if bounds is None or len(bounds) != 4 or not all(bounds):
-            raise ValueError
+            return False
 
     except (TypeError, AttributeError, ValueError):
         return False
@@ -33,10 +34,10 @@ def check(bounds):
 
 
 def update(old, new):
-    '''
+    """
     Extend old with any more distant values from newpoints.
     Also replace any missing min/max points in old with values from new.
-    '''
+    """
     bounds = []
     inf = float('inf')
     neginf = inf * -1
@@ -71,9 +72,9 @@ def update(old, new):
 
 
 def pad(bounds, ext=100):
-    '''
+    """
     Pad a bounding box. Works best when input is in feet or meters or something.
-    '''
+    """
     try:
         return bounds[0] - ext, bounds[1] - ext, bounds[2] + ext, bounds[3] + ext
     except TypeError:
@@ -94,18 +95,18 @@ def ring(bounds):
 
 
 def covers(b1, b2):
-    '''
+    """
     Return True if b1 covers b2.
 
     Args:
         b1 (tuple): A bounding box (minx, miny, maxx, maxy)
         b2 (tuple): A bounding box
-    '''
+    """
     return b1[0] <= b2[0] and b1[1] <= b2[1] and b1[2] >= b2[2] and b1[3] >= b2[3]
 
 
 def transform(bounds, **kwargs):
-    '''
+    """
     Project a bounding box, taking care to not slice off the sides.
 
     Args:
@@ -116,13 +117,13 @@ def transform(bounds, **kwargs):
 
     Returns:
         tuple
-    '''
+    """
     transformer = kwargs.get('transformer')
     in_crs = kwargs.get('in_crs')
     out_crs = kwargs.get('out_crs')
 
     if not transformer and not (in_crs and out_crs):
-        raise TypeError('Need input CRS and output CRS or a Transformer')
+        raise errors.SvgisError('Need input CRS and output CRS or a Transformer')
 
     if transformer is None:
         transformer = Transformer.from_crs(in_crs, out_crs, skip_equivalent=True, always_xy=True)

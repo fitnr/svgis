@@ -9,19 +9,20 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, 2020, Neil Freeman <contact@fakeisthenewreal.org>
 import os.path
-import fiona.transform
-import fiona.crs
-from pyproj.crs import CRS
-import utm
-from .utils import DEFAULT_GEOID
-from . import bounding
 
+import fiona.crs
+import fiona.transform
+import utm
+from pyproj.crs import CRS
+
+from . import errors, bounding
+from .utils import DEFAULT_GEOID
 
 METHODS = 'default', 'file', 'local', 'utm'
 
 
 def tm_proj4(x0, y0, y1):
-    '''
+    """
     Generate the proj4 string for a local Transverse Mercator projection
     centered at a given longitude and between two latitudes.
 
@@ -32,14 +33,16 @@ def tm_proj4(x0, y0, y1):
 
     Returns:
         (str) proj4 string
-    '''
-    return ('+proj=lcc +lon_0={x0} +lat_1={y1} +lat_2={y0} +lat_0={y1}'
-            '+x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0'
-            '+units=m +no_defs').format(x0=x0, y0=y0, y1=y1)
+    """
+    return (
+        '+proj=lcc +lon_0={x0} +lat_1={y1} +lat_2={y0} +lat_0={y1}'
+        '+x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0'
+        '+units=m +no_defs'
+    ).format(x0=x0, y0=y0, y1=y1)
 
 
 def utm_proj4(lon, lat):
-    '''
+    """
     Generate the proj4 string for the UTM projection at a given (lon, lat) coordinate.
 
     Args:
@@ -48,7 +51,7 @@ def utm_proj4(lon, lat):
 
     Returns:
         (str) proj4 string
-    '''
+    """
     try:
         _, _, zonenumber, zoneletter = utm.from_latlon(lat, lon)
 
@@ -60,12 +63,12 @@ def utm_proj4(lon, lat):
 
         return '+proj=utm +zone={} +{} +datum=WGS84 +units=m +no_defs'.format(zonenumber, hemisphere)
 
-    except utm.error.OutOfRangeError as e:
-        raise ValueError(e)
+    except utm.error.OutOfRangeError as err:
+        raise errors.SvgisError(err) from err
 
 
 def generateproj4(method, bounds, file_crs):
-    '''
+    """
     Generate a Proj4 projection definition: either the local UTM zone
     or a custom transverse mercator.
 
@@ -79,9 +82,9 @@ def generateproj4(method, bounds, file_crs):
 
     Returns:
         (str) proj4 string
-    '''
+    """
     if bounds is None or file_crs is None:
-        raise ValueError('generatecrs missing bounds and file crs')
+        raise errors.SvgisError('generatecrs missing bounds and file crs')
 
     is_longlat = _is_longlat(file_crs)
     if method == 'default':
@@ -110,6 +113,8 @@ def generateproj4(method, bounds, file_crs):
 
         return tm_proj4(x0, miny, maxy)
 
+    raise errors.SvgisError("Unexpected method. Valid methods are default, local or utm. Got: %s" % method)
+
 
 def _is_longlat(crs):
     '''Test if CRS is in lat/long coordinates'''
@@ -127,12 +132,12 @@ def _is_longlat(crs):
 
 
 def pick(project, bounds=None, file_crs=None):
-    '''
+    """
     Pick a projection or projection method to use.
 
     Returns:
         (mixed) one of: None, 'local', 'utm' or a dict
-    '''
+    """
     out_crs = None
     project = project or 'default'
 
@@ -151,7 +156,7 @@ def pick(project, bounds=None, file_crs=None):
             try:
                 out_crs = fiona.crs.from_string(generateproj4(project, bounds, file_crs))
 
-            except ValueError:
+            except errors.SvgisError:
                 return project
 
         # Is a file
@@ -168,8 +173,8 @@ def pick(project, bounds=None, file_crs=None):
 
 
 def fake_to_string(crs):
-    '''
+    """
     Fake to_string for debugging in places where fiona.crs.to_string
     isn't available
-    '''
+    """
     return ' '.join('+{0[0]}={0[1]}'.format(i) for i in crs.items())

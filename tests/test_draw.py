@@ -8,9 +8,11 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
-import unittest
 import re
+import unittest
+
 import six
+
 from svgis import draw, errors, svgis
 
 

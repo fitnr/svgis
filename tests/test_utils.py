@@ -1,22 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
 import unittest
-import logging
+
 from svgis import utils
+from svgis.errors import SvgisError
 
 
 class UtilsTestCase(unittest.TestCase):
 
     def testPosInt(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(SvgisError):
             utils.posint(-1)
         assert utils.posint(1) == 1
         assert utils.posint(111) == 111

@@ -9,7 +9,9 @@
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
 import unittest
+
 from svgis import projection
+from svgis.errors import SvgisError
 from svgis.utils import DEFAULT_GEOID
 
 SHP = 'tests/test_data/cb_2014_us_nation_20m.json'
@@ -22,7 +24,7 @@ class ProjectionTestCase(unittest.TestCase):
 
         assert projection.utm_proj4(-21, -42) == '+proj=utm +zone=27 +south +datum=WGS84 +units=m +no_defs'
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(SvgisError):
             projection.utm_proj4(-200, 100)
 
     def testLocalTm(self):

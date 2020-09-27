@@ -10,11 +10,12 @@
 # Copyright (c) 2016, 2020, Neil Freeman <contact@fakeisthenewreal.org>
 
 from six import string_types
+
 from . import dom, utils
 
 
 def _element(tag, contents=None, **kwargs):
-    '''
+    """
     Draw an element, optionally wrapping contents.
 
     Args:
@@ -24,7 +25,7 @@ def _element(tag, contents=None, **kwargs):
 
     Returns:
         str (unicode in Python 2)
-    '''
+    """
     attribs = toattribs(**kwargs)
     if contents:
         return '<{0}{1}>{2}</{0}>'.format(tag, attribs, contents)
@@ -49,7 +50,7 @@ def _poly(name):
 
 
 def circle(point, precision=None, **kwargs):
-    '''
+    """
     Create a svg circle element. Keyword arguments are mapped to attributes.
 
     Args:
@@ -58,13 +59,12 @@ def circle(point, precision=None, **kwargs):
 
     Returns:
         str (unicode in Python 2)
-    '''
-    return _element('circle', cx=utils.rnd(point[0], precision),
-                    cy=utils.rnd(point[1], precision), **kwargs)
+    """
+    return _element('circle', cx=utils.rnd(point[0], precision), cy=utils.rnd(point[1], precision), **kwargs)
 
 
 def text(string, start, precision=None, **kwargs):
-    '''
+    """
     Create an svg text element.
 
     Args:
@@ -73,13 +73,13 @@ def text(string, start, precision=None, **kwargs):
 
     Returns:
         str
-    '''
+    """
     start = [utils.rnd(i, precision) for i in start]
     return _element('text', string, x=start[0], y=start[1], **kwargs)
 
 
 def rect(start, width, height, precision=None, **kwargs):
-    '''
+    """
     Create an svg rect element.
 
     Args:
@@ -90,7 +90,7 @@ def rect(start, width, height, precision=None, **kwargs):
 
     Returns:
         str (unicode in Python 2)
-    '''
+    """
     start = [utils.rnd(i, precision) for i in start]
     width = utils.rnd(width, precision)
     height = utils.rnd(height, precision)
@@ -99,7 +99,7 @@ def rect(start, width, height, precision=None, **kwargs):
 
 
 def line(start, end, precision=None, **kwargs):
-    '''
+    """
     Create an svg line element.
 
     Args:
@@ -109,7 +109,7 @@ def line(start, end, precision=None, **kwargs):
 
     Returns:
         str (unicode in Python 2)
-    '''
+    """
     start = [utils.rnd(i, precision) for i in start]
     end = [utils.rnd(i, precision) for i in end]
 
@@ -117,7 +117,7 @@ def line(start, end, precision=None, **kwargs):
 
 
 def path(coordinates, precision=None, **kwargs):
-    '''
+    """
     Create an svg path element as a string.
 
     Args:
@@ -126,7 +126,7 @@ def path(coordinates, precision=None, **kwargs):
 
     Returns:
         str (unicode in Python 2)
-    '''
+    """
     fmt = _fmt(precision)
     coords = utils.dedupe(i if isinstance(i, string_types) else fmt.format(i) for i in coordinates)
     return _element('path', d=' '.join(coords), **kwargs)
@@ -134,7 +134,7 @@ def path(coordinates, precision=None, **kwargs):
 
 @_poly
 def polyline():
-    '''
+    """
     Create an svg polyline element
 
     Args:
@@ -143,13 +143,13 @@ def polyline():
 
     Returns:
         str (unicode in Python 2)
-    '''
+    """
     return 'polyline'
 
 
 @_poly
 def polygon():
-    '''
+    """
     Create an svg polygon element
 
     Args:
@@ -158,22 +158,18 @@ def polygon():
 
     Returns:
         str (unicode in Python 2)
-    '''
+    """
     return 'polygon'
 
 
 def toattribs(**kwargs):
-    '''
+    """
     Convert keyword arguments to SVG attribute definitions.
 
     Returns:
         str (unicode in Python 2)
-    '''
-    attribs = ' '.join(
-        '{}="{}"'.format(k, dom.ampencode(v))
-        for k, v in kwargs.items()
-        if v is not None and v != ''
-    )
+    """
+    attribs = ' '.join('{}="{}"'.format(k, dom.ampencode(v)) for k, v in kwargs.items() if v is not None and v != '')
     if attribs:
         return ' ' + attribs
 
@@ -181,7 +177,7 @@ def toattribs(**kwargs):
 
 
 def defstyle(style=None):
-    '''
+    """
     Create a defs element that wraps a CSS style.
 
     Args:
@@ -189,7 +185,7 @@ def defstyle(style=None):
 
     Returns:
         str (unicode in Python 2)
-    '''
+    """
     if style:
         return '<defs><style type="text/css"><![CDATA[{}]]></style></defs>'.format(style)
 
@@ -197,7 +193,7 @@ def defstyle(style=None):
 
 
 def group(members=None, **kwargs):
-    '''
+    """
     Create a group with the given scale and translation.
 
     Args:
@@ -207,13 +203,13 @@ def group(members=None, **kwargs):
 
     Returns:
         str (unicode in Python 2)
-    '''
+    """
     members = members or ''
     return _element('g', ''.join(members), **kwargs)
 
 
 def drawing(size, members, precision=None, viewbox=None, style=None):
-    '''
+    """
     Create an SVG element.
 
     Args:
@@ -224,7 +220,7 @@ def drawing(size, members, precision=None, viewbox=None, style=None):
 
     Returns:
         str (unicode in Python 2)
-    '''
+    """
     kwargs = {
         'width': size[0],
         'height': size[1],

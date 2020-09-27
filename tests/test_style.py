@@ -8,18 +8,20 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 
-import unittest
-import re
 import os
+import re
+import unittest
 from io import BytesIO, StringIO
 from xml.dom import minidom
+
 try:
     from lxml import etree
 except ImportError:
     import xml.etree.ElementTree as etree
 
 from svgis import dom, style
-from . import TEST_SVG, TEST_CSS
+
+from . import TEST_CSS, TEST_SVG
 
 
 class CssTestCase(unittest.TestCase):

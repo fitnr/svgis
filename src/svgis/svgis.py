@@ -2,37 +2,42 @@
 
 """Draw SVG maps"""
 
+import logging
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, 2020, Neil Freeman <contact@fakeisthenewreal.org>
 import os.path
+import warnings
 from collections import Iterable
 from functools import partial
-import logging
-import warnings
+
 import fiona
 import fiona.transform
 from six import string_types
 
-from . import bounding, draw, errors, projection, svg, transform, utils
+from . import bounding, draw, projection
+from .errors import SvgisError
 from . import style as _style
+from . import svg, transform, utils
 
-
-STYLE = ('polyline,line,rect,path,polygon,.polygon{'
-         'fill:none;'
-         'stroke:#000;'
-         'stroke-width:1px;'
-         'stroke-linejoin:round;'
-         '}')
+STYLE = (
+    'polyline,line,rect,path,polygon,.polygon{'
+    'fill:none;'
+    'stroke:#000;'
+    'stroke-width:1px;'
+    'stroke-linejoin:round;'
+    '}'
+)
 
 
 warnings.filterwarnings("ignore")
 
 
 def map(layers, bounds=None, scale=None, **kwargs):
-    '''
+    """
     Draw a geodata layer to SVG. This is shorthand for creating a :class:`SVGIS` instance
     and immediately runnning :class:`SVGIS.compose`.
 
@@ -54,8 +59,9 @@ def map(layers, bounds=None, scale=None, **kwargs):
 
     Returns:
         String (unicode in Python 2) containing an entire SVG document.
-    '''
-    scale = (1. / scale) if scale else 1.
+    """
+    # pylint: disable=redefined-builtin
+    scale = (1.0 / scale) if scale else 1.0
     bounds = bounding.check(bounds)
 
     # Try to read style file(s)
@@ -74,7 +80,7 @@ def map(layers, bounds=None, scale=None, **kwargs):
         id_field=kwargs.pop('id_field', None),
         class_fields=class_fields,
         data_fields=data_fields,
-        simplify=kwargs.pop('simplify', None)
+        simplify=kwargs.pop('simplify', None),
     ).compose(**kwargs)
 
     return drawing
@@ -118,7 +124,7 @@ class SVGIS:
         elif isinstance(files, Iterable):
             self.files = files
         else:
-            raise ValueError("'files' must be a file name or list of file names")
+            raise SvgisError("'files' must be a file name or list of file names")
 
         self.log.info('starting SVGIS, files: %s', ', '.join(self.files))
 
@@ -169,10 +175,7 @@ class SVGIS:
             # Assume input CRS is WGS 84
             self._in_crs = utils.DEFAULT_GEOID
             self.log.debug('setting input crs to default %s', utils.DEFAULT_GEOID)
-            self.log.warning(
-                'Found no input coordinate system, '
-                'assuming WGS84 (long/lat) coordinates.'
-            )
+            self.log.warning('Found no input coordinate system, ' 'assuming WGS84 (long/lat) coordinates.')
 
     @property
     def out_crs(self):
@@ -211,7 +214,7 @@ class SVGIS:
         return self._projected_bounds
 
     def update_projected_bounds(self, in_crs, out_crs, bounds, padding=None):
-        '''
+        """
         Extend projected_bounds bbox with self.padding.
 
         Args:
@@ -221,7 +224,7 @@ class SVGIS:
 
         Returns:
             (tuple) bounding box in out_crs coordinates.
-        '''
+        """
         # This may happen many times if we were passed bounds, but it's a cheap operation.
         self.log.debug('updating bounds - in_crs: %s', in_crs)
         self.log.debug('                - out_crs: %s', out_crs)
@@ -231,7 +234,7 @@ class SVGIS:
         return self._projected_bounds
 
     def _get_clipper(self, layer_bounds, out_bounds, scalar=None):
-        '''
+        """
         Get a clipping function for the given input crs and bounds.
 
         Args:
@@ -241,7 +244,7 @@ class SVGIS:
 
         Returns:
             None if layer_bounds are inside out_bounds or clipping is off.
-        '''
+        """
         if not self.clip or bounding.covers(out_bounds, layer_bounds):
             return None
 
@@ -263,7 +266,7 @@ class SVGIS:
         return None
 
     def _prepare_layer(self, layer, filename, bounds, scalar, **kwargs):
-        '''
+        """
         Prepare the keyword args for drawing a layer.
 
         Args:
@@ -277,14 +280,14 @@ class SVGIS:
 
         Returns:
             (dict) Arguments for self._feature
-        '''
+        """
         result = {
             'transforms': [
                 self._reprojector(layer.crs),
                 partial(transform.scale_geom, factor=scalar),
                 # Get clipping function based on a slightly extended version of _projected_bounds.
                 self._get_clipper(layer.bounds, bounds, scalar=scalar),
-                self.simplifier
+                self.simplifier,
             ]
         }
 
@@ -310,7 +313,7 @@ class SVGIS:
         return result
 
     def compose_file(self, path, unprojected_bounds=None, **kwargs):
-        '''
+        """
         Draw fiona file to an SVG group.
 
         Args:
@@ -327,7 +330,7 @@ class SVGIS:
 
         Returns:
             dict with keys: members, id, class. This is ready to be passed to svgis.svg.group.
-        '''
+        """
         padding = kwargs.pop('padding', self.padding)
         kwargs['scalar'] = kwargs.get('scalar', self.scalar)
         unprojected_bounds = unprojected_bounds or self.unprojected_bounds
@@ -366,11 +369,11 @@ class SVGIS:
         return {
             'members': group,
             'id': kwargs['name'],
-            'class': u' '.join(_style.sanitize(c) for c in layer.schema['properties'].keys())
+            'class': u' '.join(_style.sanitize(c) for c in layer.schema['properties'].keys()),
         }
 
     def feature(self, feature, transforms, classes, datas=None, **kwargs):
-        '''
+        """
         Draw a single feature.
 
         Args:
@@ -384,7 +387,7 @@ class SVGIS:
 
         Returns:
             str (unicode in Python 2)
-        '''
+        """
         name = kwargs.pop('name', '?')
         geom = feature.get('geometry')
         precision = kwargs.pop('precision', self.precision)
@@ -393,15 +396,16 @@ class SVGIS:
         try:
             # Check if geometry exists (a bit unpythonic, but cleaner errs this way).
             if geom is None:
-                raise ValueError('NULL geometry')
+                raise SvgisError('NULL geometry')
 
             # Apply transformations to the geometry.
             for t in transforms:
                 geom = t(geom) if t is not None else geom
 
-        except ValueError as e:
-            self.log.warning('error transforming feature %s of %s: %s',
-                             kwargs.get('id', feature.get('id', '?')), name, e)
+        except SvgisError as e:
+            self.log.warning(
+                'error transforming feature %s of %s: %s', kwargs.get('id', feature.get('id', '?')), name, e
+            )
             return ''
 
         # Set up the element's properties.
@@ -422,13 +426,12 @@ class SVGIS:
             # Draw the geometry.
             return draw.geometry(geom, precision=precision, **drawargs)
 
-        except errors.SvgisError as e:
-            self.log.warning('unable to draw feature %s of %s: %s',
-                             kwargs.get('id', feature.get('id', '?')), name, e)
+        except SvgisError as e:
+            self.log.warning('unable to draw feature %s of %s: %s', kwargs.get('id', feature.get('id', '?')), name, e)
             return u''
 
     def compose(self, bounds=None, style=None, viewbox=True, inline=True, **kwargs):
-        '''
+        """
         Draw files to svg.
 
         Args:
@@ -444,18 +447,16 @@ class SVGIS:
 
         Returns:
             String (unicode in Python 2) containing an entire SVG document.
-        '''
+        """
         # Set up arguments
         scalar = kwargs.pop('scalar', self.scalar)
         bounds = bounding.check(bounds) or self.unprojected_bounds
 
         # Draw files
-        members = [svg.group(**self.compose_file(f, bounds, scalar=scalar, **kwargs))
-                   for f in self.files]
+        members = [svg.group(**self.compose_file(f, bounds, scalar=scalar, **kwargs)) for f in self.files]
 
         self.log.info('composing drawing')
-        drawing = self.draw(members, scalar, kwargs.get('precision'),
-                            style=style, viewbox=viewbox, inline=inline)
+        drawing = self.draw(members, scalar, kwargs.get('precision'), style=style, viewbox=viewbox, inline=inline)
 
         # Always reset projected bounds.
         self._projected_bounds = (None,) * 4
@@ -463,7 +464,7 @@ class SVGIS:
         return drawing
 
     def draw(self, members, scalar=None, precision=None, style=None, **kwargs):
-        '''
+        """
         Combine drawn layers into an SVG drawing.
 
         Args:
@@ -476,7 +477,7 @@ class SVGIS:
 
         Returns:
             String (unicode in Python 2) containing an entire SVG document.
-        '''
+        """
         scalar = scalar or self.scalar
         precision = precision or self.precision
         style = style or self.style
@@ -486,7 +487,7 @@ class SVGIS:
             if any((utils.isinf(b) for b in self._projected_bounds)):
                 self.log.warning('Drawing has infinite bounds, consider changing projection or bounding box.')
 
-            dims = [float(b or 0.) * scalar for b in self.projected_bounds]
+            dims = [float(b or 0.0) * scalar for b in self.projected_bounds]
         except TypeError:
             self.log.warning(r'Unable to find bounds, map is probably empty ¯\_(ツ)_/¯')
             dims = 0, 0, 0, 0
