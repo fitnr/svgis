@@ -36,7 +36,10 @@ requires = [
 numpy = ["numpy"]
 clip = ["shapely>=1.5.7"]
 simplify = ["visvalingamwyatt>=0.1.1"]
-dev = ["coverage[toml]"]
+dev = [
+    "coverage[toml]",
+    "pylint>2.5.0"
+]
 doc = [
     "sphinx",
     "sphinx-rtd-theme"
@@ -48,3 +51,21 @@ svgis = "svgis.cli:main"
 [tool.coverage.run]
 branch = true
 source = ["svgis"]
+
+[tool.black]
+line-length = 120
+target-version = ["py38"]
+include = 'py$'
+skip-string-normalization = true
+
+[tool.pylint.master]
+fail-under = "9.5"
+
+[tool.pylint.basic]
+good-names = ["g", "f", "i", "j", "k", "x", "y", "z"]
+
+[tool.pylint.messages_control]
+disable = "invalid-name"
+
+[tool.pylint.format]
+max-line-length = 120

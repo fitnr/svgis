@@ -57,6 +57,9 @@ tests/test_data/test.svg: tests/test_data/cb_2014_us_nation_20m.json
 	- svgis draw --viewbox -j '$(PROJECTION)' -f 1000 -c "polygon { fill: blue }" --bounds -124 20.5 -64 49 $< -o $@
 	@touch $@
 
+format:
+	black src tests
+
 deploy: docs.zip | clean
 	git push
 	git push --tags
