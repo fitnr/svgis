@@ -52,6 +52,15 @@ svgis = "svgis.cli:main"
 branch = true
 source = ["svgis"]
 
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "except ImportError",
+]
+
 [tool.black]
 line-length = 120
 target-version = ["py38"]
@@ -62,7 +71,7 @@ skip-string-normalization = true
 fail-under = "9.5"
 
 [tool.pylint.basic]
-good-names = ["g", "f", "i", "j", "k", "x", "y", "z"]
+good-names = "f,g,i,j,k,x,y,z"
 
 [tool.pylint.messages_control]
 disable = "invalid-name"

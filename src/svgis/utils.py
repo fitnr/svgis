@@ -5,12 +5,10 @@
 
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
-from itertools import groupby
-
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
+from itertools import groupby
 from math import ceil, floor
 
 from .errors import SvgisError

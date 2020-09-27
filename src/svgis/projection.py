@@ -15,7 +15,7 @@ import fiona.transform
 import utm
 from pyproj.crs import CRS
 
-from . import errors, bounding
+from . import bounding, errors
 from .utils import DEFAULT_GEOID
 
 METHODS = 'default', 'file', 'local', 'utm'

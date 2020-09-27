@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
-import functools
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
+import functools
 import unittest
 
 from svgis import transform
@@ -16,7 +14,6 @@ try:
     import shapely.geometry
 
     class ClipTestCase(unittest.TestCase):
-
         def setUp(self):
             self.bounds = (1, 1, 9, 9)
             self.coords = [[(2, 2), (100, 2), (11, 11), (12, 12), (2, 10), (2, 2)]]
@@ -27,12 +24,9 @@ try:
             minx, miny, maxx, maxy = self.bounds
             bounds = {
                 "type": "Polygon",
-                "coordinates": [[(minx, miny), (minx, maxy), (maxx, maxy), (maxx, miny), (minx, miny)]]
+                "coordinates": [[(minx, miny), (minx, maxy), (maxx, maxy), (maxx, miny), (minx, miny)]],
             }
-            coords = {
-                "type": "Polygon",
-                "coordinates": self.coords
-            }
+            coords = {"type": "Polygon", "coordinates": self.coords}
 
             b = shapely.geometry.shape(bounds)
             c = shapely.geometry.shape(coords)
@@ -51,30 +45,30 @@ try:
 
             self.assertSequenceEqual(set(self.expected), set(clipped['coordinates']))
 
+
 except ImportError:
     pass
 
 
 class SimplifyTestCase(unittest.TestCase):
-
     def testSimplify(self):
         a = transform.simplifier(None)
-        assert a is None
+        self.assertIsNone(a)
 
         b = transform.simplifier(100)
-        assert b is None
+        self.assertIsNone(b)
 
         c = transform.simplifier(50)
 
         try:
             import visvalingamwyatt
-            assert isinstance(c, functools.partial)
+
+            self.assertIsInstance(c, functools.partial)
         except ImportError:
-            assert c is None
+            self.assertIsNone(c)
 
 
 class ExpandTestCase(unittest.TestCase):
-
     def setUp(self):
         self.bounds = (1, 1, 9, 9)
         self.coords = [[(2, 2), (100, 2), (11, 11), (12, 12), (2, 10), (2, 2)]]
@@ -94,10 +88,7 @@ class ExpandTestCase(unittest.TestCase):
         self.assertSequenceEqual(expanded, transform.expand(expanded))
 
     def testExpandGeometry(self):
-        geom = {
-            "type": "LineString",
-            "coordinates": self.gen
-        }
+        geom = {"type": "LineString", "coordinates": self.gen}
 
         expanded = transform.expand_geom(geom)
 
@@ -113,16 +104,7 @@ class ExpandTestCase(unittest.TestCase):
 
         GC = {
             "type": "GeometryCollection",
-            "geometries": [
-                {
-                    "type": "LineString",
-                    "coordinates": self.gen
-                },
-                {
-                    "type": "LineString",
-                    "coordinates": gen
-                }
-            ]
+            "geometries": [{"type": "LineString", "coordinates": self.gen}, {"type": "LineString", "coordinates": gen}],
         }
         a = transform.expand_geom(GC)
 

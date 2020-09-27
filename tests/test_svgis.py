@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
-
 import logging
 import re
 import unittest
@@ -29,11 +26,7 @@ class SvgisTestCase(unittest.TestCase):
             'pear': 1,
             'kale': 'leafy green',
         },
-        "geometry": {
-            "type": "Polygon",
-            "id": "Polygon",
-            "coordinates": [[(0, 0), (1, 0), (0, 1), (0, 0)]]
-        }
+        "geometry": {"type": "Polygon", "id": "Polygon", "coordinates": [[(0, 0), (1, 0), (0, 1), (0, 0)]]},
     }
 
     def setUp(self):
@@ -80,20 +73,16 @@ class SvgisTestCase(unittest.TestCase):
         self.assertIn('cb_2014_us_nation_20m', match.groups()[0])
 
     def testRepr(self):
-        expected = ("SVGIS(files=['{}'], "
-                    'out_crs=None)'.format(self.file))
+        expected = "SVGIS(files=['{}'], " 'out_crs=None)'.format(self.file)
         self.assertEqual(str(self.svgis_obj), expected)
 
     def testDrawGeometry(self):
         feat = {
             "geometry": {
                 'type': 'LineString',
-                'coordinates': [[-110.8, 35.3], [-110.9, 35.8], [-110.5, 35.1], [-110.8, 35.3]]
+                'coordinates': [[-110.8, 35.3], [-110.9, 35.8], [-110.5, 35.1], [-110.8, 35.3]],
             },
-            "properties": {
-                'foo': 'bar',
-                'cat': 'meow'
-            }
+            "properties": {'foo': 'bar', 'cat': 'meow'},
         }
         drawn = self.svgis_obj.feature(feat, [], classes=['foo'], id_field='cat', name='quux')
         assert isinstance(drawn, six.string_types)
@@ -120,10 +109,10 @@ class SvgisTestCase(unittest.TestCase):
 
             try:
                 self.assertIsInstance(b, str)
-            except AssertionError as er:
+            except AssertionError as err:
                 raise AssertionError(type(b)) from err
 
-        except NameError as nameerr:
+        except NameError:
             try:
                 self.assertIsInstance(a, str)
             except AssertionError as err:
@@ -158,8 +147,8 @@ class SvgisTestCase(unittest.TestCase):
             # check that points have 1 decimal place
             points = poly.getAttribute('points')
             x, y = points.split(' ').pop(0).split(',')
-            assert len(x[x.index('.') + 1:]) == 1
-            assert len(y[y.index('.') + 1:]) == 1
+            assert len(x[x.index('.') + 1 :]) == 1
+            assert len(y[y.index('.') + 1 :]) == 1
 
     def testOpenZips(self):
         archive = 'zip://tests/fixtures/test.zip/fixtures/cb_2014_us_nation_20m.json'

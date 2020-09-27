@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
-
 import io
 import os
 import re
@@ -73,15 +70,19 @@ class CliTestCase(unittest.TestCase):
 
         self.assertEqual(p.exit_code, 0)
 
-        expected = set(u'+proj=lcc +lon_0=-111.0 +lat_1=35.64903 +lat_2=35.450777 '
-                       '+lat_0 +y_0=0 +ellps=GRS80 '
-                       '+towgs84 +no_defs'.split(' '))
+        expected = set(
+            u'+proj=lcc +lon_0=-111.0 +lat_1=35.64903 +lat_2=35.450777 '
+            '+lat_0 +y_0=0 +ellps=GRS80 '
+            '+towgs84 +no_defs'.split(' ')
+        )
 
         self.assertSetEqual(set(p.output.strip().split(' ')), expected)
 
     def testCliDraw(self):
-        self.invoke(['draw', '--crs', PROJECTION, '--scale', '1000', self.shp,
-                     '-o', 'tmp.svg', '--viewbox', '--bounds'] + [str(b) for b in BOUNDS])
+        self.invoke(
+            ['draw', '--crs', PROJECTION, '--scale', '1000', self.shp, '-o', 'tmp.svg', '--viewbox', '--bounds']
+            + [str(b) for b in BOUNDS]
+        )
 
         try:
             result = minidom.parse('tmp.svg').getElementsByTagName('svg').item(0)

@@ -7,7 +7,6 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, 2020, Neil Freeman <contact@fakeisthenewreal.org>
 # pylint: disable=c-extension-no-member
-
 import logging
 import re
 

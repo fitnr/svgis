@@ -6,7 +6,6 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://www.opensource.org/licenses/GNU General Public License v3 (GPLv3)-license
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
-
 import logging
 import sys
 import warnings
@@ -84,9 +83,7 @@ def main(context):
 
 
 # Style
-style_help = (
-    "Style to append to SVG. Either a valid CSS string, a file path (must end in '.css'). Use '-' for stdin."
-)
+style_help = "Style to append to SVG. Either a valid CSS string, a file path (must end in '.css'). Use '-' for stdin."
 
 
 @main.command()

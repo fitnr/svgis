@@ -2,13 +2,12 @@
 
 """Draw SVG maps"""
 
-import logging
-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, 2020, Neil Freeman <contact@fakeisthenewreal.org>
+import logging
 import os.path
 import warnings
 from collections import Iterable
@@ -19,9 +18,9 @@ import fiona.transform
 from six import string_types
 
 from . import bounding, draw, projection
-from .errors import SvgisError
 from . import style as _style
 from . import svg, transform, utils
+from .errors import SvgisError
 
 STYLE = (
     'polyline,line,rect,path,polygon,.polygon{'

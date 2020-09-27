@@ -5,7 +5,6 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
-import logging
 import os
 import unittest
 import warnings
@@ -24,8 +23,7 @@ class MapTestCase(unittest.TestCase):
     css = 'polygon{fill:green}'
 
     def testMapWithStyle(self):
-        result = svgis.map(
-            self.shp, style=self.css, scale=1000, crs=self.projection, bounds=self.bounds, clip=None)
+        result = svgis.map(self.shp, style=self.css, scale=1000, crs=self.projection, bounds=self.bounds, clip=None)
         self.assertIn(self.css, result)
 
         style = 'tmp.css'
@@ -34,14 +32,14 @@ class MapTestCase(unittest.TestCase):
             w.write(self.css)
 
         try:
-            result = svgis.map(
-                self.shp, style=[style], scale=1000, crs=self.projection, bounds=self.bounds, clip=None)
+            result = svgis.map(self.shp, style=[style], scale=1000, crs=self.projection, bounds=self.bounds, clip=None)
             self.assertIn(self.css, result)
 
         finally:
             os.remove('tmp.css')
 
     def testMap(self):
+        # pylint: disable=duplicate-code
         a = svgis.map(self.shp, scale=1000, crs=self.projection, bounds=self.bounds, clip=False)
 
         with open('a.svg', 'w') as A:

@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
-
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
-
 import unittest
 from os import path
 from xml.dom import minidom
@@ -23,7 +20,7 @@ class ProjectionDrawTestCase(unittest.TestCase):
         # IL E (ft)
         2790: (347026, 556571, 364500, 592793),
         # NAD 83
-        4269: (-87.8, 41.7, -87.5, 41.9)
+        4269: (-87.8, 41.7, -87.5, 41.9),
     }
 
     def setUp(self):
