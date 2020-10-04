@@ -1,10 +1,8 @@
 SVGIS
 -----
 [![Build Status](http://img.shields.io/travis/fitnr/svgis/master.svg?style=flat)](https://travis-ci.org/fitnr/svgis)
-[![Coverage Status](https://img.shields.io/coveralls/fitnr/svgis/master.svg?style=flat)](https://coveralls.io/r/fitnr/svgis?branch=master)
 
-
-Create SVG drawings from vector geodata files (SHP, geoJSON, etc).
+Create SVG drawings from vector geodata files (SHP, geojson, etc).
 
 SVGIS is great for: creating small multiples, combining lots of datasets in a sensible projection, and drawing styled based on classes in the source data. It's perfect for creating base maps for editing in a drawing program, and its CSS-based styling gives great flexibility for styling.
 
@@ -14,37 +12,23 @@ svgis draw south_dakota.shp north_dakota.geojson -o dakota.svg
 svgis draw england.shp scotland.shp wales.shp --style gb.css -o great_britain.svg
 ````
 
-Documentation: http://pythonhosted.org/svgis
+Documentation: https://svgis.readthedocs.io/en/stable/
 
 ## Install
 
 Requires [fiona](http://pypi.python.org/pypi/fiona), which in turn requires GDAL.
 
-To instal GDAL:
-
-On OS X: `brew install gdal` (requires [Homebrew](http://brew.sh))
-
-On Linux: `sudo apt-get install libgdal1-dev`
-
-On Windows: see [OSGeo4W](https://trac.osgeo.org/osgeo4w/wiki)
+See the [GDAL docs](https://gdal.org/download.html#binaries) for install info.
 
 Then:
 ````
 pip install svgis
 ````
 
-An option feature of svgis is clipping polygons to a bounding box. This will speed things up if you need to draw only part of a very complex feature.
-
-To support clipping output shapes, you'll need the [GEOS](https://trac.osgeo.org/geos/) library:
-
-* OS X: `brew install geos`
-* Linux: `sudo apt-get install geos`
-* Windows: GEOS is part of OSGeo4W, so you have it!
-
-Then, install svgis with a slightly different command:
+An optional feature of svgis is clipping polygons to a bounding box. This will speed things up if you need to draw only part of a very complex feature.
 
 ````
-pip install svgis[clip]
+pip install 'svgis[clip]'
 ````
 
 ## Commands
@@ -58,7 +42,7 @@ Additional commands:
 * `svgis scale`: change the scale of an existing SVG
 * `svgis style`: add css styles to an existing SVG
 
-Read the [docs](http://pythonhosted.org/svgis/) for complete information on these commands and their options.
+Read the [docs](https://svgis.readthedocs.io/en/stable/) for complete information on these commands and their options.
 
 ### Examples
 
