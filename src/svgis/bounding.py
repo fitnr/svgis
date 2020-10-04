@@ -95,11 +95,15 @@ def ring(bounds):
 
 def covers(b1, b2):
     """
-    Return True if b1 covers b2.
+    Check if a bounding box covers another. Returns ``False`` if any
+    points in ``b2`` are outside ``b1`.
 
     Args:
         b1 (tuple): A bounding box (minx, miny, maxx, maxy)
         b2 (tuple): A bounding box
+
+    Returns:
+        ``bool``
     """
     return b1[0] <= b2[0] and b1[1] <= b2[1] and b1[2] >= b2[2] and b1[3] >= b2[3]
 
@@ -115,7 +119,7 @@ def transform(bounds, **kwargs):
         out_crs (dict): Fiona-type proj4 mapping representing output projection.
 
     Returns:
-        tuple
+        ``tuple``
     """
     transformer = kwargs.get('transformer')
     in_crs = kwargs.get('in_crs')

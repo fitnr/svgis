@@ -48,7 +48,7 @@ def lines(geom, **kwargs):
         geom (object): A GeoJSON-like LineString or MultiLineString geometry object.
 
     Returns:
-        str (unicode in Python 2) representation of the SVG group or polyline element(s).
+        ``str`` representation of the SVG group or polyline element(s).
     """
     if geom['type'] == 'LineString':
         return linestring(geom['coordinates'], **kwargs)
@@ -68,7 +68,7 @@ def polygons(geom, **kwargs):
         geom (object): A GeoJSON-like Polygon or MultiPolygon geometry object.
 
     Returns:
-        str (unicode in Python 2) representation of the SVG group, path or polygon element.
+        ``str`` representation of the SVG group, path or polygon element.
     """
     if geom['type'] == 'Polygon':
         return polygon(geom['coordinates'], **kwargs)
@@ -80,7 +80,15 @@ def polygons(geom, **kwargs):
 
 
 def polygon(coordinates, **kwargs):
-    """Serialize lists of coordinates to a svg polygon."""
+    """
+    Serialize lists of coordinates to a svg polygon.
+
+    Arguments:
+        coordinates (sequence):  Sequence of rings.
+
+    Returns:
+        ``str`` representation of an svg ``path``
+    """
     if len(coordinates) == 1:
         return svg.polygon(coordinates[0], **kwargs)
 
@@ -119,7 +127,7 @@ def points(geom, **kwargs):
         geom (object): A GeoJSON-like Point or MultiPoint geometry object.
 
     Returns:
-        str (unicode in Python 2) representation of the SVG group, or circle element
+        ``str`` representation of the SVG group, or circle element
     """
     kwargs['r'] = kwargs.get('r', 1)
 
@@ -157,7 +165,7 @@ def geometry(geom, bbox=None, precision=None, **kwargs):
                          elements (e.g. class, id, style).
 
     Returns:
-        str (unicode in Python 2) representation of SVG element(s) of the given geometry.
+        ``str`` representation of SVG element(s) of the given geometry.
     """
     if bbox:
         geom = transform.clip(geom, bbox)
@@ -185,6 +193,6 @@ def group(geometries, **kwargs):
         geometries (Sequence): GeoJSON-like geometry dicts.
 
     Returns:
-        str (unicode in Python 2) representation of the SVG group
+        ``str`` representation of the SVG group
     """
     return svg.group([geometries(g, fill_rule="evenodd", **kwargs) for g in geometries])

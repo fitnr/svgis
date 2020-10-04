@@ -24,7 +24,7 @@ def _element(tag, contents=None, **kwargs):
         kwargs: to be transformed into attributes
 
     Returns:
-        str (unicode in Python 2)
+        ``str``
     """
     attribs = toattribs(**kwargs)
     if contents:
@@ -58,7 +58,7 @@ def circle(point, precision=None, **kwargs):
         precision (int): rounding precision
 
     Returns:
-        str (unicode in Python 2)
+        ``str``
     """
     return _element('circle', cx=utils.rnd(point[0], precision), cy=utils.rnd(point[1], precision), **kwargs)
 
@@ -72,7 +72,7 @@ def text(string, start, precision=None, **kwargs):
         start (tuple): starting coordinate
 
     Returns:
-        str
+        ``str``
     """
     start = [utils.rnd(i, precision) for i in start]
     return _element('text', string, x=start[0], y=start[1], **kwargs)
@@ -89,7 +89,7 @@ def rect(start, width, height, precision=None, **kwargs):
         precision (int): rounding precision
 
     Returns:
-        str (unicode in Python 2)
+        ``str``
     """
     start = [utils.rnd(i, precision) for i in start]
     width = utils.rnd(width, precision)
@@ -108,7 +108,7 @@ def line(start, end, precision=None, **kwargs):
         precision (int): rounding precision
 
     Returns:
-        str (unicode in Python 2)
+        ``str``
     """
     start = [utils.rnd(i, precision) for i in start]
     end = [utils.rnd(i, precision) for i in end]
@@ -125,7 +125,7 @@ def path(coordinates, precision=None, **kwargs):
         precision (int): rounding precision
 
     Returns:
-        str (unicode in Python 2)
+        ``str``
     """
     fmt = _fmt(precision)
     coords = utils.dedupe(i if isinstance(i, string_types) else fmt.format(i) for i in coordinates)
@@ -142,7 +142,7 @@ def polyline():
         precision (int): rounding precision
 
     Returns:
-        str (unicode in Python 2)
+        ``str``
     """
     return 'polyline'
 
@@ -157,7 +157,7 @@ def polygon():
         precision (int): rounding precision
 
     Returns:
-        str (unicode in Python 2)
+        ``str``
     """
     return 'polygon'
 
@@ -167,7 +167,7 @@ def toattribs(**kwargs):
     Convert keyword arguments to SVG attribute definitions.
 
     Returns:
-        str (unicode in Python 2)
+        ``str``
     """
     attribs = ' '.join('{}="{}"'.format(k, dom.ampencode(v)) for k, v in kwargs.items() if v is not None and v != '')
     if attribs:
@@ -184,7 +184,7 @@ def defstyle(style=None):
         style (string): A CSS string.
 
     Returns:
-        str (unicode in Python 2)
+        ``str``
     """
     if style:
         return '<defs><style type="text/css"><![CDATA[{}]]></style></defs>'.format(style)
@@ -202,7 +202,7 @@ def group(members=None, **kwargs):
                         attributes of the group, i.e. key="value".
 
     Returns:
-        str (unicode in Python 2)
+        ``str``
     """
     members = members or ''
     return _element('g', ''.join(members), **kwargs)
@@ -219,7 +219,7 @@ def drawing(size, members, precision=None, viewbox=None, style=None):
         style (string): CSS string.
 
     Returns:
-        str (unicode in Python 2)
+        ``str``
     """
     kwargs = {
         'width': size[0],

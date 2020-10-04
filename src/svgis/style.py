@@ -47,8 +47,8 @@ def sanitize(string):
 def construct_classes(classes, properties):
     """
     Build a class string for an element using the properties. Class names
-    take the form CLASS_PROPERTY. If a given class isn't found in properties,
-    the class name is added (e.g. CLASS).
+    take the form ``myclass_value``. If a given class isn't found in properties,
+    the class name is added (e.g. ``myclass``).
 
     Args:
         classes (Sequence): Column names to include in the class list
@@ -100,7 +100,7 @@ def pick(style):
 
 
 def rescale(svgfile, factor):
-    """Add a scale() operation to an entire svg file."""
+    """Add a ``scale()`` operation to an entire svg file."""
     svg = etree.parse(svgfile).getroot()
     scalar = 'scale({})'.format(factor)
     g = svg.find('.//g', namespaces=svg.nsmap)
@@ -109,7 +109,13 @@ def rescale(svgfile, factor):
 
 
 def replace_comments(css):
-    '''Replace one-line non-standard comments ('//') with body-style comments (/* .. */).'''
+    """
+    Replace one-line non-standard comments with body-style comments::
+
+       // non-standard comment
+       /* body-style comment */
+
+    """
     return re.sub(r'//(.+)', r'/*\1 */', css)
 
 

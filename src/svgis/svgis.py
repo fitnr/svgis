@@ -57,7 +57,7 @@ def map(layers, bounds=None, scale=None, **kwargs):
                 99: not very much. 1: a lot.
 
     Returns:
-        String (unicode in Python 2) containing an entire SVG document.
+        ``str`` containing an entire SVG document.
     """
     # pylint: disable=redefined-builtin
     scale = (1.0 / scale) if scale else 1.0
@@ -163,9 +163,13 @@ class SVGIS:
 
     @property
     def in_crs(self):
+        """Return the CRS being used for input geodata."""
         return self._in_crs
 
     def set_in_crs(self, crs):
+        """
+        Set the CRS to use for input geodata, falling back on the default (WGS84).
+        """
         if not self.in_crs and crs:
             self.log.debug('setting input crs to %s', crs)
             self._in_crs = crs
@@ -178,6 +182,7 @@ class SVGIS:
 
     @property
     def out_crs(self):
+        """The output CRS of this drawing"""
         if self._out_crs in projection.METHODS:
             return None
 
@@ -222,7 +227,7 @@ class SVGIS:
             bounds (tuple): bounding box.
 
         Returns:
-            (tuple) bounding box in out_crs coordinates.
+            ``tuple`` bounding box in out_crs coordinates.
         """
         # This may happen many times if we were passed bounds, but it's a cheap operation.
         self.log.debug('updating bounds - in_crs: %s', in_crs)
@@ -242,7 +247,7 @@ class SVGIS:
             scalar (float): Map scale.
 
         Returns:
-            None if layer_bounds are inside out_bounds or clipping is off.
+            ``None`` if layer_bounds are inside out_bounds or clipping is off.
         """
         if not self.clip or bounding.covers(out_bounds, layer_bounds):
             return None
@@ -278,7 +283,7 @@ class SVGIS:
             class_fields (list): Fields to use for element class attribute.
 
         Returns:
-            (dict) Arguments for self._feature
+            ``dict`` Arguments for ``self._feature``
         """
         result = {
             'transforms': [
@@ -328,7 +333,8 @@ class SVGIS:
             id_field (string): Field to use as element ID (default: self.id_field).
 
         Returns:
-            dict with keys: members, id, class. This is ready to be passed to svgis.svg.group.
+            A ``dict`` with the keys: ``members``, ``id``, ``class``.
+            This is ready to be passed to ``svgis.svg.group``.
         """
         padding = kwargs.pop('padding', self.padding)
         kwargs['scalar'] = kwargs.get('scalar', self.scalar)
@@ -385,7 +391,7 @@ class SVGIS:
             name (str): layer name (usually basename of the input file).
 
         Returns:
-            str (unicode in Python 2)
+            ``str``
         """
         name = kwargs.pop('name', '?')
         geom = feature.get('geometry')
@@ -445,7 +451,7 @@ class SVGIS:
             precision (int): Precision for rounding output coordinates.
 
         Returns:
-            String (unicode in Python 2) containing an entire SVG document.
+            ``str`` containing an entire SVG document.
         """
         # Set up arguments
         scalar = kwargs.pop('scalar', self.scalar)
@@ -475,7 +481,7 @@ class SVGIS:
             inline (bool): If True, try to run CSS into each element.
 
         Returns:
-            String (unicode in Python 2) containing an entire SVG document.
+            ``str`` containing an entire SVG document.
         """
         scalar = scalar or self.scalar
         precision = precision or self.precision
