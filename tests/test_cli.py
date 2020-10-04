@@ -93,7 +93,7 @@ class CliTestCase(unittest.TestCase):
             fixture_vb = [float(x) for x in fixture.attributes.get('viewBox').value.split(',')]
 
             for r, f in zip(result_vb, fixture_vb):
-                self.assertAlmostEqual(r, f, 5)
+                self.assertAlmostEqual(r, f, 5, 'viewbox doesnt match fixture')
 
         finally:
             os.remove('tmp.svg')

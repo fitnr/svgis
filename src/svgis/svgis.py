@@ -10,7 +10,7 @@
 import logging
 import os.path
 import warnings
-from collections import Iterable
+from collections.abc import Iterable
 from functools import partial
 
 import fiona

@@ -12,115 +12,71 @@ from svgis import transform
 
 try:
     import shapely.geometry
-
-    class ClipTestCase(unittest.TestCase):
-        def setUp(self):
-            self.bounds = (1, 1, 9, 9)
-            self.coords = [[(2, 2), (100, 2), (11, 11), (12, 12), (2, 10), (2, 2)]]
-            self.expected = [((2.0, 9.0), (9.0, 9.0), (9.0, 2.0), (2.0, 2.0), (2.0, 9.0))]
-            self.gen = (x for x in self.coords[0])
-
-        def testShapely(self):
-            minx, miny, maxx, maxy = self.bounds
-            bounds = {
-                "type": "Polygon",
-                "coordinates": [[(minx, miny), (minx, maxy), (maxx, maxy), (maxx, miny), (minx, miny)]],
-            }
-            coords = {"type": "Polygon", "coordinates": self.coords}
-
-            b = shapely.geometry.shape(bounds)
-            c = shapely.geometry.shape(coords)
-            i = b.intersection(c)
-
-            result = shapely.geometry.mapping(i)
-            self.assertSequenceEqual(result['coordinates'], self.expected)
-
-        def testClip(self):
-            clipped = transform.clip({"type": "Polygon", "coordinates": self.coords}, self.bounds)
-            self.assertSequenceEqual(clipped['coordinates'], self.expected)
-
-        def testClipGeometry(self):
-            geometry = {"type": "Polygon", "coordinates": self.coords}
-            clipped = transform.clip(geometry, self.bounds)
-
-            self.assertSequenceEqual(set(self.expected), set(clipped['coordinates']))
-
+    NO_SHAPELY = False
 
 except ImportError:
-    pass
+    NO_SHAPELY = True
+try:
+    import visvalingamwyatt
+    VW = True
+except ImportError:
+    VW = False
 
 
-class SimplifyTestCase(unittest.TestCase):
-    def testSimplify(self):
-        a = transform.simplifier(None)
-        self.assertIsNone(a)
+class ClipTestCase(unittest.TestCase):
+    """Test svgis.transform.clip"""
 
-        b = transform.simplifier(100)
-        self.assertIsNone(b)
-
-        c = transform.simplifier(50)
-
-        try:
-            import visvalingamwyatt
-
-            self.assertIsInstance(c, functools.partial)
-        except ImportError:
-            self.assertIsNone(c)
-
-
-class ExpandTestCase(unittest.TestCase):
     def setUp(self):
         self.bounds = (1, 1, 9, 9)
         self.coords = [[(2, 2), (100, 2), (11, 11), (12, 12), (2, 10), (2, 2)]]
         self.expected = [((2.0, 9.0), (9.0, 9.0), (9.0, 2.0), (2.0, 2.0), (2.0, 9.0))]
         self.gen = (x for x in self.coords[0])
 
-    def testExpand(self):
-        expanded = transform.expand(self.gen)
-
-        try:
-            expanded = expanded.tolist()
-        except AttributeError:
-            pass
-
-        self.assertSequenceEqual([tuple(x) for x in expanded], self.coords[0])
-
-        self.assertSequenceEqual(expanded, transform.expand(expanded))
-
-    def testExpandGeometry(self):
-        geom = {"type": "LineString", "coordinates": self.gen}
-
-        expanded = transform.expand_geom(geom)
-
-        try:
-            expanded['coordinates'] = expanded['coordinates'].tolist()
-        except AttributeError:
-            pass
-
-        self.assertSequenceEqual([tuple(x) for x in expanded['coordinates']], self.coords[0])
-
-    def testExpandGeomCollection(self):
-        gen = (x for x in self.coords[0])
-
-        GC = {
-            "type": "GeometryCollection",
-            "geometries": [{"type": "LineString", "coordinates": self.gen}, {"type": "LineString", "coordinates": gen}],
+    @unittest.skipIf(NO_SHAPELY, "Shapely not installed")
+    def testShapely(self):
+        minx, miny, maxx, maxy = self.bounds
+        bounds = {
+            "type": "Polygon",
+            "coordinates": [[(minx, miny), (minx, maxy), (maxx, maxy), (maxx, miny), (minx, miny)]],
         }
-        a = transform.expand_geom(GC)
+        coords = {"type": "Polygon", "coordinates": self.coords}
 
-        assert len(a['geometries']) == 2
+        b = shapely.geometry.shape(bounds)
+        c = shapely.geometry.shape(coords)
+        i = b.intersection(c)
 
-        try:
-            b = a['geometries'][0]['coordinates'].tolist()
+        result = shapely.geometry.mapping(i)
+        self.assertSequenceEqual(result['coordinates'], self.expected)
 
-        except AttributeError:
-            b = a['geometries'][0]['coordinates']
+    @unittest.skipIf(NO_SHAPELY, "Shapely not installed")
+    def testClip(self):
+        clipped = transform.clip({"type": "Polygon", "coordinates": self.coords}, self.bounds)
+        self.assertSequenceEqual(clipped['coordinates'], self.expected)
 
-        self.assertSequenceEqual(b[0], [2, 2])
+    @unittest.skipIf(NO_SHAPELY, "Shapely not installed")
+    def testClipGeometry(self):
+        geometry = {"type": "Polygon", "coordinates": self.coords}
+        clipped = transform.clip(geometry, self.bounds)
 
-    def testStrangeGeometry(self):
-        with self.assertRaises(NotImplementedError):
-            transform.expand_geom({"type": "Magic", "coordinates": [], "geometries": []})
+        self.assertSequenceEqual(set(self.expected), set(clipped['coordinates']))
+
+
+class SimplifyTestCase(unittest.TestCase):
+    """Test svgis.transform.simplifier"""
+
+    def testSimplifyNone(self):
+        a = transform.simplifier(None)
+        self.assertIsNone(a)
+
+    @unittest.skipIf(not VW, "visvalingamwyatt is not installed")
+    def testSimplifyTypeVV(self):
+        c = transform.simplifier(50)
+        self.assertIsInstance(c, functools.partial)
+
+    @unittest.skipIf(VW, "visvalingamwyatt is installed")
+    def testSimplifyTypeNoVW(self):
+        c = transform.simplifier(50)
+        self.assertIsNone(c)
 
 
 if __name__ == '__main__':

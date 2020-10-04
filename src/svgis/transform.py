@@ -9,7 +9,6 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, 2020, Neil Freeman <contact@fakeisthenewreal.org>
 from functools import partial
-from types import GeneratorType
 
 try:
     from shapely.geometry import mapping, shape
@@ -24,51 +23,6 @@ try:
     import visvalingamwyatt as vw
 except ImportError:
     pass
-
-
-def _expand_np(coordinates):
-    return np.array(_expand_py(coordinates))
-
-
-def _expand_py(coordinates):
-    return tuple(coordinates)
-
-
-def expand(ring):
-    if isinstance(ring, GeneratorType):
-        try:
-            return _expand_np(ring)
-        except NameError:
-            return _expand_py(ring)
-    else:
-        return ring
-
-
-def expand_rings(rings):
-    try:
-        return tuple(_expand_np(ring) for ring in rings)
-    except NameError:
-        return tuple(_expand_py(ring) for ring in rings)
-
-
-def expand_geom(geom):
-    '''Expand generators in a geometry's coordinates.'''
-    if geom['type'] == 'MultiPolygon':
-        geom['coordinates'] = tuple(expand_rings(rings) for rings in geom['coordinates'])
-
-    elif geom['type'] in ('Polygon', 'MultiLineString'):
-        geom['coordinates'] = expand_rings(geom['coordinates'])
-
-    elif geom['type'] in ('Point', 'MultiPoint', 'LineString'):
-        geom['coordinates'] = expand(geom['coordinates'])
-
-    elif geom['type'] == 'GeometryCollection':
-        geom['geometries'] = tuple(expand_geom(g) for g in geom['geometries'])
-
-    else:
-        raise NotImplementedError("Unsupported geometry type " + geom['type'])
-
-    return geom
 
 
 def clipper(bbox):
@@ -91,10 +45,8 @@ def clipper(bbox):
 
         def func(geometry):
             # This is technically only needed in Py3, but whatever.
-            geom = expand_geom(geometry)
-
             try:
-                clipped = bbox_shape.intersection(shape(geom))
+                clipped = bbox_shape.intersection(shape(geometry))
             except (ValueError, TopologicalError):
                 return geometry
 
