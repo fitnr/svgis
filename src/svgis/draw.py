@@ -167,20 +167,24 @@ def geometry(geom, bbox=None, precision=None, **kwargs):
     Returns:
         ``str`` representation of SVG element(s) of the given geometry.
     """
-    if bbox:
-        geom = transform.clip(geom, bbox)
+    try:
+        if bbox:
+            geom = transform.clip(geom, bbox)
 
-    if geom['type'] in ('Point', 'MultiPoint'):
-        return points(geom, precision=precision, **kwargs)
+        if geom['type'] in ('Point', 'MultiPoint'):
+            return points(geom, precision=precision, **kwargs)
 
-    if geom['type'] in ('LineString', 'MultiLineString'):
-        return lines(geom, precision=precision, **kwargs)
+        if geom['type'] in ('LineString', 'MultiLineString'):
+            return lines(geom, precision=precision, **kwargs)
 
-    if geom['type'] in ('Polygon', 'MultiPolygon'):
-        return polygons(geom, precision=precision, **kwargs)
+        if geom['type'] in ('Polygon', 'MultiPolygon'):
+            return polygons(geom, precision=precision, **kwargs)
 
-    if geom['type'] == 'GeometryCollection':
-        return geometrycollection(geom, bbox, precision, **kwargs)
+        if geom['type'] == 'GeometryCollection':
+            return geometrycollection(geom, bbox, precision, **kwargs)
+
+    except Exception as e:
+        raise SvgisError("Error drawing feature: {}".format(e)) from e
 
     raise SvgisError("Can't draw features of type: {}".format(geom['type']))
 

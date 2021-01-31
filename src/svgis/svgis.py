@@ -393,10 +393,11 @@ class SVGIS:
         Returns:
             ``str``
         """
-        name = kwargs.pop('name', '?')
+        name = kwargs.pop('name', None)
         geom = feature.get('geometry')
         precision = kwargs.pop('precision', self.precision)
         datas = datas or {}
+        fid = feature['properties'].get(kwargs.get('id_field'), feature.get('id', '?'))
 
         try:
             # Check if geometry exists (a bit unpythonic, but cleaner errs this way).
@@ -406,6 +407,10 @@ class SVGIS:
             # Apply transformations to the geometry.
             for t in transforms:
                 geom = t(geom) if t is not None else geom
+
+            if not geom['coordinates']:
+                self.log.debug('Skipping feature with empty geometry after transformation: "%s" in layer "%s"', fid, name or '?')
+                return ''
 
         except SvgisError as e:
             self.log.warning(
@@ -419,21 +424,21 @@ class SVGIS:
         classes = _style.construct_classes(classes, feature['properties'])
 
         # Add the layer name to the class list.
-        if name != '?':
+        if name:
             classes.insert(0, _style.sanitize(name))
 
         drawargs['class'] = ' '.join(classes)
 
         if 'id_field' in kwargs and kwargs['id_field'] in feature['properties']:
-            drawargs['id'] = _style.sanitize(feature['properties'].get(kwargs['id_field']))
+            drawargs['id'] = _style.sanitize(fid)
 
         try:
             # Draw the geometry.
             return draw.geometry(geom, precision=precision, **drawargs)
 
         except SvgisError as e:
-            self.log.warning('unable to draw feature %s of %s: %s', kwargs.get('id', feature.get('id', '?')), name, e)
-            return u''
+            self.log.warning('unable to draw feature %s of %s: %s', fid, name or '?', e)
+            return ''
 
     def compose(self, bounds=None, style=None, viewbox=True, inline=True, **kwargs):
         """
