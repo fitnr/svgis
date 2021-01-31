@@ -9,7 +9,6 @@
 import logging
 import sys
 import warnings
-from signal import SIG_DFL, SIGPIPE, signal
 
 import click
 import fiona.crs
@@ -78,8 +77,6 @@ def main(context):
     ch = logging.StreamHandler()
     ch.setLevel(logging.WARN)
     context.log.addHandler(ch)
-
-    signal(SIGPIPE, SIG_DFL)
 
 
 # Style
