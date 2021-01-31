@@ -18,12 +18,12 @@ With SVGIS, a command like this:
 
 .. code:: bash
 
-    svgis draw ne_10m_admin_0_countries.shp \
-    --bounds -13 35 35 62 \
-    --project EPSG:102013 \
-    --scale 1000 \
+    svgis draw ne_110m_admin_0_countries.shp \
+    --bounds -10 30 40 60 \
+    --project EPSG:3035 \
+    --scale 5000 \
     --id-field name \
-    --style ".ne_10m_admin_0_countries {fill: tan;} .Germany { fill: purple }" \
+    --style ".ne_110m_admin_0_countries {fill: tan;} #Germany { fill: purple }" \
 
 
 Generates a map like this:
