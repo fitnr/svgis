@@ -43,7 +43,7 @@ class SvgisTestCase(unittest.TestCase):
 
     def testSvgisCreate(self):
         self.assertEqual(self.svgis_obj.files, [self.file])
-        assert self.svgis_obj._projected_bounds == (None,) * 4
+        self.assertIsNone(self.svgis_obj._projected_bounds)
         assert self.svgis_obj.out_crs is None
         assert self.svgis_obj.style == svgis.STYLE
 

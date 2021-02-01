@@ -106,10 +106,10 @@ class SVGIS:
     """
 
     # The bounding box in input coordinates.
-    _unprojected_bounds = (None,) * 4
+    _unprojected_bounds = None
 
     # The bounding box in output coordinates, to be determined as we draw.
-    _projected_bounds = (None,) * 4
+    _projected_bounds = None
 
     _in_crs, _out_crs = None, None
 
@@ -207,16 +207,16 @@ class SVGIS:
     @property
     def unprojected_bounds(self):
         '''Returns None if projected bounds aren't set'''
-        if not all(self._unprojected_bounds):
-            return None
-        return self._unprojected_bounds
+        if self._unprojected_bounds:
+            return self._unprojected_bounds
+        return None
 
     @property
     def projected_bounds(self):
         '''Returns None if projected bounds aren't (yet) set'''
-        if not all(self._projected_bounds):
-            return None
-        return self._projected_bounds
+        if self._projected_bounds:
+            return self._projected_bounds
+        return None
 
     def update_projected_bounds(self, in_crs, out_crs, bounds, padding=None):
         """
@@ -359,7 +359,10 @@ class SVGIS:
                     if not self.projected_bounds:
                         self.update_projected_bounds(self.in_crs, self.out_crs, unprojected_bounds, padding)
 
-                    # Convert global bounds to layer.crs.
+                    self.log.debug(
+                        'Getting projected bounds %s (%s) in layer crs (%s)',
+                        self.projected_bounds, self.out_crs, layer.crs
+                    )
                     bounds = bounding.transform(self.projected_bounds, in_crs=self.out_crs, out_crs=layer.crs)
 
                 # When we have no passed bounds:
@@ -472,7 +475,7 @@ class SVGIS:
         drawing = self.draw(members, scalar, kwargs.get('precision'), style=style, viewbox=viewbox, inline=inline)
 
         # Always reset projected bounds.
-        self._projected_bounds = (None,) * 4
+        self._projected_bounds = None
 
         return drawing
 
