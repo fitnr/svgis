@@ -14,6 +14,7 @@ import fiona.crs
 import fiona.transform
 import utm
 from pyproj.crs import CRS
+from pyproj.exceptions import CRSError
 
 from . import bounding, errors
 from .utils import DEFAULT_GEOID
@@ -35,9 +36,8 @@ def tm_proj4(x0, y0, y1):
         (str) proj4 string
     """
     return (
-        '+proj=lcc +lon_0={x0} +lat_1={y1} +lat_2={y0} +lat_0={y1}'
-        '+x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0'
-        '+units=m +no_defs'
+        '+proj=lcc +lon_0={x0} +lat_1={y1} +lat_2={y0} +lat_0={y1} '
+        '+x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
     ).format(x0=x0, y0=y0, y1=y1)
 
 
@@ -93,7 +93,7 @@ def generateproj4(method, bounds, file_crs):
         if is_longlat:
             method = 'local'
         else:
-            return fiona.crs.to_string(file_crs)
+            return CRS(file_crs)
 
     if is_longlat:
         longlat_bounds = bounds
@@ -138,38 +138,27 @@ def pick(project, bounds=None, file_crs=None):
     Returns:
         (mixed) one of: None, 'local', 'utm' or a dict
     """
-    out_crs = None
     project = project or 'default'
-
-    if isinstance(project, dict):
+    if isinstance(project, CRS):
         return project
+
+    try:
+        return CRS(project)
+    except CRSError:
+        pass
 
     if isinstance(project, str):
         if project.lower() == 'file':
-            out_crs = file_crs if file_crs is not None else 'file'
+            return file_crs if file_crs is not None else 'file'
 
-        # Is an epsg code
-        elif project.lower()[:5] == 'epsg:':
-            out_crs = fiona.crs.from_epsg(int(project.split(':')[1]))
+        if project.lower() in METHODS:
+            return CRS(generateproj4(project, bounds, file_crs))
 
-        elif project.lower() in METHODS:
-            try:
-                out_crs = fiona.crs.from_string(generateproj4(project, bounds, file_crs))
-
-            except errors.SvgisError:
-                return project
-
-        # Is a file
-        elif os.path.exists(project):
+        if os.path.exists(project):
             with open(project) as f:
-                out_crs = fiona.crs.from_string(f.read())
+                return CRS(f.read())
 
-        else:
-            # Assume it's a proj4 string.
-            # fiona.crs.from_string returns {} if it isn't.
-            out_crs = fiona.crs.from_string(project)
-
-    return out_crs
+    raise errors.SvgisError(format('Unable to convert to projection: {}', project))
 
 
 def fake_to_string(crs):

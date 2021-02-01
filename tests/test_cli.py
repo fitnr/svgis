@@ -62,7 +62,7 @@ class CliTestCase(unittest.TestCase):
 
     def testSvgProjectUtm(self):
         p = self.invoke(['project', '--method', 'utm', '--', '-110.277906', '35.450777', '-110.000477', '35.649030'])
-        expected = set('+proj=utm +zone=12 +datum=WGS84 +units=m +no_defs'.split(' '))
+        expected = set('+proj=utm +zone=12 +datum=WGS84 +units=m +no_defs +type=crs'.split(' '))
         self.assertSetEqual(set(p.output.strip().split(' ')), expected)
 
     def testSvgProject(self):
@@ -70,12 +70,20 @@ class CliTestCase(unittest.TestCase):
 
         self.assertEqual(p.exit_code, 0)
 
-        expected = set(
-            u'+proj=lcc +lon_0=-111.0 +lat_1=35.64903 +lat_2=35.450777 '
-            '+lat_0 +y_0=0 +ellps=GRS80 '
-            '+towgs84 +no_defs'.split(' ')
-        )
-
+        expected = set([
+            '+type=crs',
+            '+lat_0=35.64903',
+            '+x_0=0',
+            '+units=m',
+            '+lon_0=-111',
+            '+towgs84=0,0,0,0,0,0,0',
+            '+y_0=0',
+            '+lat_1=35.64903',
+            '+proj=lcc',
+            '+no_defs',
+            '+lat_2=35.450777',
+            '+ellps=GRS80',
+        ])
         self.assertSetEqual(set(p.output.strip().split(' ')), expected)
 
     def testCliDraw(self):

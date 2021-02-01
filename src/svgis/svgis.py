@@ -15,6 +15,7 @@ from functools import partial
 
 import fiona
 import fiona.transform
+from pyproj.crs import CRS
 from six import string_types
 
 from . import bounding, draw, projection
@@ -134,7 +135,7 @@ class SVGIS:
 
         # This may return a keyword, which will require more updating.
         # If so, will update when files are open.
-        self._out_crs = projection.pick(crs)
+        self._out_crs = crs
         self.log.debug('picked tentative output projection or method: %s', self._out_crs)
 
         self.scalar = kwargs.pop('scalar', 1) or 1
@@ -170,23 +171,23 @@ class SVGIS:
         """
         Set the CRS to use for input geodata, falling back on the default (WGS84).
         """
-        if not self.in_crs and crs:
-            self.log.debug('setting input crs to %s', crs)
-            self._in_crs = crs
+        if not self.in_crs:
+            if crs:
+                self.log.debug('setting input crs to %s', crs)
+                self._in_crs = projection.pick(crs)
+                return
 
-        if not crs:
             # Assume input CRS is WGS 84
-            self._in_crs = utils.DEFAULT_GEOID
-            self.log.debug('setting input crs to default %s', utils.DEFAULT_GEOID)
+            self._in_crs = projection.pick(utils.DEFAULT_GEOID)
+            self.log.debug('setting input crs to default %s', self._in_crs)
             self.log.warning('Found no input coordinate system, ' 'assuming WGS84 (long/lat) coordinates.')
 
     @property
     def out_crs(self):
         """The output CRS of this drawing"""
-        if self._out_crs in projection.METHODS:
-            return None
-
-        return self._out_crs
+        if isinstance(self._out_crs, CRS):
+            return self._out_crs
+        return None
 
     def set_out_crs(self, bounds):
         '''Set the output CRS, if not yet set.'''
@@ -197,11 +198,11 @@ class SVGIS:
         # either use something passed in, a non latlong layer projection,
         # the local UTM, or customize local TM
         self.log.debug('Picking a projection:')
-        self.log.debug('    out crs: %s', self._out_crs)
-        self.log.debug('    in crs: %s', projection.fake_to_string(self.in_crs))
-        self.log.debug('    bounds: %s', bounds)
+        self.log.debug('  out crs: %s', self._out_crs)
+        self.log.debug('  in crs: %s', self.in_crs)
+        self.log.debug('  bounds: %s', bounds)
         self._out_crs = projection.pick(self._out_crs, bounds, self.in_crs)
-        self.log.debug('Set output crs to %s', projection.fake_to_string(self.out_crs))
+        self.log.debug('Set output crs to %s', self.out_crs)
 
     @property
     def unprojected_bounds(self):
@@ -230,11 +231,12 @@ class SVGIS:
             ``tuple`` bounding box in out_crs coordinates.
         """
         # This may happen many times if we were passed bounds, but it's a cheap operation.
-        self.log.debug('updating bounds - in_crs: %s', in_crs)
-        self.log.debug('                - out_crs: %s', out_crs)
+        self.log.debug('updating bounds')
+        self.log.debug('  in_crs: %s', in_crs)
+        self.log.debug('  out_crs: %s', out_crs)
         projected = bounding.transform(bounds, in_crs=in_crs, out_crs=out_crs)
         self._projected_bounds = bounding.pad(projected, padding or 0)
-        self.log.debug('                - new bounds: %s', self._projected_bounds)
+        self.log.debug('  new bounds: %s', self._projected_bounds)
         return self._projected_bounds
 
     def _get_clipper(self, layer_bounds, out_bounds, scalar=None):
@@ -264,8 +266,9 @@ class SVGIS:
         '''Return a reprojection transform from in_crs to self.out_crs.'''
         if self.out_crs != in_crs:
             self.log.info('set up reprojection')
-            self.log.debug('set up reprojection - input crs: %s', projection.fake_to_string(in_crs))
-            return partial(fiona.transform.transform_geom, in_crs, self.out_crs)
+            self.log.debug('  input crs: %s', in_crs)
+            self.log.debug('  output crs: %s', self.out_crs)
+            return partial(fiona.transform.transform_geom, in_crs, self.out_crs.to_dict())
 
         return None
 

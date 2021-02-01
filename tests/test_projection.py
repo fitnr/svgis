@@ -25,9 +25,8 @@ class ProjectionTestCase(unittest.TestCase):
 
     def testLocalTm(self):
         fixture = (
-            '+proj=lcc +lon_0=0 +lat_1=0 +lat_2=0 +lat_0=0'
-            '+x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0'
-            '+units=m +no_defs'
+            '+proj=lcc +lon_0=0 +lat_1=0 +lat_2=0 +lat_0=0 '
+            '+x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
         )
         self.assertEqual(projection.tm_proj4(0, 0, 0), fixture)
 

@@ -233,7 +233,7 @@ def project(bounds, method, crs):
         click.echo('Either two or four bounds required', err=True)
         return
 
-    result = fiona.crs.to_string(projection.pick(method, file_crs=crs, bounds=bounds))
+    result = projection.pick(method, file_crs=crs, bounds=bounds).to_proj4()
     click.echo(result.encode('utf-8'))
 
 
