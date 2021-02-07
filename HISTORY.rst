@@ -1,3 +1,10 @@
+0.5.1
+-----
+
+* Improve Windows compatibility (#5)
+* Improve projection handling (#4)
+* Update documentation
+
 0.5.0
 -----
 
