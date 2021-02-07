@@ -361,7 +361,9 @@ class SVGIS:
 
                     self.log.debug(
                         'Getting projected bounds %s (%s) in layer crs (%s)',
-                        self.projected_bounds, self.out_crs, layer.crs
+                        self.projected_bounds,
+                        self.out_crs,
+                        layer.crs,
                     )
                     bounds = bounding.transform(self.projected_bounds, in_crs=self.out_crs, out_crs=layer.crs)
 
@@ -415,7 +417,9 @@ class SVGIS:
                 geom = t(geom) if t is not None else geom
 
             if not geom['coordinates']:
-                self.log.debug('Skipping feature with empty geometry after transformation: "%s" in layer "%s"', fid, name or '?')
+                self.log.debug(
+                    'Skipping feature with empty geometry after transformation: "%s" in layer "%s"', fid, name or '?'
+                )
                 return ''
 
         except SvgisError as e:

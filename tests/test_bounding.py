@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Tests on bounding box management."""
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
@@ -30,15 +31,15 @@ class ConvertTestCase(unittest.TestCase):
         self.assertSequenceEqual(bounding.pad(bounds, ext=10), (-110, -110, 110, 110))
 
     def test_bbox_covers(self):
-        b1 = (0, 0, 10, 10)
-        b2 = (0, 0, 20, 10)
-        b3 = (0, 0, 5, 11)
+        a = (0, 0, 10, 10)
+        b = (0, 0, 20, 10)
+        c = (0, 0, 5, 11)
 
-        self.assertFalse(bounding.covers(b1, b2))
-        self.assertTrue(bounding.covers(b2, b1))
-        self.assertFalse(bounding.covers(b1, b3))
-        self.assertFalse(bounding.covers(b3, b1))
-        self.assertTrue(bounding.covers(b3, b3))
+        self.assertFalse(bounding.covers(a, b))
+        self.assertTrue(bounding.covers(b, a))
+        self.assertFalse(bounding.covers(a, c))
+        self.assertFalse(bounding.covers(c, a))
+        self.assertTrue(bounding.covers(c, c))
 
     def testbounds_to_ring(self):
         fixture = [

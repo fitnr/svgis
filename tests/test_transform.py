@@ -5,6 +5,7 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015, Neil Freeman <contact@fakeisthenewreal.org>
+# pylint: disable=unused-import
 import functools
 import unittest
 
@@ -12,12 +13,14 @@ from svgis import transform
 
 try:
     import shapely.geometry
+
     NO_SHAPELY = False
 
 except ImportError:
     NO_SHAPELY = True
 try:
     import visvalingamwyatt
+
     VW = True
 except ImportError:
     VW = False

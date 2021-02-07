@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Tests on the svgis command line tool"""
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
+# pylint: disable=duplicate-code
 import io
 import os
 import re
@@ -70,20 +72,22 @@ class CliTestCase(unittest.TestCase):
 
         self.assertEqual(p.exit_code, 0)
 
-        expected = set([
-            '+type=crs',
-            '+lat_0=35.64903',
-            '+x_0=0',
-            '+units=m',
-            '+lon_0=-111',
-            '+towgs84=0,0,0,0,0,0,0',
-            '+y_0=0',
-            '+lat_1=35.64903',
-            '+proj=lcc',
-            '+no_defs',
-            '+lat_2=35.450777',
-            '+ellps=GRS80',
-        ])
+        expected = set(
+            [
+                '+type=crs',
+                '+lat_0=35.64903',
+                '+x_0=0',
+                '+units=m',
+                '+lon_0=-111',
+                '+towgs84=0,0,0,0,0,0,0',
+                '+y_0=0',
+                '+lat_1=35.64903',
+                '+proj=lcc',
+                '+no_defs',
+                '+lat_2=35.450777',
+                '+ellps=GRS80',
+            ]
+        )
         self.assertSetEqual(set(p.output.strip().split(' ')), expected)
 
     def testCliDraw(self):

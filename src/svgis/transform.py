@@ -1,8 +1,5 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 '''Clip and simplify geometries'''
-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
@@ -121,6 +118,7 @@ def scale(coordinates, scalar=1):
 
 
 def scale_rings(rings, factor=1):
+    """Apply scale() to a list of rings."""
     return [scale(ring, factor) for ring in rings]
 
 

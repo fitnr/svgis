@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Tests on the SVGIS object."""
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
+# pylint: disable=unused-import
 import logging
 import re
 import unittest

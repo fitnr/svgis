@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-'''Deal with projections'''
-
+"""Do the work of picking, generating and transforming coordinate reference systems."""
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
@@ -10,8 +8,6 @@
 # Copyright (c) 2016, 2020, Neil Freeman <contact@fakeisthenewreal.org>
 import os.path
 
-import fiona.crs
-import fiona.transform
 import utm
 from pyproj.crs import CRS
 from pyproj.exceptions import CRSError
