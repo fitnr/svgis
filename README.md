@@ -12,7 +12,7 @@ svgis draw south_dakota.shp north_dakota.geojson -o dakota.svg
 svgis draw england.shp scotland.shp wales.shp --style gb.css -o great_britain.svg
 ````
 
-Documentation: https://svgis.readthedocs.io/en/stable/
+Complete documentation, with more examples and explanation of classes and methods: https://svgis.readthedocs.io/en/stable/
 
 ## Install
 
