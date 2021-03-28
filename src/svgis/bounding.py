@@ -72,7 +72,14 @@ def update(old, new):
 
 def pad(bounds, ext=100):
     """
-    Pad a bounding box. Works best when input is in feet or meters or something.
+    Pad a bounding box. Works best when input is in a projected unit (i.e. feet or meters).
+
+    Args:
+        bounds (tuple): a bounding box (minx, miny, maxx, maxy)
+        ext (int): the distance to pad the box, in projected units. Default: 100.
+
+    Returns:
+        tuple: A bounding box (minx, miny, maxx, maxy)
     """
     try:
         return bounds[0] - ext, bounds[1] - ext, bounds[2] + ext, bounds[3] + ext
@@ -81,7 +88,16 @@ def pad(bounds, ext=100):
 
 
 def ring(bounds):
-    '''Convert min, max points to a boundary ring.'''
+    '''
+    Convert min, max points to a boundary ring.
+
+    Args:
+        bounds (tuple): a bounding box (minx, miny, maxx, maxy)
+
+    Return:
+        list: a geojson-like ring of coordinates
+
+    '''
     minx, miny, maxx, maxy = bounds
     xs, ys = list(utils.between(minx, maxx)), list(utils.between(miny, maxy))
 
@@ -94,16 +110,14 @@ def ring(bounds):
 
 
 def covers(b1, b2):
-    """
-    Check if a bounding box covers another. Returns ``False`` if any
-    points in ``b2`` are outside ``b1`.
+    """Check if a bounding box covers another.
 
     Args:
-        b1 (tuple): A bounding box (minx, miny, maxx, maxy)
-        b2 (tuple): A bounding box
+        b1 (tuple): a bounding box (minx, miny, maxx, maxy)
+        b2 (tuple): a bounding box
 
     Returns:
-        ``bool``
+        bool: ``False`` if any points in ``b2`` are outside ``b1``.
     """
     return b1[0] <= b2[0] and b1[1] <= b2[1] and b1[2] >= b2[2] and b1[3] >= b2[3]
 
@@ -119,7 +133,7 @@ def transform(bounds, **kwargs):
         out_crs (dict): Fiona-type proj4 mapping representing output projection.
 
     Returns:
-        ``tuple``
+        tuple: The input ``bounds`` reprojected from ``in_crs`` to ``out_crs``
     """
     transformer = kwargs.get('transformer')
     in_crs = kwargs.get('in_crs')
