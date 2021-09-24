@@ -416,7 +416,7 @@ class SVGIS:
             for t in transforms:
                 geom = t(geom) if t is not None else geom
 
-            if not geom['coordinates']:
+            if geom['coordinates'] is None or len(geom['coordinates']) == 0:
                 self.log.debug(
                     'Skipping feature with empty geometry after transformation: "%s" in layer "%s"', fid, name or '?'
                 )
