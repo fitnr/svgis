@@ -1,3 +1,9 @@
+0.5.2
+-----
+* Fix an error checking certain geometries (#8)
+* Migrate CI workflows from Travis to Github Actions
+* Remove Python 3.5 from list of supported versions
+
 0.5.1
 -----
 
