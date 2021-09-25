@@ -146,6 +146,6 @@ def scale_geom(geom, factor=1):
         geom['geometries'] = [scale_geom(i) for i in geom['geometries']]
 
     else:
-        raise NotImplementedError("Unsupported geometry type: {}".format(geom['type']))
+        raise NotImplementedError(f"Unsupported geometry type: {geom['type']}")
 
     return geom

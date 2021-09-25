@@ -124,51 +124,51 @@ class CssTestCase(unittest.TestCase):
         assert self.css in result.toxml()
 
     def testSanitize(self):
-        assert style.sanitize(None) == u'None'
-        assert style.sanitize(u'') == u''
-        self.assertEqual(style.sanitize(u'ü'), u'_ü')
-        self.assertEqual(style.sanitize(u'!foo'), u'_!foo')
-        assert style.sanitize(u'müller') == u'müller'
+        assert style.sanitize(None) == 'None'
+        assert style.sanitize('') == ''
+        self.assertEqual(style.sanitize('ü'), '_ü')
+        self.assertEqual(style.sanitize('!foo'), '_!foo')
+        assert style.sanitize('müller') == 'müller'
 
-        self.assertEqual(style.sanitize(1), u'_1')
+        self.assertEqual(style.sanitize(1), '_1')
 
-        self.assertEqual(style.sanitize('foo.bar'), u'foobar')
-        self.assertEqual(style.sanitize(u'fooba.r'), u'foobar')
+        self.assertEqual(style.sanitize('foo.bar'), 'foobar')
+        self.assertEqual(style.sanitize('fooba.r'), 'foobar')
 
-        self.assertEqual(style.sanitize('.foo'), u'foo')
+        self.assertEqual(style.sanitize('.foo'), 'foo')
 
-        self.assertEqual(style.sanitize(u'foo#bar'), u'foobar')
-        self.assertEqual(style.sanitize(u'foobar#'), u'foobar')
+        self.assertEqual(style.sanitize('foo#bar'), 'foobar')
+        self.assertEqual(style.sanitize('foobar#'), 'foobar')
 
-        self.assertEqual(style.sanitize(u'x \t'), 'x_')
+        self.assertEqual(style.sanitize('x \t'), 'x_')
 
-        self.assertEqual(style.sanitize(u'"huh"'), u'huh')
+        self.assertEqual(style.sanitize('"huh"'), 'huh')
 
     def testConstructClasses(self):
-        self.assertEqual(style.construct_classes(('foo',), {'foo': 'bar'}), [u'foo_bar'])
-        self.assertEqual(style.construct_classes(['foo'], {'foo': 'bar'}), [u'foo_bar'])
+        self.assertEqual(style.construct_classes(('foo',), {'foo': 'bar'}), ['foo_bar'])
+        self.assertEqual(style.construct_classes(['foo'], {'foo': 'bar'}), ['foo_bar'])
 
-        self.assertEqual(style.construct_classes(['foo'], {'foo': None}), [u'foo_None'])
+        self.assertEqual(style.construct_classes(['foo'], {'foo': None}), ['foo_None'])
 
     def testCreateClasses(self):
         classes = style.construct_classes(self.classes, self.properties)
-        self.assertEqual(classes, [u'apple_fruit'])
+        self.assertEqual(classes, ['apple_fruit'])
 
-        classes = style.construct_classes(self.classes, {'apple': u'fruit'})
-        self.assertEqual(classes, [u'apple_fruit'])
+        classes = style.construct_classes(self.classes, {'apple': 'fruit'})
+        self.assertEqual(classes, ['apple_fruit'])
 
-        classes = style.construct_classes(self.classes, {'apple': u'früit'})
-        self.assertEqual(classes, [u'apple_früit'])
+        classes = style.construct_classes(self.classes, {'apple': 'früit'})
+        self.assertEqual(classes, ['apple_früit'])
 
         classes = style.construct_classes(self.classes, {'apple': 1})
-        self.assertEqual(classes, [u'apple_1'])
+        self.assertEqual(classes, ['apple_1'])
 
     def testCreateClassesMissing(self):
         classes = style.construct_classes(self.classes, {'apple': ''})
-        self.assertEqual(classes, [u'apple_'])
+        self.assertEqual(classes, ['apple_'])
 
         classes = style.construct_classes(self.classes, {'apple': None})
-        self.assertEqual(classes, [u'apple_None'])
+        self.assertEqual(classes, ['apple_None'])
 
     def testPartialStyleName(self):
         inlined = style.inline(self.svg)

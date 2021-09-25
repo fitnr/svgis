@@ -57,7 +57,7 @@ def construct_classes(classes, properties):
     Returns:
         (list) class names
     """
-    f = u'{}_{}'
+    f = '{}_{}'
     return [sanitize(f.format(p, properties.get(p))) for p in classes if p in properties]
 
 
@@ -102,7 +102,7 @@ def pick(style):
 def rescale(svgfile, factor):
     """Add a ``scale()`` operation to an entire svg file."""
     svg = etree.parse(svgfile).getroot()
-    scalar = 'scale({})'.format(factor)
+    scalar = f'scale({factor})'
     g = svg.find('.//g', namespaces=svg.nsmap)
     g.attrib['transform'] = (g.attrib.get('transform') + ' ' + scalar).strip()
     return etree.tostring(svg, encoding='utf-8').decode('utf-8')

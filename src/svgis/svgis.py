@@ -63,7 +63,7 @@ def map(layers, bounds=None, scale=None, **kwargs):
     bounds = bounding.check(bounds)
 
     # Try to read style file(s)
-    styles = u''.join(_style.pick(s) for s in kwargs.pop('style', []))
+    styles = ''.join(_style.pick(s) for s in kwargs.pop('style', []))
 
     class_fields = set(a for c in kwargs.pop('class_fields', []) for a in c.split(','))
     data_fields = set(a for c in kwargs.pop('data_fields', []) for a in c.split(','))
@@ -158,7 +158,7 @@ class SVGIS:
         self.data_fields = kwargs.pop('data_fields', [])
 
     def __repr__(self):
-        return ('SVGIS(files={0.files}, out_crs={0.out_crs})').format(self)
+        return f'SVGIS(files={self.files}, out_crs={self.out_crs})'
 
     @property
     def in_crs(self):
@@ -378,7 +378,7 @@ class SVGIS:
         return {
             'members': group,
             'id': kwargs['name'],
-            'class': u' '.join(_style.sanitize(c) for c in layer.schema['properties'].keys()),
+            'class': ' '.join(_style.sanitize(c) for c in layer.schema['properties'].keys()),
         }
 
     def feature(self, feature, transforms, classes, datas=None, **kwargs):
@@ -520,7 +520,7 @@ class SVGIS:
             self.log.debug('drawing with viewbox')
         else:
             viewbox = None
-            transform_attrib += ' translate({},{})'.format(-dims[0], -dims[3])
+            transform_attrib += f' translate({-dims[0]},{-dims[3]})'
             self.log.debug('translating contents to fit')
 
         # Create container and then SVG

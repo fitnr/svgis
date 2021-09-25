@@ -184,9 +184,9 @@ def geometry(geom, bbox=None, precision=None, **kwargs):
             return geometrycollection(geom, bbox, precision, **kwargs)
 
     except Exception as e:
-        raise SvgisError("Error drawing feature: {}".format(e)) from e
+        raise SvgisError(f"Error drawing feature: {e}") from e
 
-    raise SvgisError("Can't draw features of type: {}".format(geom['type']))
+    raise SvgisError(f"Can't draw features of type: {geom['type']}")
 
 
 def group(geometries, **kwargs):

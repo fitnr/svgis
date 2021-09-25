@@ -28,9 +28,9 @@ def _element(tag, contents=None, **kwargs):
     """
     attribs = toattribs(**kwargs)
     if contents:
-        return '<{0}{1}>{2}</{0}>'.format(tag, attribs, contents)
+        return f"<{tag}{attribs}>{contents}</{tag}>"
 
-    return '<{0}{1}/>'.format(tag, attribs)
+    return f"<{tag}{attribs}/>"
 
 
 def _fmt(precision):
@@ -169,7 +169,7 @@ def toattribs(**kwargs):
     Returns:
         ``str``
     """
-    attribs = ' '.join('{}="{}"'.format(k, dom.ampencode(v)) for k, v in kwargs.items() if v is not None and v != '')
+    attribs = ' '.join(f'{k}="{dom.ampencode(v)}"' for k, v in kwargs.items() if v is not None and v != '')
     if attribs:
         return ' ' + attribs
 
@@ -187,7 +187,7 @@ def defstyle(style=None):
         ``str``
     """
     if style:
-        return '<defs><style type="text/css"><![CDATA[{}]]></style></defs>'.format(style)
+        return f'<defs><style type="text/css"><![CDATA[{style}]]></style></defs>'
 
     return '<defs />'
 

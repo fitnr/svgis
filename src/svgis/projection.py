@@ -33,10 +33,8 @@ def tm_proj4(x0, y0, y1):
     Returns:
         (str) proj4 string
     """
-    return (
-        '+proj=lcc +lon_0={x0} +lat_1={y1} +lat_2={y0} +lat_0={y1} '
-        '+x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
-    ).format(x0=x0, y0=y0, y1=y1)
+    proj = f'+proj=lcc +lon_0={x0} +lat_1={y1} +lat_2={y0} +lat_0={y1}'
+    return proj + ' +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
 
 
 def utm_proj4(lon, lat):
@@ -59,7 +57,7 @@ def utm_proj4(lon, lat):
         elif zoneletter in 'MLKJHGFEDCBA':
             hemisphere = 'south'
 
-        return '+proj=utm +zone={} +{} +datum=WGS84 +units=m +no_defs'.format(zonenumber, hemisphere)
+        return f'+proj=utm +zone={zonenumber} +{hemisphere} +datum=WGS84 +units=m +no_defs'
 
     except utm.error.OutOfRangeError as err:
         raise errors.SvgisError(err) from err
@@ -112,7 +110,7 @@ def generateproj4(method, bounds, file_crs):
 
         return tm_proj4(x0, miny, maxy)
 
-    raise errors.SvgisError("Unexpected method. Valid methods are default, local or utm. Got: %s" % method)
+    raise errors.SvgisError(f"Unexpected method. Valid methods are default, local or utm. Got: {method}")
 
 
 def _is_longlat(crs):
@@ -161,7 +159,7 @@ def pick(project, bounds=None, file_crs=None):
             with open(project) as f:
                 return CRS(f.read())
 
-    raise errors.SvgisError(format('Unable to convert to projection: {}', project))
+    raise errors.SvgisError(f'Unable to convert to projection: {project}')
 
 
 def fake_to_string(crs):
@@ -169,4 +167,4 @@ def fake_to_string(crs):
     Fake to_string for debugging in places where fiona.crs.to_string
     isn't available
     """
-    return ' '.join('+{0[0]}={0[1]}'.format(i) for i in crs.items())
+    return ' '.join(f'+{i[0]}={i[1]}' for i in crs.items())

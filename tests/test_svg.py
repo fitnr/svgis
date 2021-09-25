@@ -84,26 +84,26 @@ class SvgTestCase(unittest.TestCase):
 
     def testRect(self):
         rect = svg.rect((0, 0), 10, 10)
-        self.assertIsInstance(rect, type(u''))
-        fix = u'<rect', u'x="0"', u'y="0"', u'width="10"', u'height="10"', u'/>'
+        self.assertIsInstance(rect, type(''))
+        fix = '<rect', 'x="0"', 'y="0"', 'width="10"', 'height="10"', '/>'
         self.assertPartsIn(fix, rect)
 
     def testLine(self):
         line = svg.line((0, 0), (10, 10))
-        assert isinstance(line, type(u''))
-        fix = u'<line', u'x1="0"', u'y1="0"', u'x2="10"', u'y2="10"', u'/>'
+        assert isinstance(line, type(''))
+        fix = '<line', 'x1="0"', 'y1="0"', 'x2="10"', 'y2="10"', '/>'
         self.assertPartsIn(fix, line)
 
     def testText(self):
         text = svg.text('hi', (2, 2))
-        assert isinstance(text, type(u''))
-        fix = u'<text', u'x="2"', u'y="2"', u'hi', u'</text>'
+        assert isinstance(text, type(''))
+        fix = '<text', 'x="2"', 'y="2"', 'hi', '</text>'
 
         self.assertPartsIn(fix, text)
 
         text = svg.text('hi', (2.22222, 2.222222), precision=2)
-        assert isinstance(text, type(u''))
-        fix = u'<text', u'x="2.22"', u'y="2.22"', u'hi', u'</text>'
+        assert isinstance(text, type(''))
+        fix = '<text', 'x="2.22"', 'y="2.22"', 'hi', '</text>'
 
         self.assertPartsIn(fix, text)
 
