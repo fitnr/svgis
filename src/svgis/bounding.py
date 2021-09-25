@@ -143,7 +143,7 @@ def transform(bounds, **kwargs):
         raise errors.SvgisError('Need input CRS and output CRS or a Transformer')
 
     if transformer is None:
-        transformer = Transformer.from_crs(in_crs, out_crs, skip_equivalent=True, always_xy=True)
+        transformer = Transformer.from_crs(in_crs, out_crs, always_xy=True)
 
     densebounds = ring(bounds)
     xbounds, ybounds = list(zip(*transformer.itransform(densebounds)))
