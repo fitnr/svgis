@@ -1,0 +1,45 @@
+name: svgis
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.5, 3.6, 3.7, 3.8, 3.9]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install GDAL
+        run: |
+          sudo apt-get -q update
+          sudo apt-get -q install -y libgdal-dev
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip flit
+          flit install
+
+      - name: Run Python tests
+        run: make test
+
+      - name: Run CLI tests
+        run: make test-cli
+
+      - name: Coverage report
+        run: make coverage -o test
+      - name: show command line help
+        run: |
+          svgis -h
+          svgis draw -h
+          svgis style -h
+          svgis scale -h
+          svgis project -h
+          svgis bounds -h
