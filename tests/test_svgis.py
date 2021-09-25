@@ -173,6 +173,11 @@ class SvgisTestCase(unittest.TestCase):
         assert 'pear_1' in r2
         assert 'kale_leafy_green' in r2
 
+    def testIssue8(self):
+        '''Test for coordinate testing bug in: https://github.com/fitnr/svgis/issues/8'''
+        s = svgis.SVGIS('tests/fixtures/issue-8.geojson', crs='file')
+        result = s.compose()
+        self.assertIn('<polyline points="-121', result)
 
 if __name__ == '__main__':
     unittest.main()
