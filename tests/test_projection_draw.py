@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
@@ -6,13 +5,14 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, Neil Freeman <contact@fakeisthenewreal.org>
 import unittest
+import logging
 from os import path
 from xml.dom import minidom
 
 from svgis import svgis
 
 EPSG3528 = {'init': 'epsg:3528', 'no_defs': True}
-
+# logging.getLogger('svgis').setLevel(logging.DEBUG)
 
 class ProjectionDrawTestCase(unittest.TestCase):
 
@@ -47,18 +47,16 @@ class ProjectionDrawTestCase(unittest.TestCase):
         self.assertIn('points', dict(polygons[1].attributes.items()))
 
     def testDrawWithReProjectionRepeat(self):
-        s = svgis.SVGIS(self.files[::-1], self.bounds[4269], out_crs=EPSG3528, scalar=100)
+        s = svgis.SVGIS(self.files[1], self.bounds[4269], out_crs=EPSG3528, scalar=100)
         s.compose()
-
-        u = s.compose(bounds=(-87.6475, 42.0705, -87.5165, 42.1452))
-
+        u = s.compose()
+        self.assertIn('points', u)
         i = u.index('points')
         self.assertIn('points', u[i:])
 
     def testDrawWithSameProjection(self):
         s = svgis.SVGIS(self.files, crs=2790)
         a = s.compose()
-
         self.assertIn('points', a)
         i = a.index('points')
         self.assertIn('points', a[i:])

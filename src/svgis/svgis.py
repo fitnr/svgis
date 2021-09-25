@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-
 """Draw SVG maps"""
-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
@@ -135,7 +133,7 @@ class SVGIS:
 
         # This may return a keyword, which will require more updating.
         # If so, will update when files are open.
-        self._out_crs = crs
+        self._out_crs = kwargs.get('out_crs', crs)
         self.log.debug('picked tentative output projection or method: %s', self._out_crs)
 
         self.scalar = kwargs.pop('scalar', 1) or 1
@@ -179,8 +177,8 @@ class SVGIS:
 
             # Assume input CRS is WGS 84
             self._in_crs = projection.pick(utils.DEFAULT_GEOID)
-            self.log.debug('setting input crs to default %s', self._in_crs)
-            self.log.warning('Found no input coordinate system, ' 'assuming WGS84 (long/lat) coordinates.')
+            self.log.debug('set_in_crs: setting input crs to default %s', self._in_crs)
+            self.log.warning('set_in_crs: Found no input coordinate system, ' 'assuming WGS84 (long/lat) coordinates.')
 
     @property
     def out_crs(self):
@@ -197,12 +195,11 @@ class SVGIS:
         # Determine projection transformation:
         # either use something passed in, a non latlong layer projection,
         # the local UTM, or customize local TM
-        self.log.debug('Picking a projection:')
-        self.log.debug('  out crs: %s', self._out_crs)
-        self.log.debug('  in crs: %s', self.in_crs)
-        self.log.debug('  bounds: %s', bounds)
+        self.log.debug('set_out_crs:  out crs: %s', self._out_crs)
+        self.log.debug('set_out_crs:  in crs: %s', self.in_crs)
+        self.log.debug('set_out_crs:  bounds: %s', bounds)
         self._out_crs = projection.pick(self._out_crs, bounds, self.in_crs)
-        self.log.debug('Set output crs to %s', self.out_crs)
+        self.log.debug('set_out_crs: Set output crs to %s', self.out_crs)
 
     @property
     def unprojected_bounds(self):
@@ -231,12 +228,11 @@ class SVGIS:
             ``tuple`` bounding box in out_crs coordinates.
         """
         # This may happen many times if we were passed bounds, but it's a cheap operation.
-        self.log.debug('updating bounds')
-        self.log.debug('  in_crs: %s', in_crs)
-        self.log.debug('  out_crs: %s', out_crs)
+        self.log.debug('update_projected_bounds:  in_crs: %s', in_crs)
+        self.log.debug('update_projected_bounds:  out_crs: %s', out_crs)
         projected = bounding.transform(bounds, in_crs=in_crs, out_crs=out_crs)
         self._projected_bounds = bounding.pad(projected, padding or 0)
-        self.log.debug('  new bounds: %s', self._projected_bounds)
+        self.log.debug('update_projected_bounds:  new bounds: %s', self._projected_bounds)
         return self._projected_bounds
 
     def _get_clipper(self, layer_bounds, out_bounds, scalar=None):
@@ -352,7 +348,7 @@ class SVGIS:
 
                 # When we have passed bounds:
                 if unprojected_bounds:
-                    # Set the output CRS, if not yet set, using unprojected bounds.
+                    self.log.debug("Set the output CRS, if not yet set, using unprojected bounds: %s", unprojected_bounds)
                     self.set_out_crs(unprojected_bounds)
 
                     # If we haven't set the projected bounds yet, do that.
@@ -369,7 +365,7 @@ class SVGIS:
 
                 # When we have no passed bounds:
                 else:
-                    # Set the output CRS, if not yet set, using this layer's bounds.
+                    self.log.debug("Set the output CRS, if not yet set, using this layer's bounds.")
                     self.set_out_crs(layer.bounds)
 
                     # Extend projection_bounds
@@ -475,7 +471,9 @@ class SVGIS:
         # Draw files
         members = [svg.group(**self.compose_file(f, bounds, scalar=scalar, **kwargs)) for f in self.files]
 
-        self.log.info('composing drawing')
+        self.log.info('compose(): bounds  = %s', bounds)
+        self.log.info('compose(): style   = %s', (style or '')[:25])
+        self.log.info('compose(): viewbox = %s', viewbox)
         drawing = self.draw(members, scalar, kwargs.get('precision'), style=style, viewbox=viewbox, inline=inline)
 
         # Always reset projected bounds.
