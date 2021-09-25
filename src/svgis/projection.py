@@ -6,6 +6,7 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, 2020, Neil Freeman <contact@fakeisthenewreal.org>
+import logging
 import os.path
 
 import utm
@@ -15,6 +16,7 @@ from pyproj.exceptions import CRSError
 from . import bounding, errors
 from .utils import DEFAULT_GEOID
 
+LOG = logging.getLogger('svgis')
 METHODS = 'default', 'file', 'local', 'utm'
 
 
@@ -79,6 +81,7 @@ def generateproj4(method, bounds, file_crs):
     Returns:
         (str) proj4 string
     """
+    LOG.debug('generating proj4')
     if bounds is None or file_crs is None:
         raise errors.SvgisError('generatecrs missing bounds and file crs')
 
@@ -134,6 +137,7 @@ def pick(project, bounds=None, file_crs=None):
     Returns:
         (mixed) one of: None, 'local', 'utm' or a dict
     """
+    LOG.debug('projection.pick("%s")', project)
     project = project or 'default'
     if isinstance(project, CRS):
         return project
@@ -144,10 +148,13 @@ def pick(project, bounds=None, file_crs=None):
         pass
 
     if isinstance(project, str):
+        LOG.debug('projection is a str')
         if project.lower() == 'file':
+            LOG.debug('"project" == file')
             return file_crs if file_crs is not None else 'file'
 
         if project.lower() in METHODS:
+            LOG.debug('"project" is in METHODS')
             return CRS(generateproj4(project, bounds, file_crs))
 
         if os.path.exists(project):
