@@ -14,6 +14,7 @@ from svgis import svgis
 EPSG3528 = {'init': 'epsg:3528', 'no_defs': True}
 # logging.getLogger('svgis').setLevel(logging.DEBUG)
 
+
 class ProjectionDrawTestCase(unittest.TestCase):
 
     bounds = {

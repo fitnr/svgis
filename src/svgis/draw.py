@@ -16,6 +16,7 @@ def _applyid(multifunc):
     This decorator applies the ID attribute to the group that
     contains multi-part geometries, rather than the elements of the group.
     """
+
     @wraps(multifunc)
     def func(coordinates, **kwargs):
         ID = kwargs.pop('id', None)

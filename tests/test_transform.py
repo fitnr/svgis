@@ -32,7 +32,7 @@ class ClipTestCase(unittest.TestCase):
     def setUp(self):
         self.bounds = (1, 1, 9, 9)
         self.coords = [[(2, 2), (100, 2), (11, 11), (12, 12), (2, 10), (2, 2)]]
-        self.expected = [((2.0, 9.0), (9.0, 9.0), (9.0, 2.0), (2.0, 2.0), (2.0, 9.0))]
+        self.fixture = shapely.geometry.Polygon(((2.0, 9.0), (9.0, 9.0), (9.0, 2.0), (2.0, 2.0), (2.0, 9.0)))
         self.gen = (x for x in self.coords[0])
 
     @unittest.skipIf(NO_SHAPELY, "Shapely not installed")
@@ -46,22 +46,14 @@ class ClipTestCase(unittest.TestCase):
 
         b = shapely.geometry.shape(bounds)
         c = shapely.geometry.shape(coords)
-        i = b.intersection(c)
-
-        result = shapely.geometry.mapping(i)
-        self.assertSequenceEqual(result['coordinates'], self.expected)
+        result = b.intersection(c)
+        self.assertTrue(result.equals(self.fixture), f"{result} == {self.fixture}")
 
     @unittest.skipIf(NO_SHAPELY, "Shapely not installed")
     def testClip(self):
         clipped = transform.clip({"type": "Polygon", "coordinates": self.coords}, self.bounds)
-        self.assertSequenceEqual(clipped['coordinates'], self.expected)
-
-    @unittest.skipIf(NO_SHAPELY, "Shapely not installed")
-    def testClipGeometry(self):
-        geometry = {"type": "Polygon", "coordinates": self.coords}
-        clipped = transform.clip(geometry, self.bounds)
-
-        self.assertSequenceEqual(set(self.expected), set(clipped['coordinates']))
+        result = shapely.geometry.Polygon(clipped['coordinates'][0])
+        self.assertTrue(result.equals(self.fixture), f"{result} == {self.fixture}")
 
 
 class SimplifyTestCase(unittest.TestCase):

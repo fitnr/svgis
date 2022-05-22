@@ -179,5 +179,6 @@ class SvgisTestCase(unittest.TestCase):
         result = s.compose()
         self.assertIn('<polyline points="-121', result)
 
+
 if __name__ == '__main__':
     unittest.main()
