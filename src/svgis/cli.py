@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """Command-line utilities for SVGIS."""
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
@@ -18,7 +16,7 @@ from . import graticule as _graticule
 from . import projection
 from . import style as _style
 from . import svgis
-from .utils import DEFAULT_GEOID, posint
+from .utils import DEFAULT_GEOID
 
 none = {'flag_value': None, 'expose_value': False, 'help': '(not enabled)'}
 
@@ -81,6 +79,13 @@ def main(context):
 
 # Style
 style_help = "Style to append to SVG. Either a valid CSS string, a file path (must end in '.css'). Use '-' for stdin."
+
+
+def validate_posint(_, __, value):
+    """Validate a positive integer"""
+    if value <= 0 or not isinstance(value, int):
+        raise click.BadParameter("Should be a positive integer")
+    return value
 
 
 @main.command()
@@ -153,7 +158,7 @@ def bounds(layer, crs, latlon=False):
     type=float,
     metavar="minx miny maxx maxy",
     help='In the same coordinate system as the first input layer',
-    default=None,
+    default=[None, None, None, None],
 )
 @click.option('-c', '--style', type=str, metavar='CSS', help="CSS file or string", multiple=True)
 @click.option('-f', '--scale', type=int, default=None, help='Scale for the map (units are divided by this number)')
@@ -163,7 +168,6 @@ def bounds(layer, crs, latlon=False):
     '-a',
     '--class-fields',
     type=str,
-    default='',
     metavar='FIELDS',
     multiple=True,
     help='Geodata fields to use as class (comma-separated)',
@@ -172,7 +176,6 @@ def bounds(layer, crs, latlon=False):
     '-a',
     '--data-fields',
     type=str,
-    default='',
     metavar='FIELDS',
     multiple=True,
     help='Geodata fields to add as data-* attributes (comma-separated)',
@@ -183,8 +186,9 @@ def bounds(layer, crs, latlon=False):
     '-P',
     '--precision',
     metavar='INTEGER',
-    type=posint,
+    type=int,
     default=5,
+    callback=validate_posint,
     help='Rounding precision for coordinates (default: 5)',
 )
 @click.option('--clip/--no-clip', ' /-n', **clipkwargs)
@@ -195,7 +199,6 @@ def bounds(layer, crs, latlon=False):
 def draw(layer, output, **kwargs):
     """Draw SVGs from input geodata"""
     log = logging.getLogger('svgis')
-
     verbose = kwargs.pop('verbose', None)
     if verbose:
         level = logging.DEBUG if verbose > 1 else logging.INFO
@@ -213,7 +216,7 @@ def draw(layer, output, **kwargs):
 
 # Proj
 @main.command()
-@click.argument('bounds', nargs=-1, type=float, default=None)
+@click.argument('bounds', nargs=4, metavar="MINX MINY MAXX MAXY", required=True, type=float)
 @click.option('-m', '--method', default='local', type=click.Choice(('utm', 'local')), help='Defaults to local')
 @click.option('-j', '--crs', default=DEFAULT_GEOID, help='Projection of the bounding coordinates')
 def project(bounds, method, crs):
@@ -224,13 +227,6 @@ def project(bounds, method, crs):
     # pylint: disable=redefined-outer-name
     if crs in projection.METHODS:
         click.echo('CRS must be an EPSG code, a Proj4 string, or file containing a Proj4 string.', err=1)
-        return
-
-    if len(bounds) == 2:
-        bounds = bounds + bounds
-
-    if len(bounds) != 4:
-        click.echo('Either two or four bounds required', err=True)
         return
 
     result = projection.pick(method, file_crs=crs, bounds=bounds).to_proj4()
@@ -249,7 +245,7 @@ crs_help2 = (
 
 # Graticule
 @main.command()
-@click.argument('bounds', nargs=4, type=float, metavar='minx miny maxx maxy')
+@click.argument('bounds', nargs=4, type=float, metavar="MINX MINY MAXX MAXY")
 @click.option('-s', '--step', type=float, help='Step between lines (in projected units)', required=True)
 @click.option('-j', '--crs', type=str, default=None, help=crs_help2)
 @click.option('-o', '--output', default=sys.stdout, type=click.File('wb'), help="Defaults to stdout")

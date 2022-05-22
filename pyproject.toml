@@ -11,19 +11,16 @@ keywords = "svg, gis, geojson, shapefile, cartography, map, geodata"
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Natural Language :: English",
     "Operating System :: Unix",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "Operating System :: OS Independent",
 ]
 description-file = "README.md"
 requires = [
-    "six>=1.7.3,<2",
-    "click>=6.2,<8",
+    "click>=8,<9",
     "pyproj>=2.6",
     "fiona>=1.8",
     "tinycss2>=1.0.2",
@@ -63,7 +60,7 @@ exclude_lines = [
 
 [tool.black]
 line-length = 120
-target-version = ["py38"]
+target-version = ["py310"]
 include = 'py$'
 skip-string-normalization = true
 

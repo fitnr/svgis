@@ -12,13 +12,6 @@ from svgis.errors import SvgisError
 
 
 class UtilsTestCase(unittest.TestCase):
-    def testPosInt(self):
-        with self.assertRaises(SvgisError):
-            utils.posint(-1)
-        self.assertEqual(utils.posint(1), 1)
-        self.assertEqual(utils.posint(111), 111)
-        self.assertEqual(utils.posint(1.11), 1)
-
     def test_isinf(self):
         self.assertTrue(utils.isinf(float('inf')))
         self.assertTrue(utils.isinf(float('-inf')))

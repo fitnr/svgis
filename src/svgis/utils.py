@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 '''Utilities for svgis'''
 
 # This file is part of svgis.
@@ -11,18 +8,8 @@
 from itertools import groupby
 from math import ceil, floor
 
-from .errors import SvgisError
-
 # WGS 84
 DEFAULT_GEOID = 4326
-
-
-def posint(i):
-    '''Fake class for positive integers only'''
-    val = int(i)
-    if val < 0:
-        raise SvgisError('Must be a positive integer')
-    return val
 
 
 def isinf(x):

@@ -13,7 +13,6 @@ from functools import partial
 import fiona
 import fiona.transform
 from pyproj.crs import CRS
-from six import string_types
 
 from . import bounding, draw, projection
 from . import style as _style
@@ -116,7 +115,7 @@ class SVGIS:
     def __init__(self, files, bounds=None, crs=None, **kwargs):
         self.log = logging.getLogger('svgis')
 
-        if isinstance(files, string_types):
+        if isinstance(files, str):
             self.files = [files]
         elif isinstance(files, Iterable):
             self.files = files

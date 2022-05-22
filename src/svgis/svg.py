@@ -6,8 +6,6 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2016, 2020, Neil Freeman <contact@fakeisthenewreal.org>
 
-from six import string_types
-
 from . import dom, utils
 
 
@@ -125,7 +123,7 @@ def path(coordinates, precision=None, **kwargs):
         ``str``
     """
     fmt = _fmt(precision)
-    coords = utils.dedupe(i if isinstance(i, string_types) else fmt.format(i) for i in coordinates)
+    coords = utils.dedupe(i if isinstance(i, str) else fmt.format(i) for i in coordinates)
     return _element('path', d=' '.join(coords), **kwargs)
 
 

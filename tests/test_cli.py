@@ -16,6 +16,7 @@ from xml.dom import minidom
 
 import click.testing
 import fiona.errors
+from click import BadParameter
 
 import svgis.cli
 
@@ -118,7 +119,7 @@ class CliTestCase(unittest.TestCase):
         self.assertTrue(os.path.exists(f))
 
         try:
-            with open(f) as g:
+            with open(f, encoding="utf8") as g:
                 svg = g.read()
                 match = re.search(r'points="([^"]+)"', svg)
                 self.assertIsNotNone(match)
@@ -127,7 +128,7 @@ class CliTestCase(unittest.TestCase):
             points = [[float(x) for x in p.split(',')] for p in result.split(' ')]
 
             with fiona.open(self.dc) as src:
-                ring = next(src)['geometry']['coordinates'][0]
+                ring = next(iter(src))['geometry']['coordinates'][0]
 
             for points in zip(ring, points):
                 for z in zip(*points):
@@ -158,6 +159,15 @@ class CliTestCase(unittest.TestCase):
 
         with self.assertRaises(fiona.errors.DriverError):
             self.invoke(('draw', 'zip://lksdjlksjdf.zip/foo'))
+
+    def test_validate_posint(self):
+        with self.assertRaises(BadParameter):
+            svgis.cli.validate_posint(None, None, -1)
+
+        with self.assertRaises(BadParameter):
+            svgis.cli.validate_posint(None, None, 0.5)
+
+        self.assertEqual(svgis.cli.validate_posint(None, None, 1), 1)
 
 
 if __name__ == '__main__':

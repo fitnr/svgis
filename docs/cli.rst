@@ -496,14 +496,14 @@ Add or replace the CSS style in an SVG.
 svgis project
 ^^^^^^^^^^^^^
 
-SVGIS can automatically generate local projections or pick the local UTM projection for input geodata. This utility gives the projection SVGIS would pick for a given boundary box in PROJ4 syntax. The input can be either a bounding box or a single coordinate pair.
+SVGIS can automatically generate local projections or pick the local UTM projection for input geodata. This utility gives the projection SVGIS would pick for a given boundary box in PROJ4 syntax. The input should be four coordinates: ``minx miny maxx maxy``.
 
 By default, ``svgis project`` expects WGS84 coordinates. Specify another projection with the ``--crs`` argument.
 
 The output projection will be a local Transverse Mercator projection. Use ``--method utm`` to return the local UTM projection.
 
 For coordinates with negative numbers, use the ``--`` argument separator to prevent the utility
-getting confused:
+getting confused with the ``-`` option flag:
 
 ::
     svgis project -m utm -- 16.3449768409 -34.8191663551 32.830120477 -22.0913127581
@@ -514,7 +514,7 @@ getting confused:
 
 ::
 
-    Usage: svgis project [OPTIONS] minx miny maxx maxy | x y
+    Usage: svgis project [OPTIONS] MINX MINY MAXX MAXY
 
     Options:
       -m, --method [utm|local]  Defaults to local
