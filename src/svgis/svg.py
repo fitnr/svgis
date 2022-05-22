@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 '''Create string versions of SVG elements.'''
 
 # This file is part of svgis.

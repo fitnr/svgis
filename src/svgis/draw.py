@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 '''Draw geometries as SVG elements'''
 
 # This file is part of svgis.
@@ -19,11 +16,10 @@ def _applyid(multifunc):
     This decorator applies the ID attribute to the group that
     contains multi-part geometries, rather than the elements of the group.
     """
-
     @wraps(multifunc)
     def func(coordinates, **kwargs):
         ID = kwargs.pop('id', None)
-        result = svg.group(multifunc(coordinates, **kwargs), fill_rule="evenodd", id=ID)
+        result = svg.group(multifunc(coordinates, **kwargs), id=ID)
         return result
 
     return func
@@ -89,6 +85,7 @@ def polygon(coordinates, **kwargs):
     Returns:
         ``str`` representation of an svg ``path``
     """
+    kwargs.setdefault("fill-rule", "evenodd")
     if len(coordinates) == 1:
         return svg.polygon(coordinates[0], **kwargs)
 
@@ -110,7 +107,7 @@ def polygon(coordinates, **kwargs):
         instructions.extend(ring[::-1] if utils.clockwise(ring) else ring)
         instructions.append('z')
 
-    return svg.path(instructions, fill_rule='evenodd', **kwargs)
+    return svg.path(instructions, **kwargs)
 
 
 @_applyid
@@ -150,7 +147,7 @@ def geometrycollection(collection, bbox, precision, **kwargs):
     """Serialize diverse geometry rtpes to svg."""
     ID = kwargs.pop('id', None)
     geoms = (geometry(g, bbox=bbox, precision=precision, **kwargs) for g in collection['geometries'])
-    return svg.group(geoms, fill_rule="evenodd", id=ID)
+    return svg.group(geoms, id=ID)
 
 
 def geometry(geom, bbox=None, precision=None, **kwargs):
@@ -199,4 +196,5 @@ def group(geometries, **kwargs):
     Returns:
         ``str`` representation of the SVG group
     """
-    return svg.group([geometries(g, fill_rule="evenodd", **kwargs) for g in geometries])
+    kwargs.setdefault("fill-rule", "evenodd")
+    return svg.group([geometries(g, **kwargs) for g in geometries])

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
@@ -110,6 +108,7 @@ class DrawTestCase(unittest.TestCase):
         drawn = draw.polygon(self.polygon['geometry']['coordinates'])
         assert "{},{}".format(*self.lis1[0]) in drawn
         feat = self.obj.feature(self.polygon, [], classes=self.classes, id_field=None)
+        assert 'fill-rule="evenodd"' in feat
         assert 'cat_meow' in feat
 
     def testDrawMultiPolygon(self):

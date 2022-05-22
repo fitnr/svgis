@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Draw SVG maps"""
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
@@ -524,7 +523,7 @@ class SVGIS:
             self.log.debug('translating contents to fit')
 
         # Create container and then SVG
-        container = svg.group(members, fill_rule='evenodd', transform=transform_attrib)
+        container = svg.group(members, transform=transform_attrib)
         drawing = svg.drawing(size, [container], style=style, precision=precision, viewbox=viewbox)
 
         if kwargs.pop('inline', False):
