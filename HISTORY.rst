@@ -1,3 +1,8 @@
+0.5.3
+-----
+* Correct "fill-rule" attribute (#11)
+* Remove Python 3.6, 3.7 from list of supported versions
+
 0.5.2
 -----
 * Fix an error checking certain geometries (#8)

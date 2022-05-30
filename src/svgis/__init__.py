@@ -8,7 +8,7 @@
 from . import bounding, draw, errors, projection, style, svg, svgis, transform
 from .svgis import SVGIS, map
 
-__version__ = '0.5.2'
+__version__ = '0.5.3'
 
 __all__ = [
     'bounding',
