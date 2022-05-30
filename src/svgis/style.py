@@ -1,8 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 '''Mess around with SVG styling'''
-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
@@ -86,7 +82,7 @@ def pick(style):
     try:
         _, ext = os.path.splitext(style)
         if ext == '.css':
-            with open(style) as f:
+            with open(style, encoding="utf-8") as f:
                 return f.read()
 
     except (AttributeError, TypeError):
@@ -134,7 +130,7 @@ def add_style(svgfile, style, replace=False):
     root, ext = os.path.splitext(style)
 
     if ext == '.css' or root == '/dev/stdin':
-        with open(style) as f:
+        with open(style, encoding="utf-8") as f:
             style = replace_comments(f.read())
 
     try:

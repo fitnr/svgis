@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """Do the work of picking, generating and transforming coordinate reference systems."""
 # This file is part of svgis.
 # https://github.com/fitnr/svgis

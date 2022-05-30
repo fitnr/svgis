@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """Tests on bounding box management."""
 # This file is part of svgis.
 # https://github.com/fitnr/svgis

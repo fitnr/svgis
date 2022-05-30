@@ -1,8 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 '''Utilities for working with bounding boxes'''
-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:

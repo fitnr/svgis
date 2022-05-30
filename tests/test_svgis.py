@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """Tests on the SVGIS object."""
 # This file is part of svgis.
 # https://github.com/fitnr/svgis

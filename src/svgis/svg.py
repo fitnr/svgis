@@ -1,5 +1,4 @@
 '''Create string versions of SVG elements.'''
-
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
@@ -30,8 +29,8 @@ def _element(tag, contents=None, **kwargs):
 
 def _fmt(precision):
     if precision is None:
-        return '{0[0]},{0[1]}'
-    return '{{0[0]:.{0}f}},{{0[1]:.{0}f}}'.format(precision)
+        return "{0[0]},{0[1]}"
+    return f"{{0[0]:.{precision}f}},{{0[1]:.{precision}f}}"
 
 
 def _poly(name):

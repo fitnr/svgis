@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 '''Utilities for manipulating the DOM and applying styles to same'''
 # This file is part of svgis.
 # https://github.com/fitnr/svgis

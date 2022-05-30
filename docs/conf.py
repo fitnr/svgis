@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # svgis documentation build configuration file, created by
 # sphinx-quickstart on Tue Jan 26 11:23:58 2016.

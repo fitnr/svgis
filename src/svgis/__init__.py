@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """Create SVG drawings from vector geodata files (SHP, geoJSON, etc)."""
 # This file is part of svgis.
 # https://github.com/fitnr/svgis

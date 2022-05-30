@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 '''Clip and simplify geometries'''
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
