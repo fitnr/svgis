@@ -6,8 +6,6 @@
 import re
 import unittest
 
-import six
-
 from svgis import draw, errors, svgis
 
 
@@ -80,28 +78,28 @@ class DrawTestCase(unittest.TestCase):
     def testDrawPoint(self):
         feat = self.obj.feature(self.point, [], classes=self.classes, id_field=None)
 
-        assert isinstance(feat, six.string_types)
+        assert isinstance(feat, str)
         self.assertIn('cat_meow', feat)
 
     def testDrawLine(self):
         line = draw.lines(self.linestring['geometry'])
-        assert isinstance(line, six.string_types)
+        assert isinstance(line, str)
 
         feat = self.obj.feature(self.linestring, [], classes=self.classes, id_field=None)
 
-        assert isinstance(feat, six.string_types)
+        assert isinstance(feat, str)
         assert 'cat_meow' in feat
 
     def testDrawMultiLine(self):
         mls1 = draw.multilinestring(self.multilinestring['geometry']['coordinates'])
         mls2 = draw.lines(self.multilinestring['geometry'])
 
-        assert isinstance(mls1, six.string_types)
-        assert isinstance(mls2, six.string_types)
+        assert isinstance(mls1, str)
+        assert isinstance(mls2, str)
 
         grp = self.obj.feature(self.multilinestring, [], classes=self.classes, id_field=None)
 
-        assert isinstance(grp, six.string_types)
+        assert isinstance(grp, str)
         assert 'cat_meow' in grp
 
     def testDrawPolygon(self):
@@ -114,7 +112,7 @@ class DrawTestCase(unittest.TestCase):
     def testDrawMultiPolygon(self):
         drawn = draw.multipolygon(self.multipolygon['geometry']['coordinates'])
 
-        assert isinstance(drawn, six.string_types)
+        assert isinstance(drawn, str)
 
     def testDrawMultiPoint(self):
         points = draw.multipoint(self.lis1, id='foo')
@@ -127,10 +125,10 @@ class DrawTestCase(unittest.TestCase):
         geom = {'coordinates': (0, 0), 'type': 'Point'}
         kwargs = {"class": "boston"}
         point = draw.points(geom, **kwargs)
-        self.assertIsInstance(point, six.string_types)
+        self.assertIsInstance(point, str)
 
         point = draw.points(geom, **kwargs)
-        assert isinstance(point, six.string_types)
+        assert isinstance(point, str)
 
     def testDrawPolygonComplicated(self):
         coordinates = [
@@ -139,7 +137,7 @@ class DrawTestCase(unittest.TestCase):
         ]
 
         polygon = draw.polygon(coordinates)
-        self.assertIsInstance(polygon, six.string_types)
+        self.assertIsInstance(polygon, str)
         assert 'class="polygon"' in polygon
 
         kw = {'class': 'a'}
@@ -162,7 +160,7 @@ class DrawTestCase(unittest.TestCase):
             ],
         }
         a = draw.geometry(gc, id='cats')
-        assert isinstance(a, six.string_types)
+        assert isinstance(a, str)
         assert 'id="cats"' in a
 
     def testDrawAndConvertToString(self):

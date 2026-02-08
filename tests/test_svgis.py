@@ -10,8 +10,6 @@ import re
 import unittest
 from xml.dom import minidom
 
-import six
-
 from svgis import errors, svgis
 
 
@@ -55,7 +53,7 @@ class SvgisTestCase(unittest.TestCase):
 
     def testSvgisCompose(self):
         composed = self.svgis_obj.compose()
-        assert isinstance(composed, six.string_types)
+        assert isinstance(composed, str)
 
     def testSvgisClassFields(self):
         composed = self.svgis_obj.compose(class_fields=('NAME', 'GEOID'))
@@ -85,7 +83,7 @@ class SvgisTestCase(unittest.TestCase):
             "properties": {'foo': 'bar', 'cat': 'meow'},
         }
         drawn = self.svgis_obj.feature(feat, [], classes=['foo'], id_field='cat', name='quux')
-        assert isinstance(drawn, six.string_types)
+        assert isinstance(drawn, str)
 
         self.assertIn('id="meow"', drawn)
         self.assertIn('class="quux foo_bar"', drawn)

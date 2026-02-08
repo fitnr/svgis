@@ -6,7 +6,6 @@
 import unittest
 from xml.dom import minidom
 
-import six
 
 from svgis import style, svg
 
@@ -24,17 +23,17 @@ class SvgTestCase(unittest.TestCase):
 
     def test_create(self):
         s = svg.drawing((100, 100), [])
-        self.assertIsInstance(s, six.string_types)
+        self.assertIsInstance(s, str)
 
         s = svg.drawing((100, 100), [])
-        self.assertIsInstance(s, six.string_types)
+        self.assertIsInstance(s, str)
 
         s = svg.drawing((100, 100), [], style=self.newstyle)
         self.assertIn(self.newstyle, s)
 
     def testGroup(self):
         g = svg.group()
-        self.assertIsInstance(g, six.string_types)
+        self.assertIsInstance(g, str)
 
         g = svg.group(transform="translate(10,10)")
         self.assertIn('transform="translate(10,10)"', g)
@@ -49,7 +48,7 @@ class SvgTestCase(unittest.TestCase):
 
     def testDrawCircle(self):
         point = svg.circle((0.0, 0.0), r=2)
-        self.assertIsInstance(point, six.string_types)
+        self.assertIsInstance(point, str)
         assert 'r="2"' in point
         self.assertIn('cy="0.0"', point)
         assert 'cx="0.0"' in point
@@ -71,7 +70,7 @@ class SvgTestCase(unittest.TestCase):
         ]
 
         path = svg.path(coordinates)
-        self.assertIsInstance(path, six.string_types)
+        self.assertIsInstance(path, str)
         self.assertIn(' M ', path)
         self.assertIn('Z"', path)
         self.assertIn('10.0,0.0', path)
