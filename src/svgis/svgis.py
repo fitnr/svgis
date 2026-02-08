@@ -261,7 +261,7 @@ class SVGIS:
             self.log.info('set up reprojection')
             self.log.debug('  input crs: %s', in_crs)
             self.log.debug('  output crs: %s', self.out_crs)
-            return partial(fiona.transform.transform_geom, in_crs, self.out_crs.to_dict())
+            return partial(fiona.transform.transform_geom, in_crs, self.out_crs.to_string())
 
         return None
 
