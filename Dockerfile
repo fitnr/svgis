@@ -13,3 +13,5 @@ COPY ["pyproject.toml", "pyproject.toml"]
 COPY ["./src", "src/"]
 
 RUN ["python", "-m", "pip", "install", "--break-system-packages", "."]
+
+ENTRYPOINT ["svgis"]
