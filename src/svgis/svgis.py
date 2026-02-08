@@ -14,9 +14,8 @@ import fiona
 import fiona.transform
 from pyproj.crs import CRS
 
-from . import bounding, draw, projection
+from . import bounding, draw, projection, svg, transform, utils
 from . import style as _style
-from . import svg, transform, utils
 from .errors import SvgisError
 
 STYLE = (
