@@ -471,7 +471,7 @@ class SVGIS:
         self.log.info('compose(): bounds  = %s', bounds)
         self.log.info('compose(): style   = %s', (style or '')[:25])
         self.log.info('compose(): viewbox = %s', viewbox)
-        drawing = self.draw(members, scalar, kwargs.get('precision'), style=style, viewbox=viewbox, inline=inline)
+        drawing = self.draw(members, scalar, style=style, viewbox=viewbox, inline=inline, **kwargs)
 
         # Always reset projected bounds.
         self._projected_bounds = None
@@ -507,10 +507,13 @@ class SVGIS:
             self.log.warning(r'Unable to find bounds, map is probably empty ¯\_(ツ)_/¯')
             dims = 0, 0, 0, 0
 
-        # width and height
-        size = [dims[2] - dims[0], dims[3] - dims[1]]
-
-        self.log.debug('Size: %f x %f', *size)
+        # Include the width and height parameters in the output svg?
+        size = None
+        if kwargs.get('size', True):
+            size = [dims[2] - dims[0], dims[3] - dims[1]]
+            self.log.debug('Size: %f x %f', *size)
+        else:
+            self.log.debug('Not including width or height attributes in output')
 
         if kwargs.pop('viewbox', True):
             viewbox = [dims[0], -dims[3]] + size
