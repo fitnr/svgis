@@ -516,7 +516,7 @@ class SVGIS:
             self.log.debug('Not including width or height attributes in output')
 
         if kwargs.pop('viewbox', True):
-            viewbox = [dims[0], -dims[3]] + size
+            viewbox = [dims[0], -dims[3]] + [dims[2] - dims[0], dims[3]-dims[1]]
             self.log.debug('drawing with viewbox')
         else:
             viewbox = None
