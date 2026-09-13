@@ -90,7 +90,7 @@ def pick(style):
         # Probably style is None.
         return None
 
-    except IOError:
+    except OSError:
         logging.getLogger('svgis').warning("Couldn't read %s, proceeding with default style", style)
 
     return style
@@ -136,7 +136,7 @@ def add_style(svgfile, style, replace=False):
 
     try:
         svg = etree.parse(svgfile).getroot()
-    except IOError:
+    except OSError:
         try:
             svg = etree.fromstring(svgfile)
         except UnicodeDecodeError:

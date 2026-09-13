@@ -123,10 +123,9 @@ crs_help = (
 @click.option('--latlon', default=False, flag_value=True, help='Print bounds in latitude, longitude order')
 def bounds(layer, crs, latlon=False):
     """Return the bounds for a given layer, optionally projected."""
-    with fiona.Env():
-        with fiona.open(layer, "r") as f:
-            meta = {'bounds': f.bounds}
-            meta.update(f.meta)
+    with fiona.Env(), fiona.open(layer, "r") as f:
+        meta = {'bounds': f.bounds}
+        meta.update(f.meta)
 
     warnings.filterwarnings("ignore")
 

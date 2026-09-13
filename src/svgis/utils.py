@@ -5,6 +5,7 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
+import contextlib
 from itertools import groupby
 from math import ceil, floor
 
@@ -59,10 +60,8 @@ def rnd(i, precision=None):
 
 def dedupe(array):
     """Use itertools.groupby to remove duplicates in a list."""
-    try:
+    with contextlib.suppress(AttributeError):
         array = array.tolist()
-    except AttributeError:
-        pass
 
     for g in groupby(array):
         yield g[0]

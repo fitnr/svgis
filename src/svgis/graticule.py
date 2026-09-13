@@ -48,9 +48,9 @@ def graticule(bounds, step, crs_or_method=None):
         coords = unproject.itransform([(X, y) for y in frange(miny, maxy + step, step / 2.0)])
         yield _feature(i, coords, axis='x', coord=X)
 
-    for i, Y in enumerate(frange(miny, maxy + step, step), i + 1):
+    for j, Y in enumerate(frange(miny, maxy + step, step), i + 1):
         coords = unproject.itransform([(x, Y) for x in frange(minx, maxx + step, step / 2.0)])
-        yield _feature(i, coords, axis='y', coord=Y)
+        yield _feature(j, coords, axis='y', coord=Y)
 
 
 def _feature(i, coords, axis=None, coord=None):

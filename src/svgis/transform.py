@@ -5,21 +5,18 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, 2020, Neil Freeman <contact@fakeisthenewreal.org>
+import contextlib
 from functools import partial
 
-try:
+with contextlib.suppress(ImportError):
     from shapely.geometry import mapping, shape
     from shapely.geos import TopologicalError
-except ImportError:
-    pass
-try:
+
+with contextlib.suppress(ImportError):
     import numpy as np
-except ImportError:
-    pass
-try:
+
+with contextlib.suppress(ImportError):
     import visvalingamwyatt as vw
-except ImportError:
-    pass
 
 
 def clipper(bbox):
@@ -136,10 +133,7 @@ def scale_geom(geom, factor=1):
     elif geom['type'] in ('Polygon', 'MultiLineString'):
         geom['coordinates'] = scale_rings(geom['coordinates'], factor)
 
-    elif geom['type'] in ('MultiPoint', 'LineString'):
-        geom['coordinates'] = scale(geom['coordinates'], factor)
-
-    elif geom['type'] == 'Point':
+    elif geom['type'] in ('MultiPoint', 'LineString') or geom['type'] == 'Point':
         geom['coordinates'] = scale(geom['coordinates'], factor)
 
     elif geom['type'] == 'GeometryCollection':

@@ -65,24 +65,13 @@ exclude_lines = [
     "except ImportError",
 ]
 
-[tool.pylint.master]
-fail-under = "9.5"
-
-[tool.pylint.basic]
-good-names = "f,g,i,j,k,x,y,z"
-
-[tool.pylint.messages_control]
-disable = "invalid-name"
-
-[tool.pylint.format]
-max-line-length = 120
-
 [tool.ruff]
 target-version = "py311"
 line-length = 120
 
 [tool.ruff.lint]
-select = ["I", "E"]
+select = ["I", "B", "E", "UP", "SIM"]
+ignore = ["B905", "SIM108"]
 
 [tool.ruff.format]
 quote-style = "preserve"

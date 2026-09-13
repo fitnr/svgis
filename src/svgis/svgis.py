@@ -299,7 +299,7 @@ class SVGIS:
         # Remove the id field if it doesn't appear in the properties.
         id_field = kwargs.pop('id_field', self.id_field)
 
-        result['id_field'] = id_field if id_field in layer.schema['properties'].keys() else None
+        result['id_field'] = id_field if id_field in layer.schema['properties'] else None
 
         result.update(kwargs)
 
@@ -370,7 +370,7 @@ class SVGIS:
         return {
             'members': group,
             'id': kwargs['name'],
-            'class': ' '.join(_style.sanitize(c) for c in layer.schema['properties'].keys()),
+            'class': ' '.join(_style.sanitize(c) for c in layer.schema['properties']),
         }
 
     def feature(self, feature, transforms, classes, datas=None, **kwargs):
@@ -494,7 +494,7 @@ class SVGIS:
         transform_attrib = 'scale(1,-1)'
 
         try:
-            if any((utils.isinf(b) for b in self._projected_bounds)):
+            if any(utils.isinf(b) for b in self._projected_bounds):
                 self.log.warning('Drawing has infinite bounds, consider changing projection or bounding box.')
 
             dims = [float(b or 0.0) * scalar for b in self.projected_bounds]
