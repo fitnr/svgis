@@ -112,6 +112,16 @@ class CliTestCase(unittest.TestCase):
         finally:
             os.remove('tmp.svg')
 
+    def testCliDrawNoSize(self):
+        self.invoke(['draw', '--crs', PROJECTION, '--scale', '1000', self.shp, '-o', 'tmp.svg', '--viewbox', '--no-size'])
+        try:
+            result = minidom.parse('tmp.svg').getElementsByTagName('svg').item(0)
+            self.assertFalse(result.hasAttribute('width'))
+            self.assertFalse(result.hasAttribute('height'))
+            self.assertTrue(result.hasAttribute('viewBox'))
+        finally:
+            os.remove('tmp.svg')
+
     def testDrawProjected(self):
         f = os.path.expanduser('~/tmp.svg')
         result = self.invoke(['draw', self.dc, '--output', f, '--precision', '10'])
