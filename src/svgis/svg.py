@@ -207,7 +207,7 @@ def drawing(size, members, precision=None, viewbox=None, style=None):
     Create an SVG element.
 
     Args:
-        size (tuple): width, height
+        size (tuple | None): width, height
         members (list): Strings to add to output.
         viewbox (Sequence): Four coordinates that describe an SVG viewBox.
         style (string): CSS string.
