@@ -6,6 +6,7 @@
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, 2020, Neil Freeman <contact@fakeisthenewreal.org>
 import fiona.transform
+from pyproj.crs import CRS
 from pyproj.transformer import Transformer
 
 from . import errors, utils
@@ -142,9 +143,11 @@ def transform(bounds, **kwargs):
 
     densebounds = ring(bounds)
     if transformer is None:
+        in_crs = CRS.from_user_input(in_crs)
+        out_crs = CRS.from_user_input(out_crs)
         xbounds, ybounds = fiona.transform.transform(
             in_crs,
-            out_crs.to_wkt() if hasattr(out_crs, 'to_wkt') else out_crs,
+            out_crs.to_wkt(),
             *list(zip(*densebounds)),
         )
     else:
