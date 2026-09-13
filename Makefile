@@ -46,7 +46,7 @@ fixtures:
 	$(MAKE) -C tests $@
 
 format:
-	black src tests
+	ruff format src tests
 
 deploy: docs.zip | clean
 	git push

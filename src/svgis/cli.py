@@ -1,4 +1,5 @@
 """Command-line utilities for SVGIS."""
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
@@ -37,9 +38,7 @@ try:
         'type': click.IntRange(1, 100, clamp=True),
         'metavar': 'FACTOR',
         'help': (
-            'Simplify geometries, '
-            'accepts an integer between 1 and 100, '
-            'the percentage of each geometry to retain.'
+            'Simplify geometries, accepts an integer between 1 and 100, the percentage of each geometry to retain.'
         ),
     }
 except ImportError:

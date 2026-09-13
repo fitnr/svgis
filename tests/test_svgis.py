@@ -1,4 +1,5 @@
 """Tests on the SVGIS object."""
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
@@ -64,16 +65,16 @@ class SvgisTestCase(unittest.TestCase):
         match = next(matchiter)
 
         self.assertIsNotNone(match)
-        self.assertIn(u'AFFGEOID', match.groups()[0])
-        self.assertIn(u'GEOID', match.groups()[0])
-        self.assertIn(u'NAME', match.groups()[0])
+        self.assertIn('AFFGEOID', match.groups()[0])
+        self.assertIn('GEOID', match.groups()[0])
+        self.assertIn('NAME', match.groups()[0])
 
         match = next(matchiter)
         self.assertIn('GEOID_US', match.groups()[0])
         self.assertIn('cb_2014_us_nation_20m', match.groups()[0])
 
     def testRepr(self):
-        expected = "SVGIS(files=['{}'], " 'out_crs=None)'.format(self.file)
+        expected = "SVGIS(files=['{}'], out_crs=None)".format(self.file)
         self.assertEqual(str(self.svgis_obj), expected)
 
     def testDrawGeometry(self):

@@ -10,7 +10,6 @@ from svgis import SVGIS, draw, errors
 
 
 class ErrorTestCase(unittest.TestCase):
-
     feature = {'geometry': {'type': 'Bizarro', 'coordinates': [[(1, 2), (3, 4)], [(7, 8), (9, 10)]]}, 'properties': {}}
 
     def setUp(self):
@@ -22,7 +21,7 @@ class ErrorTestCase(unittest.TestCase):
 
     def testSvgisDrawInvalidGeometry(self):
         a = SVGIS([]).feature(self.feature, [], [])
-        assert a == u''
+        assert a == ''
 
 
 if __name__ == '__main__':

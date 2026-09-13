@@ -1,4 +1,5 @@
 '''Mess around with SVG styling'''
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:

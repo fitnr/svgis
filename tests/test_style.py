@@ -1,4 +1,5 @@
 """Tests on the map styling tools, most of which are CSS manipulation."""
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
