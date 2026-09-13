@@ -88,7 +88,7 @@ def validate_posint(_, __, value):
 @outp
 @click.option('-c', '--style', type=str, help=style_help, default='')
 @click.option('-r', '--replace', flag_value=True, help='Replace existing styles')
-@click.option('--inline/--no-inline', '-l', **csskwargs)
+@click.option('--inline/--no-inline', '-l/ ', **csskwargs)
 def style(layer, output, **kwargs):
     """Add or inline the CSS styles of an SVG"""
     result = _style.add_style(layer, kwargs['style'], kwargs['replace'])
@@ -187,7 +187,7 @@ def bounds(layer, crs, latlon=False):
     help='Rounding precision for coordinates (default: 5)',
 )
 @click.option('--clip/--no-clip', **clipkwargs)
-@click.option('--inline/--no-inline', '-l', **csskwargs)
+@click.option('--inline/--no-inline', **csskwargs)
 @click.option('--viewbox/--no-viewbox', default=False, help='Draw SVG using a ViewBox (default: no ViewBox)')
 @click.option('-q', '--quiet', default=False, flag_value=True, help='Ignore warnings')
 @click.option('-v', '--verbose', default=False, count=True, help='Talk a lot')
