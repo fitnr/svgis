@@ -7,6 +7,9 @@
 # Copyright (c) 2015-16, Neil Freeman <contact@fakeisthenewreal.org>
 import unittest
 
+import fiona.transform
+from pyproj.crs import CRS
+
 from svgis import bounding, errors
 
 
@@ -103,6 +106,34 @@ class ConvertTestCase(unittest.TestCase):
 
         fixture = (43332271.446783714, 15585187.3924282, 44004528.34377961, 16321716.827537995)
         for z in zip(a, fixture):
+            self.assertAlmostEqual(*z, places=5)
+
+    def testTransformBoundsEqcMatchesFeatureProjection(self):
+        bounds = (-74, 42, -73, 43)
+        out_crs = CRS('+proj=eqc')
+
+        result = bounding.transform(bounds, in_crs=4326, out_crs=out_crs)
+
+        ring = bounding.ring(bounds)
+        xcoords, ycoords = list(zip(*ring))
+        expected_x, expected_y = fiona.transform.transform(4326, out_crs.to_wkt(), xcoords, ycoords)
+        expected = min(expected_x), min(expected_y), max(expected_x), max(expected_y)
+
+        for z in zip(result, expected):
+            self.assertAlmostEqual(*z, places=5)
+
+    def testTransformBoundsEqcEllipsoidMatchesFeatureProjection(self):
+        bounds = (-74, 42, -73, 43)
+        out_crs = CRS('+proj=eqc +ellps=sphere')
+
+        result = bounding.transform(bounds, in_crs=4326, out_crs=out_crs)
+
+        ring = bounding.ring(bounds)
+        xcoords, ycoords = list(zip(*ring))
+        expected_x, expected_y = fiona.transform.transform(4326, out_crs.to_wkt(), xcoords, ycoords)
+        expected = min(expected_x), min(expected_y), max(expected_x), max(expected_y)
+
+        for z in zip(result, expected):
             self.assertAlmostEqual(*z, places=5)
 
     def testCheck(self):

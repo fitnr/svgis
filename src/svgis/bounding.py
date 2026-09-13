@@ -5,6 +5,7 @@
 # Licensed under the GNU General Public License v3 (GPLv3) license:
 # http://opensource.org/licenses/GPL-3.0
 # Copyright (c) 2015-16, 2020, Neil Freeman <contact@fakeisthenewreal.org>
+import fiona.transform
 from pyproj.transformer import Transformer
 
 from . import errors, utils
@@ -139,9 +140,14 @@ def transform(bounds, **kwargs):
     if not transformer and not (in_crs and out_crs):
         raise errors.SvgisError('Need input CRS and output CRS or a Transformer')
 
-    if transformer is None:
-        transformer = Transformer.from_crs(in_crs, out_crs, always_xy=True)
-
     densebounds = ring(bounds)
-    xbounds, ybounds = list(zip(*transformer.itransform(densebounds)))
+    if transformer is None:
+        xbounds, ybounds = fiona.transform.transform(
+            in_crs,
+            out_crs.to_wkt() if hasattr(out_crs, 'to_wkt') else out_crs,
+            *list(zip(*densebounds)),
+        )
+    else:
+        xbounds, ybounds = list(zip(*transformer.itransform(densebounds)))
+
     return min(xbounds), min(ybounds), max(xbounds), max(ybounds)
