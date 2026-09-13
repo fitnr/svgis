@@ -144,9 +144,11 @@ class CliTestCase(unittest.TestCase):
 
         result = self.invoke(['style', '--help'])
         assert result.exit_code == 0
+        self.assertIn('-l, --inline / --no-inline', result.output)
 
         result = self.invoke(['draw', '--help'])
         assert result.exit_code == 0
+        self.assertIn('-l, --inline / --no-inline', result.output)
 
         result = self.invoke(['project', '--help'])
         assert result.exit_code == 0
