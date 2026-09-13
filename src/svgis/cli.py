@@ -11,11 +11,9 @@ import warnings
 import click
 import fiona.crs
 
-from . import __version__, bounding
+from . import __version__, bounding, projection, svgis
 from . import graticule as _graticule
-from . import projection
 from . import style as _style
-from . import svgis
 from .utils import DEFAULT_GEOID
 
 none = {'flag_value': None, 'expose_value': False, 'help': '(not enabled)'}
