@@ -15,7 +15,6 @@ EPSG3528 = {'init': 'epsg:3528', 'no_defs': True}
 
 
 class ProjectionDrawTestCase(unittest.TestCase):
-
     bounds = {
         # IL E (ft)
         2790: (347026, 556571, 364500, 592793),
