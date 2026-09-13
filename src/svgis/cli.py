@@ -18,7 +18,7 @@ from . import style as _style
 from . import svgis
 from .utils import DEFAULT_GEOID
 
-none = {'flag_value': None, 'expose_value': False, 'help': '(not enabled)'}
+none = {'expose_value': False, 'help': '(not enabled)'}
 
 try:
     # pylint: disable=unused-import
@@ -26,7 +26,6 @@ try:
 
     clipkwargs = {
         'default': True,
-        'flag_value': True,
         'help': "Clip shapes to bounds. Slightly slower, produces smaller files (default: clip).",
     }
 except ImportError:
@@ -51,7 +50,6 @@ except ImportError:
 CLICKARGS = {'context_settings': dict(help_option_names=['-h', '--help'])}
 
 csskwargs = {
-    'flag_value': True,
     'default': True,
     'help': (
         'Inline CSS styles to each element. '
