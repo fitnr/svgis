@@ -41,7 +41,8 @@ clip = ["shapely>=1.5.7"]
 simplify = ["visvalingamwyatt>=0.1.1"]
 dev = [
     "coverage[toml]",
-    "pylint>2.5.0"
+    "pylint>2.5.0",
+    "six"
 ]
 doc = [
     "sphinx",
