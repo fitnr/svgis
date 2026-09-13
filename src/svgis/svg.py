@@ -207,7 +207,7 @@ def drawing(size, members, precision=None, viewbox=None, style=None):
     Create an SVG element.
 
     Args:
-        size (tuple): width, height
+        size (tuple | None): width, height
         members (list): Strings to add to output.
         viewbox (Sequence): Four coordinates that describe an SVG viewBox.
         style (string): CSS string.
@@ -216,12 +216,13 @@ def drawing(size, members, precision=None, viewbox=None, style=None):
         ``str``
     """
     kwargs = {
-        'width': size[0],
-        'height': size[1],
         'baseProfile': 'full',
         'version': '1.1',
         'xmlns': 'http://www.w3.org/2000/svg',
     }
+    if size is not None:
+        kwargs['width'] = size[0]
+        kwargs['height'] = size[1]
 
     if precision:
         fmt = ('{:.{precision}f}',)

@@ -188,7 +188,10 @@ def bounds(layer, crs, latlon=False):
 )
 @click.option('--clip/--no-clip', ' /-n', **clipkwargs)
 @click.option('--inline/--no-inline', '-l/ ', **csskwargs)
-@click.option('--viewbox/--no-viewbox', ' /-x', default=False, help='Draw SVG using a ViewBox (default: no ViewBox)')
+@click.option(
+    '--viewbox/--no-viewbox', ' /-x', default=False, help='Draw SVG using a ViewBox (default: no ViewBox)'
+)
+@click.option('--size/--no-size', default=True, help='Include the width and height parameters in the output')
 @click.option('-q', '--quiet', default=False, flag_value=True, help='Ignore warnings')
 @click.option('-v', '--verbose', default=False, count=True, help='Talk a lot')
 def draw(layer, output, **kwargs):
