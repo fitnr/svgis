@@ -29,11 +29,11 @@ def graticule(bounds, step, crs_or_method=None):
 
     if crs_or_method:
         out_crs = projection.pick(crs_or_method, bounds=bounds, file_crs=utils.DEFAULT_GEOID)
-        unproject = Transformer.from_crs(utils.DEFAULT_GEOID, out_crs, skip_equivalent=True, always_xy=True)
+        unproject = Transformer.from_crs(utils.DEFAULT_GEOID, out_crs, always_xy=True)
         bounds = bounding.transform(bounds, transformer=unproject)
 
     else:
-        unproject = Transformer.from_crs(4269, 4269, always_xy=True, skip_equivalent=True)
+        unproject = Transformer.from_crs(4269, 4269, always_xy=True)
 
     minx, miny, maxx, maxy = bounds
 
