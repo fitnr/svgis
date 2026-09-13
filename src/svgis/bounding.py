@@ -146,7 +146,7 @@ def transform(bounds, **kwargs):
         in_crs = CRS.from_user_input(in_crs)
         out_crs = CRS.from_user_input(out_crs)
         xbounds, ybounds = fiona.transform.transform(
-            in_crs,
+            in_crs.to_wkt(),
             out_crs.to_wkt(),
             *list(zip(*densebounds)),
         )
