@@ -1,28 +1,28 @@
 [build-system]
-requires = ["flit_core >=2,<4"]
+requires = ["flit_core<5"]
 build-backend = "flit_core.buildapi"
 
-[tool.flit.metadata]
-module = "svgis"
-author = "Neil Freeman"
-author-email = "contact@fakeisthenewreal.org"
-home-page = "https://github.com/fitnr/svgis"
-keywords = "svg, gis, geojson, shapefile, cartography, map, geodata"
+[project]
+name = "svgis"
+authors = [
+  {name = "Neil Freeman", email = "contact@fakeisthenewreal.org"}
+]
+keywords = ["svg", "gis", "geojson", 'shapefile', "cartography", "map", "geodata"]
+license = "GPL-3.0-or-later"
 classifiers = [
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Operating System :: Unix",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Operating System :: OS Independent",
 ]
-description-file = "README.md"
-requires = [
+readme = "README.md"
+dynamic = ["description", "version"]
+requires-python = ">=3.10"
+dependencies = [
     "click>=8,<9",
     "pyproj>=2.6",
     "fiona>=1.8",
@@ -32,7 +32,10 @@ requires = [
     "lxml>=4.5.0",
 ]
 
-[tool.flit.metadata.requires-extra]
+[project.urls]
+Repository = "https://github.com/fitnr/svgis"
+
+[project.optional-dependencies]
 numpy = ["numpy"]
 clip = ["shapely>=1.5.7"]
 simplify = ["visvalingamwyatt>=0.1.1"]
@@ -45,7 +48,7 @@ doc = [
     "sphinx-rtd-theme"
 ]
 
-[tool.flit.scripts]
+[project.scripts]
 svgis = "svgis.cli:main"
 
 [tool.coverage.run]
