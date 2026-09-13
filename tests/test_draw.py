@@ -12,10 +12,9 @@ from svgis import draw, errors, svgis
 
 
 class DrawTestCase(unittest.TestCase):
+    properties = {'cat': 'meow', 'dog': 'woof'}
 
-    properties = {'cat': u'meow', 'dog': 'woof'}
-
-    classes = [u'foo', 'cat']
+    classes = ['foo', 'cat']
 
     lis1 = [
         [-110.6, 35.3],

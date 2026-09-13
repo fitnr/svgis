@@ -18,7 +18,6 @@ from . import TEST_CSS, TEST_SVG
 
 
 class DomTestCase(unittest.TestCase):
-
     svg = TEST_SVG
     css = TEST_CSS
 

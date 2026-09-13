@@ -1,4 +1,5 @@
 """Draw SVG maps"""
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
@@ -14,19 +15,11 @@ import fiona
 import fiona.transform
 from pyproj.crs import CRS
 
-from . import bounding, draw, projection
+from . import bounding, draw, projection, svg, transform, utils
 from . import style as _style
-from . import svg, transform, utils
 from .errors import SvgisError
 
-STYLE = (
-    'polyline,line,rect,path,polygon,.polygon{'
-    'fill:none;'
-    'stroke:#000;'
-    'stroke-width:1px;'
-    'stroke-linejoin:round;'
-    '}'
-)
+STYLE = 'polyline,line,rect,path,polygon,.polygon{fill:none;stroke:#000;stroke-width:1px;stroke-linejoin:round;}'
 
 
 warnings.filterwarnings("ignore")
@@ -83,7 +76,6 @@ def map(layers, bounds=None, scale=None, **kwargs):
 
 
 class SVGIS:
-
     """
     Draw geodata files to SVG.
 
@@ -176,7 +168,7 @@ class SVGIS:
             # Assume input CRS is WGS 84
             self._in_crs = projection.pick(utils.DEFAULT_GEOID)
             self.log.debug('set_in_crs: setting input crs to default %s', self._in_crs)
-            self.log.warning('set_in_crs: Found no input coordinate system, ' 'assuming WGS84 (long/lat) coordinates.')
+            self.log.warning('set_in_crs: Found no input coordinate system, assuming WGS84 (long/lat) coordinates.')
 
     @property
     def out_crs(self):
@@ -346,7 +338,9 @@ class SVGIS:
 
                 # When we have passed bounds:
                 if unprojected_bounds:
-                    self.log.debug("Set the output CRS, if not yet set, using unprojected bounds: %s", unprojected_bounds)
+                    self.log.debug(
+                        "Set the output CRS, if not yet set, using unprojected bounds: %s", unprojected_bounds
+                    )
                     self.set_out_crs(unprojected_bounds)
 
                     # If we haven't set the projected bounds yet, do that.
@@ -514,7 +508,7 @@ class SVGIS:
         self.log.debug('Size: %f x %f', *size)
 
         if kwargs.pop('viewbox', True):
-            viewbox = [dims[0], -dims[3]] + [dims[2] - dims[0], dims[3]-dims[1]]
+            viewbox = [dims[0], -dims[3]] + [dims[2] - dims[0], dims[3] - dims[1]]
             self.log.debug('drawing with viewbox')
         else:
             viewbox = None

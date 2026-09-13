@@ -1,4 +1,5 @@
 """Command-line utilities for SVGIS."""
+
 # This file is part of svgis.
 # https://github.com/fitnr/svgis
 # Licensed under the GNU General Public License v3 (GPLv3) license:
@@ -11,11 +12,9 @@ import warnings
 import click
 import fiona.crs
 
-from . import __version__, bounding
+from . import __version__, bounding, projection, svgis
 from . import graticule as _graticule
-from . import projection
 from . import style as _style
-from . import svgis
 from .utils import DEFAULT_GEOID
 
 none = {'expose_value': False, 'help': '(not enabled)'}
@@ -39,9 +38,7 @@ try:
         'type': click.IntRange(1, 100, clamp=True),
         'metavar': 'FACTOR',
         'help': (
-            'Simplify geometries, '
-            'accepts an integer between 1 and 100, '
-            'the percentage of each geometry to retain.'
+            'Simplify geometries, accepts an integer between 1 and 100, the percentage of each geometry to retain.'
         ),
     }
 except ImportError:
